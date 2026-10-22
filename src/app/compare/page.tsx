@@ -51,8 +51,7 @@ function Row({ label, cells, better, hint }: { label: string; cells: Cell[]; bet
   return (
     <div className="cmp-row">
       <span className="label">
-        {label}
-        {hint ? <Hint label={label}>{hint}</Hint> : null}
+        {hint ? <Hint label={label}>{hint}</Hint> : label}
       </span>
       <div className="cmp-cells" style={{ ["--n" as string]: cells.length }}>
         {cells.map((c, k) => (
@@ -160,8 +159,8 @@ export default async function ComparePage({ searchParams }: Props) {
               <Row hint={GLOSSARY.sev2} label="Sev 2 · Bleeding" cells={cell((c) => c.s90.sevCounts[1], num)} better="low" />
               <Row hint={GLOSSARY.sev3} label="Sev 3 · Can't ship" cells={cell((c) => c.s90.sevCounts[2], num)} better="low" />
               <Row hint={GLOSSARY.sev4} label="Sev 4 · Papercut" cells={cell((c) => c.s90.sevCounts[3], num)} better="low" />
-              <Row hint={GLOSSARY.mttr} label="Median time to resolve" cells={cell((c) => c.s90.medianResolveMinutes, dur)} better="low" />
-              <Row hint={GLOSSARY.longest} label="Longest incident" cells={cell((c) => c.s90.longestMinutes || null, dur)} better="low" />
+              <Row hint={GLOSSARY.mttr} label="Median fix" cells={cell((c) => c.s90.medianResolveMinutes, dur)} better="low" />
+              <Row hint={GLOSSARY.longest} label="Longest" cells={cell((c) => c.s90.longestMinutes || null, dur)} better="low" />
               <Row hint={GLOSSARY.security} label="Security incidents" cells={cell((c) => c.s90.securityCount, num)} better="low" />
             </div>
           </section>

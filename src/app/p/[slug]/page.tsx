@@ -211,10 +211,10 @@ export default async function ProviderPage({ params, searchParams }: Props) {
           <Stat label="Admitted uptime" value={fmtPct(s.admittedUptime, 3)} note={`Grade ${s.grade}`} hint={GLOSSARY.uptime} />
           <Stat label="Incidents" value={String(s.incidentCount)} note={`${s.sevCounts[0]} Sev 1`} hint={GLOSSARY.incidents} />
           <Stat label="Sev 1 downtime" value={fmtDuration(s.sev1Minutes)} hint={GLOSSARY.sev1Downtime} />
-          <Stat label="Median time to resolve" value={s.medianResolveMinutes != null ? fmtDuration(s.medianResolveMinutes) : "–"} hint={GLOSSARY.mttr} />
-          <Stat label="Longest incident" value={s.longestMinutes ? fmtDuration(s.longestMinutes) : "–"} hint={GLOSSARY.longest} />
+          <Stat label="Median fix" value={s.medianResolveMinutes != null ? fmtDuration(s.medianResolveMinutes) : "–"} hint={GLOSSARY.mttr} />
+          <Stat label="Longest" value={s.longestMinutes ? fmtDuration(s.longestMinutes) : "–"} hint={GLOSSARY.longest} />
           <Stat
-            label="Since last incident"
+            label="Since last"
             hint={GLOSSARY.sinceLast}
             value={lastIncident ? (lastIncident.resolvedAt ? fmtDuration((now - lastIncident.resolvedAt) / 60_000) : "ongoing") : "–"}
             hot={!lastIncident?.resolvedAt && Boolean(lastIncident)}
@@ -335,8 +335,8 @@ export default async function ProviderPage({ params, searchParams }: Props) {
       <section className="stack">
         <h2 className="h2">Communication</h2>
         <div className="stats">
-          <Stat label="Updates per incident" value={comms.updatesPerIncident != null ? comms.updatesPerIncident.toFixed(1) : "–"} note="Last 12 months" hint={GLOSSARY.updatesPer} />
-          <Stat label="Median update gap" value={comms.medianGapMinutes != null ? fmtDuration(comms.medianGapMinutes) : "–"} note="Last 12 months" hint={GLOSSARY.updateGap} />
+          <Stat label="Updates each" value={comms.updatesPerIncident != null ? comms.updatesPerIncident.toFixed(1) : "–"} note="Last 12 months" hint={GLOSSARY.updatesPer} />
+          <Stat label="Update gap" value={comms.medianGapMinutes != null ? fmtDuration(comms.medianGapMinutes) : "–"} note="Last 12 months" hint={GLOSSARY.updateGap} />
           <Stat label="Postmortems" value={`${comms.postmortems} of ${comms.serious}`} note="Sev 1–2" hint={GLOSSARY.postmortems} />
         </div>
       </section>

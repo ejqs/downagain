@@ -44,11 +44,11 @@ export function StripLegend() {
   );
 }
 
-/** A tappable "?" that opens a one-line explanation over the surrounding box. */
+/** A label you can tap (dotted underline) to open a one-line explanation over the surrounding box. */
 export function Hint({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <details className="hint">
-      <summary aria-label={`What is ${label}?`}>?</summary>
+      <summary>{label}</summary>
       <span className="hint-body" role="note">{children}</span>
     </details>
   );
@@ -58,8 +58,7 @@ export function Stat({ label, value, note, hot, hint }: { label: string; value: 
   return (
     <div className={`stat ${hot ? "hot" : ""}`}>
       <span className="label" style={hot ? { color: "var(--ink)" } : undefined}>
-        {label}
-        {hint ? <Hint label={label}>{hint}</Hint> : null}
+        {hint ? <Hint label={label}>{hint}</Hint> : label}
       </span>
       <span className="value">{value}</span>
       {note ? <span className="note">{note}</span> : null}
