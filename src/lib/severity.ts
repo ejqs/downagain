@@ -47,13 +47,14 @@ export const SECURITY_PENALTY = 600; // same as an hour of Sev 1
 // many were hit, and scales the penalty points. A provider with hundreds of
 // locations that reports every local blip shouldn't score like one that went
 // down everywhere. Unclear counts in full: no discount without evidence.
-export type Scope = "global" | "regional" | "local" | "subset" | "unclear";
-export const SCOPE_WEIGHT: Record<Scope, number> = { global: 1, unclear: 1, regional: 0.3, subset: 0.3, local: 0.1 };
+export type Scope = "global" | "regional" | "local" | "subset" | "single" | "unclear";
+export const SCOPE_WEIGHT: Record<Scope, number> = { global: 1, unclear: 1, regional: 0.3, subset: 0.3, single: 0.1, local: 0.1 };
 export const SCOPE_BLURB: Record<Scope, string> = {
   global: "Most customers or regions",
   unclear: "The provider didn't say",
   regional: "One region, country or a few locations",
-  subset: "One plan, model or feature, or a small share of customers",
+  subset: "One plan, or a small share of customers",
+  single: "One model, endpoint or add-on among many",
   local: "One data centre or point of presence",
 };
 export function scopeWeight(scope: string | null | undefined): number {

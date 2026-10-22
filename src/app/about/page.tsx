@@ -7,7 +7,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { STALE_AFTER_DAYS, WORKLOADS, isPriced } from "@/lib/pricing";
 import { CATEGORIES } from "@/lib/providers";
 
-const SCOPE_ORDER: Scope[] = ["global", "unclear", "regional", "subset", "local"];
+const SCOPE_ORDER: Scope[] = ["global", "unclear", "regional", "subset", "single", "local"];
 
 export const metadata: Metadata = pageMeta({
   title: "How it works",

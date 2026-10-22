@@ -4,9 +4,9 @@ import { notFound } from "next/navigation";
 import { getProviderHistory, safeSnapshot, type IncidentRow, type ProviderRow, type ReviewTrace } from "@/lib/data";
 import { brokenComponents, communication, dailyCells, downNow, incidentsFor, liveIncidents, monthlyTrend, scoreFor, startHeatmap, tierOf, topComponents, valueBoard } from "@/lib/views";
 import { WORKLOADS, checkedMs, fmtUsd, isStale } from "@/lib/pricing";
-import { durationMinutes } from "@/lib/grading";
+import { durationMinutes, penaltyMinutes } from "@/lib/grading";
 import { fmtAgo, fmtDate, fmtDuration, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
-import { AREA_BLURB, AREA_LABEL, AREA_SHORT, AREAS, TIER_NAMES, TIER_BLURB } from "@/lib/severity";
+import { AREA_BLURB, AREA_LABEL, AREA_SHORT, AREAS, TIER_NAMES, TIER_BLURB, TIER_WEIGHT, scopeWeight } from "@/lib/severity";
 import { STATUS_LABEL, isProblem } from "@/lib/status";
 import { gradeInput } from "@/lib/views";
 import { DayStrip, GradeTile, SevPill, Hint, Stat, StripLegend } from "@/components/ui";
@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 const brand = (name: string) => name.replace(/ API$/, "");
 
-const SCOPE_LABEL: Record<string, string> = { regional: "regional", local: "one location", subset: "some customers" };
+const SCOPE_LABEL: Record<string, string> = { regional: "regional", local: "one location", subset: "some customers", single: "one model or feature" };
 
 /** One short mono line: who graded it, how wide it was, which components. */
 function IncidentTags({ i }: { i: IncidentRow }) {
@@ -337,7 +337,10 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             const areaList = list.filter((i) => i.areaTiers?.[a] != null || (i.tierOverride != null && a === "production"));
             const inWindow = areaList.filter((i) => i.startedAt >= now - WINDOWS[win] * DAY);
             const areaTier = (i: IncidentRow) => i.areaTiers?.[a] ?? tierOf(i);
-            const worst = [...inWindow].sort((x, y) => areaTier(x) - areaTier(y) || durationMinutes(gradeInput(y)) - durationMinutes(gradeInput(x))).slice(0, 3);
+            // Worst by what it cost the grade, so a long one-model blip ranks below a short global outage.
+            const [from, to] = [new Date(now - WINDOWS[win] * DAY), new Date(now)];
+            const cost = (i: IncidentRow) => (TIER_WEIGHT[areaTier(i)] ?? 0) * scopeWeight(i.scope) * penaltyMinutes(gradeInput(i), from, to);
+            const worst = [...inWindow].sort((x, y) => cost(y) - cost(x) || areaTier(x) - areaTier(y)).slice(0, 3);
             const hit = topComponents(inWindow, 4);
             const at = monthlyTrend(areaList, now);
             const [was, is] = [at.slice(0, 6), at.slice(6)].map((h) => h.reduce((n, t) => n + t.count, 0));
@@ -362,7 +365,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
                       worst.map((i) => (
                         <div key={i.id} className="row" style={{ ["--gap" as string]: "4px 10px", alignItems: "baseline" }}>
                           <SevPill tier={areaTier(i)} security={i.security} />
-                          <span className="mono" style={{ fontSize: 13 }}>{fmtDate(i.startedAt)} · {i.resolvedAt ? fmtDuration(durationMinutes(gradeInput(i))) : "ongoing"}</span>
+                          <span className="mono" style={{ fontSize: 13 }}>{[fmtDate(i.startedAt), i.resolvedAt ? fmtDuration(durationMinutes(gradeInput(i))) : "ongoing", SCOPE_LABEL[i.scope ?? ""]].filter(Boolean).join(" · ")}</span>
                           <span style={{ fontSize: 15, flex: "1 1 100%", minWidth: 0 }}>
                             {i.url ? <a href={i.url} data-umami-event="status-page-outbound">{i.title}</a> : i.title}
                           </span>

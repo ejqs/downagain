@@ -120,6 +120,7 @@ describe("scope", () => {
     expect(pts("regional").points).toBe(72);
     expect(pts("subset").points).toBe(72);
     expect(pts("local").points).toBe(24);
+    expect(pts("single").points).toBe(24);
     expect(pts("local").areas.production.points).toBeCloseTo(24);
   });
 

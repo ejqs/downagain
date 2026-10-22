@@ -10,11 +10,11 @@ import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { areaFor, type Scope, securityBump, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
-export const PROMPT_VERSION = 5;
+export const PROMPT_VERSION = 6;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 
 const SURFACES = ["serving", "data", "ship", "manage", "peripheral"] as const;
-const SCOPES = ["global", "regional", "local", "subset", "unclear"] as const satisfies readonly Scope[];
+const SCOPES = ["global", "regional", "local", "subset", "single", "unclear"] as const satisfies readonly Scope[];
 
 export interface Verdict {
   affected: { surface: Surface; tier: 1 | 2 | 3 | 4 }[];
@@ -76,7 +76,7 @@ Tier for each affected surface:
 - 3 Can't ship: ship broken or badly degraded, or manage broken in a way that blocks deploys, config changes or accounts.
 - 4 Papercut: a slow or partly broken dashboard that blocks nothing, any peripheral problem, or minor ship trouble such as slower builds or delayed logs.
 
-Scope is the blast radius: global (most customers or regions), regional (one region or country, or a few locations), local (a single data centre, point of presence or cell), subset (one plan, model, feature, or a small share of customers everywhere), unclear (the text doesn't say). Pick the narrowest scope the text supports; "some customers" in one region is regional. The site discounts narrower scopes itself, so the tier describes how bad it was for those who were hit: do not lower a tier because only one feature, region or a share of customers was affected; set the scope instead. The one exception: a full serving or data outage is Tier 1 only when it is global, or unclear but described as widespread; otherwise Tier 2.
+Scope is the blast radius: global (most customers or regions), regional (one region or country, or a few locations), local (a single data centre, point of presence or cell), subset (one plan, or a small share of customers everywhere), single (one model, endpoint or add-on product among the many the provider offers, e.g. one hosted third-party model on an inference platform, while the rest work), unclear (the text doesn't say). Pick the narrowest scope the text supports; "some customers" in one region is regional. The site discounts narrower scopes itself, so the tier describes how bad it was for those who were hit: do not lower a tier because only one feature, region or a share of customers was affected; set the scope instead. The one exception: a full serving or data outage is Tier 1 only when it is global, or unclear but described as widespread; otherwise Tier 2.
 
 Set not_counted to true only for scheduled maintenance that stayed inside its window with no unplanned impact, a false alarm, or an incident the provider says had no customer impact. Then affected may be empty.
 
