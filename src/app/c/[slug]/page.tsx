@@ -16,9 +16,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const snap = await safeSnapshot();
   const cat = snap?.categories.find((c) => c.slug === slug);
   if (!cat) return { title: "Category" };
+  const names = snap!.providers.filter((p) => p.category === cat.slug).map((p) => p.name);
+  const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : (names[0] ?? cat.name);
   return pageMeta({
-    title: `${cat.name} leaderboard`,
-    description: `${cat.name} providers ranked by their 90-day track record, from their own status pages.`,
+    title: `${cat.name} status and uptime, ranked`,
+    description: `Is it down? ${list}, ranked by 90-day track record from their own status pages.`,
     // The first category's board is the home page, which the site links to instead.
     path: cat.slug === snap?.categories[0]?.slug ? "/" : `/c/${cat.slug}`,
   });
@@ -43,7 +45,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           ],
         }}
       />
-      <Board snap={snap} category={slug} sort={sort === "best" ? "best" : "worst"} basePath={`/c/${slug}`} />
+      <Board snap={snap} category={slug} sort={sort === "best" ? "best" : "worst"} basePath={`/c/${slug}`} heading="h1" />
       <ValueBoard snap={snap} category={slug} />
       <AlsoTracking snap={snap} current={slug} />
     </main>

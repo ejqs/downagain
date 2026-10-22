@@ -12,8 +12,8 @@ import { Heatmap, dayKey } from "@/components/Heatmap";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({
-  title: "Incidents",
-  description: "Every incident posted by the hosting platforms and AI APIs we track, newest first, with severity and duration.",
+  title: "Latest outages and incidents",
+  description: "Every outage posted by Vercel, Railway, Netlify, OpenAI, Anthropic and the rest, newest first, with severity and duration.",
   path: "/incidents",
 });
 

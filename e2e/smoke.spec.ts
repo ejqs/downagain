@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const PAGES = ["/", "/c/hosting", "/c/ai", "/incidents", "/compare", "/about", "/p/vercel", "/p/railway", "/p/heroku"];
+const PAGES = ["/", "/c/hosting", "/c/ai", "/incidents", "/compare", "/compare/railway-vs-vercel", "/about", "/p/vercel", "/p/railway", "/p/heroku"];
 
 /** Collect uncaught errors and console errors from our own origin. */
 function watchErrors(page: Page) {
@@ -49,6 +49,8 @@ test("unknown pages answer 404", async ({ page }) => {
   expect((await page.goto("/p/not-a-provider"))?.status()).toBe(404);
   expect((await page.goto("/c/not-a-category"))?.status()).toBe(404);
   expect((await page.goto("/nope"))?.status()).toBe(404);
+  expect((await page.goto("/compare/vercel-vs-vercel"))?.status()).toBe(404);
+  expect((await page.goto("/compare/vercel-vs-nope"))?.status()).toBe(404);
 });
 
 test("public JSON and badges", async ({ request }) => {
@@ -70,4 +72,21 @@ test("the incident calendar filters the list to one day", async ({ page }) => {
   await expect(page).toHaveURL(/[?&]day=\d{4}-\d{2}-\d{2}/);
   await expect(page.locator('.cal a[aria-current="date"]')).toHaveCount(1);
   await expect(page.locator(".incident").first()).toBeVisible();
+});
+
+test("matchups have one canonical page and the picker goes there", async ({ page }) => {
+  // Old query links redirect, keeping the order picked.
+  await page.goto("/compare?p=vercel,railway");
+  await expect(page).toHaveURL(/\/compare\/vercel-vs-railway$/);
+  await expect(page.locator("h1")).toHaveText("Vercel vs Railway");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/compare\/railway-vs-vercel$/);
+  await page.locator('select[name="b"]').selectOption("heroku");
+  await expect(page).toHaveURL(/\/compare\/vercel-vs-heroku$/);
+  await expect(page.locator("h1")).toHaveText("Vercel vs Heroku");
+});
+
+test("the sitemap lists provider and matchup pages", async ({ request }) => {
+  const xml = await (await request.get("/sitemap.xml")).text();
+  expect(xml).toContain("/p/vercel</loc>");
+  expect(xml).toContain("/compare/railway-vs-vercel</loc>");
 });

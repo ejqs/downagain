@@ -5,6 +5,8 @@ import { fmtDuration, fmtPct } from "@/lib/format";
 import { AREA_SHORT, AREAS } from "@/lib/severity";
 import { priceText } from "./Value";
 import { DayStrip, GradeTile, StripLegend } from "./ui";
+import { JsonLd } from "./JsonLd";
+import { absUrl } from "@/lib/site";
 
 
 export function CategoryTabs({ snap, active }: { snap: Snapshot; active: string }) {
@@ -31,16 +33,38 @@ export function CategoryTabs({ snap, active }: { snap: Snapshot; active: string 
   );
 }
 
-export function Board({ snap, category, sort, basePath }: { snap: Snapshot; category: string; sort: "worst" | "best"; basePath: string }) {
+export function Board({
+  snap,
+  category,
+  sort,
+  basePath,
+  heading: Heading = "h2",
+}: {
+  snap: Snapshot;
+  category: string;
+  sort: "worst" | "best";
+  basePath: string;
+  heading?: "h1" | "h2";
+}) {
   const cat = snap.categories.find((c) => c.slug === category);
   const rows = leaderboard(snap, category, sort);
   const value = new Map(valueBoard(snap, category).map((v) => [v.provider.slug, v]));
   return (
     <section className="stack" style={{ ["--gap" as string]: "14px" }}>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: `${cat?.name ?? category}, last 90 days`,
+          itemListOrder: sort === "best" ? "https://schema.org/ItemListOrderAscending" : "https://schema.org/ItemListOrderDescending",
+          numberOfItems: rows.length,
+          itemListElement: rows.map((r, i) => ({ "@type": "ListItem", position: i + 1, name: r.provider.name, url: absUrl(`/p/${r.provider.slug}`) })),
+        }}
+      />
       <CategoryTabs snap={snap} active={category} />
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end", ["--gap" as string]: "12px 16px" }}>
         <div style={{ flex: "1 1 280px", minWidth: 0 }}>
-          <h2 className="h2">{cat?.name ?? category}</h2>
+          <Heading className="h2">{cat?.name ?? category}</Heading>
           <p className="body" style={{ marginTop: 6 }}>Last 90 days</p>
         </div>
         <div className="seg" role="group" aria-label="Sort order">

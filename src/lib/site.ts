@@ -4,9 +4,9 @@ import type { Metadata } from "next";
 
 export const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://downagain.dev").replace(/\/$/, "");
 export const SITE_NAME = "downagain.dev";
-export const SITE_TITLE = "downagain.dev · Is it down again?";
+export const SITE_TITLE = "Is it down again? Hosting and AI API status, ranked · downagain.dev";
 export const SITE_DESCRIPTION =
-  "Live status and 90-day track records for the hosting platforms and AI APIs your apps run on, from each provider's own status page.";
+  "Who went down, for how long, by their own admission. Live status and 90-day uptime for Vercel, Railway, Netlify, OpenAI, Anthropic and more.";
 
 export const BRAND = {
   ink: "#0E0E10",

@@ -1,9 +1,28 @@
 import Link from "next/link";
+import type { Snapshot } from "@/lib/data";
 import { CoffeeIcon } from "./ui";
 
-export function Footer() {
+export function Footer({ snap }: { snap: Snapshot | null }) {
   return (
     <footer className="wrap">
+      {snap ? (
+        <nav className="site-directory" aria-label="Providers">
+          {snap.categories.map((c) => (
+            <div key={c.slug} className="stack" style={{ ["--gap" as string]: "6px" }}>
+              <Link href={c.slug === snap.categories[0]?.slug ? "/" : `/c/${c.slug}`} className="eyebrow">
+                {c.name}
+              </Link>
+              {snap.providers
+                .filter((p) => p.category === c.slug)
+                .map((p) => (
+                  <Link key={p.slug} href={`/p/${p.slug}`}>
+                    {p.name}
+                  </Link>
+                ))}
+            </div>
+          ))}
+        </nav>
+      ) : null}
       <div className="site-footer">
         <span>
           From official status pages, every 5 minutes. <Link href="/about">How it works</Link>

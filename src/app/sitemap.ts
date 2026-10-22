@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { safeSnapshot } from "@/lib/data";
 import { CATEGORIES, PROVIDERS } from "@/lib/providers";
 import { absUrl } from "@/lib/site";
+import { comparePath, matchups } from "@/lib/compare";
 
 // Built per request from the cached snapshot: the build has no database.
 export const dynamic = "force-dynamic";
@@ -16,8 +17,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (t > (touched.get(i.providerId) ?? 0)) touched.set(i.providerId, t);
   }
   const providers = snap
-    ? snap.providers.map((p) => ({ slug: p.slug, at: touched.get(p.id) }))
-    : PROVIDERS.map((p) => ({ slug: p.slug, at: undefined }));
+    ? snap.providers.map((p) => ({ slug: p.slug, category: p.category, at: touched.get(p.id) }))
+    : PROVIDERS.map((p) => ({ slug: p.slug, category: p.category, at: undefined }));
   const categories = snap?.categories ?? CATEGORIES;
 
   return [
@@ -33,5 +34,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.7,
     })),
+    ...matchups(providers).map(([a, b]) => {
+      const at = Math.max(a.at ?? 0, b.at ?? 0);
+      return {
+        url: absUrl(comparePath([a.slug, b.slug])),
+        ...(at ? { lastModified: new Date(at) } : {}),
+        changeFrequency: "daily" as const,
+        priority: 0.6,
+      };
+    }),
   ];
 }

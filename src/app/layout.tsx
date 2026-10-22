@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -12,6 +13,11 @@ import { SITE, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/site";
 // build has no database). Data still comes from the tagged cache, not Postgres.
 export const dynamic = "force-dynamic";
 const UMAMI_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+
+// Self-hosted at build time: no request to Google, and size-matched fallbacks so
+// text paints at once without shifting when the font arrives.
+const display = Bricolage_Grotesque({ subsets: ["latin"], axes: ["opsz"], variable: "--font-bricolage", display: "swap" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
@@ -26,10 +32,13 @@ export const metadata: Metadata = {
 const WEBSITE_LD = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": `${SITE}/#website`,
   name: SITE_NAME,
   alternateName: "downagain",
   url: `${SITE}/`,
   description: SITE_DESCRIPTION,
+  inLanguage: "en",
+  publisher: { "@type": "Person", name: "ejqs", url: "https://ejqs.net" },
 };
 
 export const viewport: Viewport = { themeColor: "#FFD400", width: "device-width", initialScale: 1 };
@@ -37,22 +46,13 @@ export const viewport: Viewport = { themeColor: "#FFD400", width: "device-width"
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const snap = await safeSnapshot();
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;700&display=swap"
-        />
-      </head>
+    <html lang="en" className={`${display.variable} ${mono.variable}`}>
       <body>
         <JsonLd data={WEBSITE_LD} />
         <Banner snap={snap} />
         <Header />
         {children}
-        <Footer />
+        <Footer snap={snap} />
         {UMAMI_ID && process.env.NODE_ENV === "production" ? (
           // Proxied through our own domain (see next.config.ts); events go to /stats/api/send.
           <Script src="/stats/script.js" data-website-id={UMAMI_ID} strategy="afterInteractive" />

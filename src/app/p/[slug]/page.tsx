@@ -15,6 +15,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { SITE, absUrl, pageMeta } from "@/lib/site";
 import { GLOSSARY } from "@/lib/glossary";
 import { beatText, priceText } from "@/components/Value";
+import { compareHref, comparePath } from "@/lib/compare";
 
 export const dynamic = "force-dynamic";
 
@@ -40,11 +41,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ? `${p.name}'s status page isn't answering.`
         : `${p.name} status: ${STATUS_LABEL[p.status].toLowerCase()}.`;
   return pageMeta({
-    title: `Is ${p.name} down? Status and track record`,
+    // People search "is OpenAI down", not "is OpenAI API down".
+    title: `Is ${brand(p.name)} down? ${brand(p.name) === p.name ? "Live" : p.name} status and outage history`,
     description: `${now} Grade ${s.grade} over the last 90 days: ${plural(s.incidentCount, "incident")}, ${fmtPct(s.admittedUptime)} admitted uptime.`,
     path: `/p/${p.slug}`,
   });
 }
+
+const brand = (name: string) => name.replace(/ API$/, "");
 
 const SCOPE_LABEL: Record<string, string> = { regional: "regional", subset: "some customers" };
 
@@ -164,6 +168,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
     .filter((x) => x.category === p.category)
     .map((x) => ({ x, s: scoreFor(snap, x.id) }))
     .sort((a, b) => a.s.points - b.s.points);
+  const rivals = peers.map((x) => x.x).filter((x) => x.slug !== p.slug);
   const shown = all ? list : list.slice(0, 20);
   const value = valueBoard(snap, p.category);
   const cost = value.find((v) => v.provider.id === p.id);
@@ -178,10 +183,28 @@ export default async function ProviderPage({ params, searchParams }: Props) {
       <JsonLd
         data={{
           "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            { "@type": "ListItem", position: 1, name: cat?.name ?? "Leaderboard", item: absUrl(catPath) },
-            { "@type": "ListItem", position: 2, name: p.name, item: absUrl(`/p/${p.slug}`) },
+          "@graph": [
+            {
+              "@type": "WebPage",
+              "@id": `${absUrl(`/p/${p.slug}`)}#page`,
+              url: absUrl(`/p/${p.slug}`),
+              name: `Is ${brand(p.name)} down?`,
+              isPartOf: { "@id": `${SITE}/#website` },
+              ...(p.lastCheckedAt ? { dateModified: new Date(p.lastCheckedAt).toISOString() } : {}),
+              about: {
+                "@type": "Organization",
+                name: brand(p.name),
+                ...(p.homepageUrl ? { url: p.homepageUrl } : {}),
+                sameAs: [p.statusPageUrl],
+              },
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: cat?.name ?? "Leaderboard", item: absUrl(catPath) },
+                { "@type": "ListItem", position: 2, name: p.name, item: absUrl(`/p/${p.slug}`) },
+              ],
+            },
           ],
         }}
       />
@@ -207,7 +230,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             {p.lastCheckedAt ? ` · checked ${fmtAgo(p.lastCheckedAt, now)}` : ""}
           </p>
           <div className="row" style={{ ["--gap" as string]: "8px", marginTop: 4 }}>
-            <Link className="btn dark" href={`/compare?p=${[p.slug, ...peers.filter((x) => x.x.slug !== p.slug).slice(0, 2).map((x) => x.x.slug)].join(",")}`} data-umami-event="compare">
+            <Link className="btn dark" href={compareHref([p.slug, ...rivals.slice(0, 2).map((x) => x.slug)])} data-umami-event="compare">
               Compare
             </Link>
             <a className="btn" href={p.statusPageUrl} data-umami-event="status-page-outbound">Status page</a>
@@ -458,7 +481,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
       <section className="stack">
         <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
           <h2 className="h2">Peers, 90 days</h2>
-          <Link href={`/compare?p=${peers.slice(0, 3).map((x) => x.x.slug).join(",")}`} style={{ fontWeight: 700, padding: "10px 0" }}>Compare</Link>
+          <Link href={compareHref(peers.slice(0, 3).map((x) => x.x.slug))} style={{ fontWeight: 700, padding: "10px 0" }}>Compare</Link>
         </div>
         <div className="peers">
           {peers.map(({ x, s: ps }) => (
@@ -472,6 +495,15 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             </Link>
           ))}
         </div>
+        {rivals.length ? (
+          <nav className="chips" aria-label={`${p.name} matchups`}>
+            {rivals.map((x) => (
+              <Link key={x.slug} href={comparePath([p.slug, x.slug])} className="chip small">
+                vs {x.name}
+              </Link>
+            ))}
+          </nav>
+        ) : null}
       </section>
 
       <section className="dark-panel">
@@ -479,7 +511,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
           <h2 style={{ fontSize: 22, fontWeight: 800 }}>README badge</h2>
           <p style={{ fontSize: 15, color: "#D4D4D8" }}>{p.name}&apos;s live grade, for your README.</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`/badge/${p.slug}.svg`} alt={`${p.name} grade badge`} height={20} style={{ alignSelf: "flex-start" }} />
+          <img src={`/badge/${p.slug}.svg`} alt={`${p.name} grade badge`} height={20} loading="lazy" style={{ alignSelf: "flex-start" }} />
           <div className="code">{badge}</div>
         </div>
       </section>

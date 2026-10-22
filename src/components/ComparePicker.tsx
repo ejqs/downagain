@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { compareHref } from "@/lib/compare";
 
 type Option = { cat: { slug: string; name: string }; provs: { slug: string; name: string }[] };
 
@@ -9,7 +10,7 @@ export function ComparePicker({ slugs, options }: { slugs: string[]; options: Op
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const form = new FormData(e.currentTarget.form!);
     const picked = ["a", "b", "c"].map((k) => String(form.get(k) ?? "")).filter(Boolean);
-    router.replace(`/compare?p=${[...new Set(picked)].join(",")}`, { scroll: false });
+    router.replace(compareHref(picked), { scroll: false });
   };
   return (
     <form className="pickers" action="/compare" method="get">

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { GRADES } from "@/lib/grading";
 import { SECURITY_PENALTY, TIER_BLURB, TIER_NAMES, TIER_WEIGHT } from "@/lib/severity";
 import { USER_AGENT } from "@/lib/fetcher";
-import { pageMeta } from "@/lib/site";
+import { SITE, SITE_NAME, absUrl, pageMeta } from "@/lib/site";
+import { JsonLd } from "@/components/JsonLd";
 import { STALE_AFTER_DAYS, WORKLOADS } from "@/lib/pricing";
 import { CATEGORIES } from "@/lib/providers";
 
@@ -12,9 +13,25 @@ export const metadata: Metadata = pageMeta({
   path: "/about",
 });
 
+const DATASET_LD = {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  name: "Hosting and AI API incident history",
+  description:
+    "Incidents posted on the official status pages of hosting platforms and AI APIs, polled every 5 minutes, with a severity tier, duration and 90-day grade for each provider.",
+  url: absUrl("/about"),
+  creator: { "@type": "Person", name: "ejqs", url: "https://ejqs.net" },
+  includedInDataCatalog: { "@type": "DataCatalog", name: SITE_NAME, url: `${SITE}/` },
+  isAccessibleForFree: true,
+  license: "https://opensource.org/license/mit",
+  keywords: ["uptime", "outages", "status page", "incidents", "hosting", "AI API"],
+  distribution: [{ "@type": "DataDownload", encodingFormat: "application/json", contentUrl: absUrl("/api/status.json") }],
+};
+
 export default function About() {
   return (
     <main className="wrap" style={{ paddingTop: 24 }}>
+      <JsonLd data={DATASET_LD} />
       <article className="prose">
         <h1 className="h1 sm">How it works</h1>
         <p className="lede">
@@ -30,6 +47,9 @@ export default function About() {
           </li>
           <li>Every incident and update is kept, even if the provider later edits or deletes it.</li>
           <li>History starts with whatever the status API exposes, usually the last 50 incidents. Provider pages show the start date.</li>
+          <li>
+            The whole board as JSON: <a href="/api/status.json" className="mono">/api/status.json</a>. Free to use. A link back is plenty.
+          </li>
         </ul>
 
         <h2 className="h2" id="severity">Severity</h2>
