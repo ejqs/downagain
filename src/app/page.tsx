@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import { safeSnapshot } from "@/lib/data";
+import { pageMeta } from "@/lib/site";
 import { daysSinceSev1, totals } from "@/lib/views";
 import { fmtDuration } from "@/lib/format";
 import { AlsoTracking, Board } from "@/components/Board";
@@ -6,6 +8,7 @@ import { Stat } from "@/components/ui";
 import { Unavailable } from "@/components/Unavailable";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = pageMeta({ path: "/" });
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ sort?: string }> }) {
   const snap = await safeSnapshot();

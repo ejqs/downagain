@@ -10,10 +10,11 @@ import { STATUS_LABEL, isProblem } from "@/lib/status";
 import { gradeInput } from "@/lib/views";
 import { DayStrip, GradeTile, SevPill, Stat, StripLegend } from "@/components/ui";
 import { Unavailable } from "@/components/Unavailable";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE, absUrl, pageMeta } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://downagain.dev";
 const WINDOWS = { "30d": 30, "90d": 90, "1y": 365 } as const;
 type WindowKey = keyof typeof WINDOWS;
 const AREAS: Area[] = ["production", "shipping", "dashboard"];
@@ -28,10 +29,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const p = snap?.providers.find((x) => x.slug === slug);
   if (!snap || !p) return { title: "Provider" };
   const s = scoreFor(snap, p.id);
-  return {
-    title: `${p.name} track record`,
-    description: `${p.name}: grade ${s.grade} over the last 90 days, ${plural(s.incidentCount, "incident")}, ${fmtPct(s.admittedUptime)} admitted uptime.`,
-  };
+  const down = downNow(snap).find((d) => d.provider.id === p.id);
+  const now = down
+    ? `${p.name} is reporting a problem right now: ${down.title}.`
+    : p.status === "operational"
+      ? `${p.name} is up right now.`
+      : p.status === "unknown"
+        ? `${p.name}'s status page isn't answering.`
+        : `${p.name} status: ${STATUS_LABEL[p.status].toLowerCase()}.`;
+  return pageMeta({
+    title: `Is ${p.name} down? Status and track record`,
+    description: `${now} Grade ${s.grade} over the last 90 days: ${plural(s.incidentCount, "incident")}, ${fmtPct(s.admittedUptime)} admitted uptime.`,
+    path: `/p/${p.slug}`,
+  });
 }
 
 function IncidentItem({ i, updates }: { i: IncidentRow; updates?: { status: string; body: string; postedAt: number }[] }) {
@@ -107,12 +117,23 @@ export default async function ProviderPage({ params, searchParams }: Props) {
     .sort((a, b) => a.s.points - b.s.points);
   const shown = all ? list : list.slice(0, 20);
   const badge = `[![${p.slug} on downagain.dev](${SITE}/badge/${p.slug}.svg)](${SITE}/p/${p.slug})`;
+  const catPath = cat && cat.slug !== snap.categories[0]?.slug ? `/c/${cat.slug}` : "/";
 
   return (
     <main className="wrap stack" style={{ ["--gap" as string]: "40px" }}>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: cat?.name ?? "Leaderboard", item: absUrl(catPath) },
+            { "@type": "ListItem", position: 2, name: p.name, item: absUrl(`/p/${p.slug}`) },
+          ],
+        }}
+      />
       <section className="row" style={{ paddingTop: 24, alignItems: "stretch", ["--gap" as string]: "20px 32px" }}>
         <div className="stack" style={{ flex: "999 1 520px", minWidth: 0 }}>
-          <Link href={cat && cat.slug !== snap.categories[0]?.slug ? `/c/${cat.slug}` : "/"} className="mono" style={{ fontSize: 13, fontWeight: 700 }}>
+          <Link href={catPath} className="mono" style={{ fontSize: 13, fontWeight: 700 }}>
             {cat?.name} / {p.kind} / {p.name}
           </Link>
           <div className="row" style={{ ["--gap" as string]: "10px 14px" }}>

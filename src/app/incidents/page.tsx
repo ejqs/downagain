@@ -6,10 +6,15 @@ import { durationMinutes } from "@/lib/grading";
 import { fmtDay, fmtDuration, fmtTime, plural } from "@/lib/format";
 import { TIER_BLURB, TIER_NAMES } from "@/lib/severity";
 import { SevPill } from "@/components/ui";
+import { pageMeta } from "@/lib/site";
 import { Unavailable } from "@/components/Unavailable";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Incidents" };
+export const metadata: Metadata = pageMeta({
+  title: "Incidents",
+  description: "Every incident posted by the hosting platforms and AI APIs we track, newest first, with severity and duration.",
+  path: "/incidents",
+});
 
 const PAGE_DAYS = 14;
 const DAY = 86_400_000;

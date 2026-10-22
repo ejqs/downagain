@@ -1,17 +1,9 @@
 import { safeSnapshot } from "@/lib/data";
 import { scoreFor } from "@/lib/views";
 import { fmtPct } from "@/lib/format";
+import { GRADE_COLORS } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
-
-const COLORS: Record<string, [string, string]> = {
-  "A+": ["#0F766E", "#FFFFFF"],
-  A: ["#0F766E", "#FFFFFF"],
-  B: ["#CCE8E4", "#0E0E10"],
-  C: ["#FFD400", "#0E0E10"],
-  D: ["#E8590C", "#0E0E10"],
-  F: ["#0E0E10", "#FFD400"],
-};
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
@@ -31,7 +23,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ file: s
   const p = snap?.providers.find((x) => x.slug === slug);
   const body = !snap || !p ? svg("downagain", "unknown", "#EEEEEA", "#0E0E10") : (() => {
     const s = scoreFor(snap, p.id);
-    const [bg, fg] = COLORS[s.grade];
+    const [bg, fg] = GRADE_COLORS[s.grade];
     return svg(p.slug, `${s.grade} · ${fmtPct(s.admittedUptime)} · 90d`, bg, fg);
   })();
   return new Response(body, {

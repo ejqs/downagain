@@ -5,11 +5,30 @@ import { fmtDuration, fmtPct } from "@/lib/format";
 import { AREA_LABEL, type Area } from "@/lib/severity";
 import type { Score } from "@/lib/grading";
 import { Unavailable } from "@/components/Unavailable";
+import { pageMeta } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Compare providers" };
 
 type Props = { searchParams: Promise<{ p?: string; a?: string; b?: string; c?: string }> };
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const snap = await safeSnapshot();
+  const q = await searchParams;
+  const asked = snap ? askedSlugs(snap, q) : [];
+  if (!snap || asked.length < 2) {
+    return pageMeta({
+      title: "Compare providers",
+      description: "Put up to three hosting platforms or AI APIs side by side: grades, admitted uptime, incidents and time to fix.",
+      path: "/compare",
+    });
+  }
+  const names = asked.map((slug) => snap.providers.find((p) => p.slug === slug)!.name);
+  return pageMeta({
+    title: `${names.join(" vs ")} uptime`,
+    description: `${names.join(" vs ")}: 90-day grades, admitted uptime, incidents and time to fix, from each provider's own status page.`,
+    path: `/compare?p=${asked.join(",")}`,
+  });
+}
 
 interface Col {
   p: ProviderRow;
@@ -40,10 +59,14 @@ function Row({ label, cells, better }: { label: string; cells: Cell[]; better?: 
   );
 }
 
-function pickSlugs(snap: Snapshot, q: Awaited<Props["searchParams"]>): string[] {
+function askedSlugs(snap: Snapshot, q: Awaited<Props["searchParams"]>): string[] {
   const valid = new Set(snap.providers.map((p) => p.slug));
   const asked = (q.p ? q.p.split(",") : [q.a, q.b, q.c]).filter((s): s is string => Boolean(s && valid.has(s)));
-  const unique = [...new Set(asked)].slice(0, 3);
+  return [...new Set(asked)].slice(0, 3);
+}
+
+function pickSlugs(snap: Snapshot, q: Awaited<Props["searchParams"]>): string[] {
+  const unique = askedSlugs(snap, q);
   if (unique.length >= 2) return unique;
   // Default: the first category's first three providers.
   const first = snap.categories[0]?.slug;

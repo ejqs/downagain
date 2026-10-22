@@ -6,6 +6,7 @@
 - A leaderboard per category (Hosting first, then AI APIs), graded A+ to F on the same 90-day window for everyone.
 - Provider pages with admitted uptime for 30d / 90d / 1y, Production / Shipping / Dashboard area grades, severity mix, 12-month trend, when incidents start, what breaks, how the provider communicates, full incident history, peers and a README badge.
 - An incident feed, a head-to-head compare page and a public `/api/status.json`.
+- Share cards per provider (`/p/<slug>/opengraph-image`) and for the site, drawn live from the same data.
 
 We never ping provider sites. We only read their official status page APIs, every 5 minutes, politely.
 
@@ -52,6 +53,7 @@ Useful scripts:
 | `bun run regrade` | Re-run the classifier over every stored incident after changing the rubric |
 | `bun run test` / `bun run lint` | Unit tests (adapters, severity, grading) / typecheck |
 | `bun run db:generate` | New migration after editing `src/db/schema.ts` |
+| `bun scripts/make-icons.ts` | Re-render the favicon and app icons after editing `assets/icon.svg` |
 
 ## Deploying on Railway
 

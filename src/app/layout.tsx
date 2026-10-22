@@ -4,9 +4,9 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Banner } from "@/components/Banner";
+import { JsonLd } from "@/components/JsonLd";
 import { safeSnapshot } from "@/lib/data";
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://downagain.dev";
+import { SITE, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/site";
 
 // Every page shows the live banner, so nothing is prerendered at build time (the
 // build has no database). Data still comes from the tagged cache, not Postgres.
@@ -15,9 +15,21 @@ const UMAMI_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: { default: "downagain.dev · Is it down again?", template: "%s · downagain.dev" },
-  description: "Live status and 90-day track records for the hosting platforms and AI APIs your apps run on, from each provider's own status page.",
-  openGraph: { siteName: "downagain.dev", type: "website" },
+  title: { default: SITE_TITLE, template: `%s · ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: { siteName: SITE_NAME, type: "website", locale: "en_US", title: SITE_TITLE, description: SITE_DESCRIPTION },
+  twitter: { card: "summary_large_image", title: SITE_TITLE, description: SITE_DESCRIPTION },
+  formatDetection: { telephone: false },
+};
+
+const WEBSITE_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  alternateName: "downagain",
+  url: `${SITE}/`,
+  description: SITE_DESCRIPTION,
 };
 
 export const viewport: Viewport = { themeColor: "#FFD400", width: "device-width", initialScale: 1 };
@@ -36,6 +48,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body>
+        <JsonLd data={WEBSITE_LD} />
         <Banner snap={snap} />
         <Header />
         {children}

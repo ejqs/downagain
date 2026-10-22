@@ -1,0 +1,79 @@
+import { safeSnapshot } from "@/lib/data";
+import { dailyCells, downNow, incidentsFor, scoreFor } from "@/lib/views";
+import { fmtDuration, fmtPct, plural } from "@/lib/format";
+import { TIER_NAMES } from "@/lib/severity";
+import { BRAND, GRADE_COLORS } from "@/lib/site";
+import { MONO, OG_SIZE, card } from "@/lib/og";
+
+export const dynamic = "force-dynamic";
+export const alt = "Provider track record on downagain.dev: 90-day grade, downtime and incidents.";
+export const size = OG_SIZE;
+export const contentType = "image/png";
+
+const CELL: Record<string, string> = { up: BRAND.up, minor: BRAND.minor, major: BRAND.down, none: BRAND.none };
+
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const snap = await safeSnapshot();
+  const p = snap?.providers.find((x) => x.slug === slug);
+  if (!snap || !p) {
+    return card(
+      <div style={{ display: "flex", flex: 1, alignItems: "center", fontSize: 96, letterSpacing: "-0.04em" }}>Is it down again?</div>,
+      "90-day track records",
+    );
+  }
+  const s = scoreFor(snap, p.id);
+  const cells = dailyCells(incidentsFor(snap, p.id), 90, snap.generatedAt, p.historyFrom);
+  const down = downNow(snap).find((d) => d.provider.id === p.id);
+  const [gradeBg, gradeFg] = GRADE_COLORS[s.grade];
+  const nameSize = p.name.length > 16 ? 76 : 104;
+
+  return card(
+    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+      <div style={{ display: "flex", flex: 1, gap: 48, alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 16 }}>
+          <span style={{ fontFamily: MONO, fontSize: 22, letterSpacing: "0.08em", color: down ? BRAND.downInk : BRAND.ink }}>
+            {down ? `DOWN NOW${down.tier ? ` · SEV ${down.tier} ${TIER_NAMES[down.tier].toUpperCase()}` : ""}` : "LAST 90 DAYS"}
+          </span>
+          <span style={{ fontSize: nameSize, lineHeight: 0.9, letterSpacing: "-0.04em" }}>{p.name}</span>
+          {s.sev1Minutes > 0 ? (
+            <div style={{ display: "flex", flexWrap: "wrap", fontSize: 44, lineHeight: 1.1, gap: "0 12px" }}>
+              <span>was down</span>
+              <span style={{ background: BRAND.down, padding: "0 10px" }}>{fmtDuration(s.sev1Minutes)}</span>
+              <span>in 90 days,</span>
+              <span>{`across ${plural(s.incidentCount, "incident")}.`}</span>
+            </div>
+          ) : (
+            <span style={{ fontSize: 44, lineHeight: 1.1 }}>
+              {s.incidentCount ? `No Sev 1 downtime in 90 days. ${plural(s.incidentCount, "smaller incident")}.` : "No incidents in 90 days."}
+            </span>
+          )}
+        </div>
+        <div
+          style={{
+            width: 260,
+            height: 290,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            background: gradeBg,
+            color: gradeFg,
+            border: `6px solid ${BRAND.ink}`,
+            boxShadow: `14px 14px 0 ${BRAND.ink}`,
+          }}
+        >
+          <span style={{ fontFamily: MONO, fontSize: 18, letterSpacing: "0.1em" }}>GRADE</span>
+          <span style={{ fontSize: s.grade.length > 1 ? 170 : 210, lineHeight: 0.9 }}>{s.grade}</span>
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 3, height: 40, marginTop: 24 }}>
+        {cells.map((c, k) => (
+          <div key={k} style={{ display: "flex", flex: 1, background: CELL[c] }} />
+        ))}
+      </div>
+    </div>,
+    `${fmtPct(s.admittedUptime)} admitted uptime · 90-day grade`,
+    down ? "down" : "hazard",
+  );
+}

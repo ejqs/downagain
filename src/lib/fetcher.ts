@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { Getter } from "@/lib/types";
+import { SITE } from "@/lib/site";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://downagain.dev";
 export const USER_AGENT = `downagain.dev/1.0 (+${SITE}/about)`;
 const TIMEOUT_MS = 8_000;
 

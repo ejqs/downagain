@@ -2,8 +2,13 @@ import type { Metadata } from "next";
 import { GRADES } from "@/lib/grading";
 import { SECURITY_PENALTY, TIER_BLURB, TIER_NAMES, TIER_WEIGHT } from "@/lib/severity";
 import { USER_AGENT } from "@/lib/fetcher";
+import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = { title: "How it works" };
+export const metadata: Metadata = pageMeta({
+  title: "How it works",
+  description: "Where the data comes from, how incidents get a severity, and how the 90-day grades are worked out.",
+  path: "/about",
+});
 
 export default function About() {
   return (
