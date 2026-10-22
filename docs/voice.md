@@ -36,4 +36,4 @@ A scoreboard, not a manual. The numbers do the talking.
 
 ## Words we use
 
-down, up, incident, outage, admitted uptime, grade, Sev 1 to Sev 4 (Lights out, Bleeding, Can't ship, Papercut), production, shipping, dashboard, postmortem, status page.
+down, up, incident, outage, admitted uptime, grade, Sev 1 to Sev 4 (Lights out, Bleeding, Can't ship, Papercut), PROD and SHIP (the two area grades), postmortem, status page.

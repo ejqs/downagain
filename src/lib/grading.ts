@@ -1,6 +1,6 @@
 // Track-record math. Everyone is ranked on the same rolling window (90 days),
 // whatever history we hold for them.
-import { AREA_OF, SECURITY_PENALTY, TIER_WEIGHT, type Area, type Surface } from "@/lib/severity";
+import { areaFor, SECURITY_PENALTY, TIER_WEIGHT, type Area, type Surface } from "@/lib/severity";
 
 export const WINDOW_DAYS = 90;
 const MIN = 60_000;
@@ -65,8 +65,11 @@ function areaTiersOf(i: GradeInput): Partial<Record<Area, number>> {
   if (i.tierOverride != null) {
     // A manual override applies to every area the incident touched.
     const out: Partial<Record<Area, number>> = {};
-    for (const s of i.surfaces ?? []) out[AREA_OF[s as Surface] ?? "production"] = i.tierOverride;
-    if (Object.keys(out).length === 0) out.production = i.tierOverride;
+    for (const s of i.surfaces ?? []) {
+      const area = areaFor(s as Surface, i.tierOverride);
+      if (area) out[area] = i.tierOverride;
+    }
+    if (Object.keys(out).length === 0 && i.tierOverride > 0 && i.tierOverride <= 3) out.production = i.tierOverride;
     return out;
   }
   return i.areaTiers ?? {};
@@ -123,9 +126,8 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
   const areas: Record<Area, AreaScore> = {
     production: { points: 0, grade: "A+", incidents: 0, downtimeMinutes: 0 },
     shipping: { points: 0, grade: "A+", incidents: 0, downtimeMinutes: 0 },
-    dashboard: { points: 0, grade: "A+", incidents: 0, downtimeMinutes: 0 },
   };
-  const areaIntervals: Record<Area, [number, number][]> = { production: [], shipping: [], dashboard: [] };
+  const areaIntervals: Record<Area, [number, number][]> = { production: [], shipping: [] };
   const sev1: [number, number][] = [];
   const sevCounts: [number, number, number, number] = [0, 0, 0, 0];
   let longest = 0;
@@ -144,7 +146,7 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
 
     const minutes = penaltyMinutes(i, from, to);
     for (const [area, t] of Object.entries(areaTiersOf(i)) as [Area, number][]) {
-      if (!t) continue;
+      if (!t || !areas[area]) continue; // e.g. a "dashboard" key graded before there were two areas
       areas[area].points += TIER_WEIGHT[t] * minutes;
       areas[area].incidents++;
       areaIntervals[area].push([i.startedAt.getTime(), end]);

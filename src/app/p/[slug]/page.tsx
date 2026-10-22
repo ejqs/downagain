@@ -5,7 +5,7 @@ import { getProviderHistory, safeSnapshot, type IncidentRow } from "@/lib/data";
 import { communication, dailyCells, downNow, incidentsFor, monthlyTrend, openIncidents, scoreFor, startHeatmap, tierOf, topComponents } from "@/lib/views";
 import { durationMinutes } from "@/lib/grading";
 import { fmtAgo, fmtDate, fmtDuration, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
-import { AREA_BLURB, AREA_LABEL, AREA_SHORT, TIER_NAMES, TIER_BLURB, type Area } from "@/lib/severity";
+import { AREA_BLURB, AREA_LABEL, AREA_SHORT, AREAS, TIER_NAMES, TIER_BLURB } from "@/lib/severity";
 import { STATUS_LABEL, isProblem } from "@/lib/status";
 import { gradeInput } from "@/lib/views";
 import { DayStrip, GradeTile, SevPill, Stat, StripLegend } from "@/components/ui";
@@ -18,7 +18,6 @@ export const dynamic = "force-dynamic";
 
 const WINDOWS = { "30d": 30, "90d": 90, "1y": 365 } as const;
 type WindowKey = keyof typeof WINDOWS;
-const AREAS: Area[] = ["production", "shipping", "dashboard"];
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const SEV_COLORS = ["var(--ink)", "var(--down)", "var(--minor)", "var(--rule)"];
 

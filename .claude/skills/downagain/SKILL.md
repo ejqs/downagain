@@ -27,7 +27,14 @@ A read-only Next.js site that ranks hosting and AI providers by their own status
 
 1. Edit `src/lib/severity.ts` and bump `CLASSIFIER_VERSION`.
 2. Update `tests/severity.test.ts` and the About page if tier meanings changed.
-3. After deploying, run `bun run regrade` against production so stored incidents use the new rules. Manual overrides are kept.
+3. If the change affects how Claude should judge incidents, update `SYSTEM_PROMPT` in `src/lib/ai-grade.ts` to match and bump `PROMPT_VERSION` (every incident is then read again, which costs budget).
+4. Deploy. The next polls regrade stored incidents 500 at a time and keep Claude's verdicts where the incident hasn't changed. Manual overrides are kept.
+
+## Claude grading
+
+- Off unless `ANTHROPIC_API_KEY` is set on the web service; `AI_GRADING=off` is the kill switch. Never commit the key.
+- Budget: `AI_MONTHLY_BUDGET_USD` (default 5), at most 15 calls per poll. Spend is summed from `incident_reviews.cost_micros`.
+- To see where Claude disagreed with the rules: `select incident_id, rules_tier, tier, verdict->>'rationale' from incident_reviews where rules_tier <> tier;`
 
 ## Grades
 

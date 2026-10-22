@@ -6,7 +6,6 @@ export const GLOSSARY = {
   grade: "Severity weight × minutes, summed over the window. Fewer points, better grade.",
   production: AREA_BLURB.production,
   shipping: AREA_BLURB.shipping,
-  dashboard: AREA_BLURB.dashboard,
   incidents: "Everything posted on the status page except scheduled maintenance.",
   sev1: TIER_BLURB[1],
   sev2: TIER_BLURB[2],

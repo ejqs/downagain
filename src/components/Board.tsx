@@ -2,10 +2,9 @@ import Link from "next/link";
 import type { Snapshot } from "@/lib/data";
 import { leaderboard, downNow, scoreFor } from "@/lib/views";
 import { fmtDuration, fmtPct } from "@/lib/format";
-import { AREA_SHORT, type Area } from "@/lib/severity";
+import { AREA_SHORT, AREAS } from "@/lib/severity";
 import { DayStrip, GradeTile, StripLegend } from "./ui";
 
-const AREAS: Area[] = ["production", "shipping", "dashboard"];
 
 export function CategoryTabs({ snap, active }: { snap: Snapshot; active: string }) {
   const down = downNow(snap);
@@ -85,7 +84,7 @@ export function Board({ snap, category, sort, basePath }: { snap: Snapshot; cate
       )}
       <StripLegend />
       <p className="mono" style={{ fontSize: 12, color: "var(--body)" }}>
-        PROD · SHIP · DASH = production, shipping, dashboard grades. <Link href="/about">How grades work</Link>
+        PROD = your users hit. SHIP = you can&apos;t deploy or manage. <Link href="/about">How grades work</Link>
       </p>
     </section>
   );

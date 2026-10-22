@@ -4,7 +4,7 @@
 
 - A **down right now** banner on every page.
 - A leaderboard per category (Hosting first, then AI APIs), graded A+ to F on the same 90-day window for everyone.
-- Provider pages with admitted uptime for 30d / 90d / 1y, Production / Shipping / Dashboard area grades, severity mix, 12-month trend, when incidents start, what breaks, how the provider communicates, full incident history, peers and a README badge.
+- Provider pages with admitted uptime for 30d / 90d / 1y, PROD and SHIP area grades, severity mix, 12-month trend, when incidents start, what breaks, how the provider communicates, full incident history, peers and a README badge.
 - An incident feed, a head-to-head compare page and a public `/api/status.json`.
 - Share cards per provider (`/p/<slug>/opengraph-image`) and for the site, drawn live from the same data.
 
@@ -22,7 +22,8 @@ Railway cron (*/5) ──POST──▶ web: /api/cron/poll ──GET (ETag)─�
 
 - **Adapters** (`src/lib/adapters/`) turn Atlassian Statuspage JSON (most providers, including incident.io pages with the compatible API), Railway's status API and Heroku's status API into one shape.
 - **Poller** (`src/lib/poller.ts`) diffs each provider against what's stored, upserts incidents and their updates, records status transitions and raw documents when they change, and reports which providers changed. Nothing is ever deleted.
-- **Severity** (`src/lib/severity.ts`) is our own rubric: Sev 1 Lights out, Sev 2 Bleeding, Sev 3 Can't ship, Sev 4 Papercut. Components map to production / shipping / dashboard; security bumps a tier (floor Sev 2); data loss is always Sev 1. `tier_override` wins.
+- **Severity** (`src/lib/severity.ts`) is our own rubric: Sev 1 Lights out, Sev 2 Bleeding, Sev 3 Can't ship, Sev 4 Papercut. Graded by impact: PROD when end users are hit, SHIP when you can't deploy, build or manage (dashboard, auth and billing outages included); papercuts only count overall. Security bumps a tier (floor Sev 2); data loss is always Sev 1. `tier_override` wins.
+- **Claude grading** (`src/lib/ai-grade.ts`, `src/lib/review.ts`): after each poll, Claude Haiku 5.5 reads new or changed incidents (title, components and every update) and refines the rule grade: tier per surface, blast radius (global, regional, subset), security, data loss. One review per incident version is stored in `incident_reviews` and reused. At most 15 calls per poll and `AI_MONTHLY_BUDGET_USD` (default $5) per month; with no key, no budget or an API error the rules grade stands.
 - **Grades** (`src/lib/grading.ts`): penalty points = tier weight × minutes until the provider says "monitoring", over a rolling 90 days. "Admitted uptime" counts only Sev 1 time the provider posted.
 - **Caching** (`src/lib/data.ts`): every read goes through `unstable_cache` tagged `status` / `provider:<slug>`. The poll route revalidates those tags only when something changed, so page traffic doesn't reach Postgres. A 10-minute safety net catches anything missed.
 - A provider stays hidden until its status source has answered once, so a wrong endpoint never shows up as an outage.
@@ -50,7 +51,8 @@ Useful scripts:
 | `bun run poll [slug…]` | Poll providers once, straight into the database |
 | `STATUS_FIXTURES_DIR=tests/fixtures bun run poll vercel railway heroku` | Same, reading saved fixtures instead of the network |
 | `bun run backfill [--provider slug]` | Seed, then pull whatever history each status API exposes (marked `origin = backfill`) |
-| `bun run regrade` | Re-run the classifier over every stored incident after changing the rubric |
+| `bun run regrade` | Re-run the classifier over every stored incident (polls also do this on their own after a `CLASSIFIER_VERSION` bump) |
+| `bun run ai-review [--limit 200] [--provider slug]` | Have Claude grade a bigger batch of pending incidents than one poll does |
 | `bun run test` / `bun run lint` | Unit and integration tests / typecheck. Needs no database: poller and route tests run on an in-process Postgres (PGlite) with the real migrations |
 | `bun run e2e:prepare && bun run build && bun run test:e2e` | Playwright smoke tests (desktop and 390px mobile) against a production build. Needs a local `DATABASE_URL`; fills it with fixtures and sample data |
 | `bun run db:generate` | New migration after editing `src/db/schema.ts` |
@@ -63,7 +65,7 @@ Useful scripts:
 The live project ("Down Again", region asia-southeast1) is set up this way already. To recreate it:
 
 1. `railway link` to the project, then `railway config plan` and read the plan before `railway config apply`.
-2. Set `CRON_SECRET` on `downagain` to a long random string. The poller reads it by reference.
+2. Set `CRON_SECRET` on `downagain` to a long random string. The poller reads it by reference. Set `ANTHROPIC_API_KEY` on `downagain` to turn on Claude grading.
 3. On a fresh database, run the history backfill once, either with `railway run --service downagain bun run backfill` or by setting the pre-deploy command to `bun run db:migrate && bun run backfill` for one deploy.
 4. `downagain.dev` is attached to the web service; DNS lives in Cloudflare (set up with Railway's one-click Cloudflare flow).
 

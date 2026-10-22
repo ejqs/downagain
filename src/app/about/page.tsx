@@ -48,14 +48,13 @@ export default function About() {
           </table>
         </div>
         <p>
-          Each status-page component maps to an area (production, shipping or dashboard), combined with the impact the provider posted. Security
+          Tiers follow impact, not component names: a billing outage that freezes accounts can&apos;t ship, a slow docs page is a papercut. Security
           incidents move up one tier (Sev 2 at least) and add {SECURITY_PENALTY} penalty points. Confirmed data loss or exposure is always Sev 1.
           Every incident shows why it got its tier, and tiers can be corrected by hand.
         </p>
         <p>
-          Status pages don&apos;t always label things fairly, so Claude also reads each new or updated incident, including every update the provider
-          posted, and judges which areas were hit, how hard, and how widely: a whole-platform outage counts for more than one region or a slice of
-          customers. Those incidents say &ldquo;graded by Claude&rdquo;. If Claude is unavailable, the rules above decide, and a manual review always wins.
+          Rules grade first. Claude then reads every update the provider posted and refines it: what broke, how hard, how widely. One region or a
+          slice of customers counts less than everyone. Those incidents say &ldquo;graded by Claude&rdquo;. A manual review always wins.
         </p>
 
         <h2 className="h2">Grades</h2>
@@ -77,7 +76,8 @@ export default function About() {
           </table>
         </div>
         <p>
-          Area grades (PROD, SHIP, DASH) use the same scale per area. <strong>Admitted uptime</strong> counts only Sev 1 time the provider posted
+          Two area grades use the same scale. <strong>PROD</strong>: your users are hit. <strong>SHIP</strong>: you can&apos;t deploy, build or
+          manage, including dashboard, auth and billing outages. Papercuts count toward the overall grade only. <strong>Admitted uptime</strong> counts only Sev 1 time the provider posted
           itself, so it&apos;s a best case. Providers grade their own homework; we just add it up.
         </p>
 

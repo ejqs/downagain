@@ -46,6 +46,12 @@ describe("applyVerdict", () => {
     expect(g.areaTiers).toEqual({ shipping: 3, production: 1 });
   });
 
+  it("counts a blocking dashboard or billing outage against SHIP and a papercut only overall", () => {
+    expect(applyVerdict(rules, verdict({ affected: [{ surface: "manage", tier: 3 }] }))).toMatchObject({ tier: 3, areaTiers: { shipping: 3 } });
+    expect(applyVerdict(rules, verdict({ affected: [{ surface: "manage", tier: 4 }] }))).toMatchObject({ tier: 4, areaTiers: {} });
+    expect(applyVerdict(rules, verdict({ affected: [{ surface: "peripheral", tier: 4 }] }))).toMatchObject({ tier: 4, areaTiers: {} });
+  });
+
   it("applies the security bump itself, with Sev 2 as the floor", () => {
     const g = applyVerdict(rules, verdict({ affected: [{ surface: "peripheral", tier: 4 }], security: true }));
     expect(g.tier).toBe(2);

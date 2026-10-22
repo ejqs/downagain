@@ -127,7 +127,7 @@ describe("GET /api/status.json", () => {
     const vercel = body.providers.find((p: { slug: string }) => p.slug === "vercel");
     expect(vercel).toMatchObject({ category: "hosting", status: "major_outage" });
     expect(vercel.grade90d).toMatch(/^(A\+|[A-DF])$/);
-    expect(Object.keys(vercel.areaGrades90d)).toEqual(["production", "shipping", "dashboard"]);
+    expect(Object.keys(vercel.areaGrades90d)).toEqual(["production", "shipping"]);
     expect(vercel.admittedUptime90d).toBeGreaterThan(0);
     expect(vercel.admittedUptime90d).toBeLessThanOrEqual(1);
     expect(body.down.map((d: { provider: string }) => d.provider)).toEqual(expect.arrayContaining(["vercel", "railway", "heroku"]));

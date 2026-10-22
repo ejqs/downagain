@@ -1,6 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { db } from "@/db";
 import { pollAll } from "@/lib/poller";
+import { regradeAll } from "@/lib/regrade";
 import { reviewPending, type ReviewReport } from "@/lib/review";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,9 @@ export async function POST(req: Request) {
     return Response.json({ error: err instanceof Error ? err.message : String(err) }, { status: 409 });
   }
 
+  // After a rules change (CLASSIFIER_VERSION bump), regrade stored incidents a batch at a time.
+  const regraded = await regradeAll(db(), { staleOnly: true, limit: 500 });
+
   // Claude refines the grades of new or changed incidents. Never fails the poll:
   // without a key, budget or a working API the rules grade simply stands.
   let review: ReviewReport | { error: string };
@@ -33,7 +37,12 @@ export async function POST(req: Request) {
     review = { error: err instanceof Error ? err.message : String(err) };
   }
 
-  const changed = [...new Set([...results.filter((r) => r.changed).map((r) => r.slug), ...("changedProviders" in review ? review.changedProviders : [])])];
+  const changed = [
+    ...new Set([
+      ...results.filter((r) => r.changed || regraded > 0).map((r) => r.slug),
+      ...("changedProviders" in review ? review.changedProviders : []),
+    ]),
+  ];
   if (changed.length || url.searchParams.has("revalidate")) {
     // Next visitor gets fresh data immediately; outages are exactly when stale pages hurt.
     revalidateTag("status", { expire: 0 });
@@ -42,6 +51,7 @@ export async function POST(req: Request) {
   return Response.json({
     changed,
     failed: results.filter((r) => !r.ok).map((r) => ({ slug: r.slug, error: r.error })),
+    regraded,
     review,
     results: results.map(({ slug, status, newIncidents, updatedIncidents }) => ({ slug, status, newIncidents, updatedIncidents })),
   });

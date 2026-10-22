@@ -12,8 +12,10 @@ describe("surfaceForComponent", () => {
     ["Machines API", "ship"],
     ["Persistent Storage (Volumes)", "data"],
     ["Postgres", "data"],
-    ["Dashboard", "peripheral"],
-    ["Payments & Billing", "peripheral"],
+    ["Dashboard", "manage"],
+    ["Payments & Billing", "manage"],
+    ["Documentation", "peripheral"],
+    ["ChatGPT", "peripheral"],
     ["Chat Completions", "serving"],
     ["Fine-tuning", "ship"],
   ])("%s → %s", (name, surface) => {
@@ -47,10 +49,27 @@ describe("classify", () => {
     expect(classify({ ...base, title: "Builds down", impact: "critical", components: ["Builds"] }).tier).toBe(2);
   });
 
-  it("dashboard is a papercut", () => {
+  it("a slow dashboard is a papercut that only counts overall", () => {
     const c = classify({ ...base, title: "Dashboard slow", components: ["Dashboard"] });
     expect(c.tier).toBe(4);
-    expect(c.areaTiers).toEqual({ dashboard: 4 });
+    expect(c.areaTiers).toEqual({});
+  });
+
+  it("a dashboard, auth or billing outage counts against shipping", () => {
+    const c = classify({ ...base, title: "Dashboard unavailable", impact: "major", components: ["Dashboard"] });
+    expect(c).toMatchObject({ tier: 3, areaTiers: { shipping: 3 } });
+  });
+
+  it("docs stay a papercut even when fully down", () => {
+    const c = classify({ ...base, title: "Docs down", impact: "critical", components: ["Documentation"] });
+    expect(c).toMatchObject({ tier: 4, areaTiers: {} });
+  });
+
+  it("grades by impact: a minor billing issue that froze accounts can't ship", () => {
+    const c = classify({ ...base, title: "Billing issue", components: ["Payments & Billing"], updateText: "Some accounts were suspended after failed card charges." });
+    expect(c).toMatchObject({ tier: 3, areaTiers: { shipping: 3 } });
+    const docs = classify({ ...base, title: "Docs search broken", components: ["Documentation"], updateText: "Users are unable to deploy from the docs quickstart button." });
+    expect(docs).toMatchObject({ tier: 3, areaTiers: { shipping: 3 } });
   });
 
   it("uses component statuses when worse than the impact field", () => {
@@ -60,7 +79,7 @@ describe("classify", () => {
   it("takes the worst surface and grades each area", () => {
     const c = classify({ ...base, title: "x", impact: "major", components: ["Builds", "Dashboard", "Postgres"] });
     expect(c.tier).toBe(1);
-    expect(c.areaTiers).toEqual({ shipping: 3, dashboard: 4, production: 1 });
+    expect(c.areaTiers).toEqual({ shipping: 3, production: 1 });
   });
 
   it("security bumps one tier with Sev 2 as the floor", () => {

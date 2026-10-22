@@ -1,20 +1,25 @@
-import { eq } from "drizzle-orm";
+import { eq, isNull, lt, or } from "drizzle-orm";
 import type { DB } from "@/db";
 import { categories, componentSurfaces, incidentUpdates, incidents, providers } from "@/db/schema";
 import { finalGrade, gradeColumns, storedVerdict } from "@/lib/review";
-import { classify, type Surface } from "@/lib/severity";
+import { CLASSIFIER_VERSION, classify, type Surface } from "@/lib/severity";
 
 /**
  * Re-run the classifier over every stored incident and re-apply Claude's stored
  * verdict where the incident hasn't changed since it was reviewed. No API calls.
- * Manual overrides are untouched.
+ * Manual overrides are untouched. With `staleOnly`, only incidents graded by an
+ * older CLASSIFIER_VERSION, at most `limit` of them; the poll route runs this so
+ * a rules change reaches production without a manual step.
  */
-export async function regradeAll(database: DB) {
-  const rows = await database
+export async function regradeAll(database: DB, opts: { staleOnly?: boolean; limit?: number } = {}) {
+  const q = database
     .select({ i: incidents, cat: categories.slug })
     .from(incidents)
     .innerJoin(providers, eq(providers.id, incidents.providerId))
-    .innerJoin(categories, eq(categories.id, providers.categoryId));
+    .innerJoin(categories, eq(categories.id, providers.categoryId))
+    .where(opts.staleOnly ? or(isNull(incidents.classifierVersion), lt(incidents.classifierVersion, CLASSIFIER_VERSION)) : undefined)
+    .$dynamic();
+  const rows = await (opts.limit ? q.limit(opts.limit) : q);
   const overrides = new Map<number, Map<string, Surface>>();
   for (const r of await database.select().from(componentSurfaces)) {
     if (!overrides.has(r.providerId)) overrides.set(r.providerId, new Map());

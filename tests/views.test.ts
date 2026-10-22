@@ -46,6 +46,8 @@ function inc(providerId: number, p: Partial<IncidentRow> & { startedAt: number }
     security: false,
     reason: null,
     overrideNote: null,
+    gradedBy: "rules",
+    scope: null,
     ...p,
   };
 }
@@ -116,7 +118,7 @@ describe("dailyCells", () => {
 describe("leaderboard", () => {
   const s = snap(
     [prov(1, { name: "Calm" }), prov(2, { name: "Chaos" }), prov(3, { name: "Also calm" }), prov(4, { category: "ai" })],
-    [inc(2, { startedAt: ago(5) }), inc(1, { startedAt: ago(5), tier: 4, areaTiers: { dashboard: 4 } })],
+    [inc(2, { startedAt: ago(5) }), inc(1, { startedAt: ago(5), tier: 4, areaTiers: {} })],
   );
 
   it("ranks worst first within a category", () => {

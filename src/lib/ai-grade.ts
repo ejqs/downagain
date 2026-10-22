@@ -8,12 +8,12 @@
 // whenever SYSTEM_PROMPT or the schema changes; every incident is then read again.
 import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
-import { AREA_OF, securityBump, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
+import { areaFor, securityBump, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
 export const PROMPT_VERSION = 1;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 
-const SURFACES = ["serving", "data", "ship", "peripheral"] as const;
+const SURFACES = ["serving", "data", "ship", "manage", "peripheral"] as const;
 const SCOPES = ["global", "regional", "subset", "unclear"] as const;
 export type Scope = (typeof SCOPES)[number];
 
@@ -60,13 +60,16 @@ Surfaces:
 - serving: the customer's running app or the product's main API. Edge, CDN, DNS, networking, runtimes, functions, compute, and for AI providers the inference APIs (messages, completions, embeddings, realtime, specific models).
 - data: databases, storage, volumes, queues, caches, backups.
 - ship: builds, deploys, CI, CLI, provisioning, logs, domains and certificates, fine-tuning, batch jobs. For hosting providers a bare "API" usually means the control plane, so it is ship unless the text says customer apps were affected.
-- peripheral: dashboard, console, billing, docs, support, account login, status page, and consumer chat apps (ChatGPT, claude.ai, Sora and similar).
+- manage: dashboard, console, account login and auth, API keys, teams, billing and payments: what developers need to change config and keep their account in good standing.
+- peripheral: docs, support, status page, marketing site, invoice views, usage charts, and consumer chat apps (ChatGPT, claude.ai, Sora and similar).
+
+Judge by impact, not by the component's name. A dashboard, auth or billing problem that stops people deploying, changing config, or freezes or suspends accounts is manage at Tier 3. If it took customers' running apps down too (for example suspended accounts stopped serving), add serving as well.
 
 Tier for each affected surface:
 - 1 Lights out: serving or data down or failing for most requests across most customers, or confirmed data loss.
 - 2 Bleeding: serving or data degraded (elevated errors or latency, some requests failing), or down only in one region, for one model, or for a minority of customers. Also ship completely down for everyone.
-- 3 Can't ship: ship broken or badly degraded, or peripheral completely down for everyone.
-- 4 Papercut: peripheral problems, or minor ship trouble such as slower builds or delayed logs.
+- 3 Can't ship: ship broken or badly degraded, or manage broken in a way that blocks deploys, config changes or accounts.
+- 4 Papercut: a slow or partly broken dashboard that blocks nothing, any peripheral problem, or minor ship trouble such as slower builds or delayed logs.
 
 Scope is the blast radius: global (most customers or regions), regional (one or a few regions or data centres), subset (one plan, model, feature, or a small share of customers), unclear (the text doesn't say). Use it when choosing tiers: a full serving or data outage is Tier 1 only when it is global, or unclear but described as widespread.
 
@@ -178,14 +181,17 @@ export function applyVerdict(rules: Classification, v: Verdict): Refined {
   let tier: Tier = 4;
   for (const a of v.affected) {
     if (!surfaces.includes(a.surface)) surfaces.push(a.surface);
-    const area = AREA_OF[a.surface];
-    areaTiers[area] = Math.min(areaTiers[area] ?? 4, a.tier) as Tier;
+    const area = areaFor(a.surface, a.tier);
+    if (area) areaTiers[area] = Math.min(areaTiers[area] ?? 4, a.tier) as Tier;
     tier = Math.min(tier, a.tier) as Tier;
   }
   // A security incident flagged as "no impact" still counts, from Sev 4 up.
   if (surfaces.length === 0) {
     surfaces.push(...(rules.surfaces.length ? rules.surfaces : (["serving"] as Surface[])));
-    for (const s of surfaces) areaTiers[AREA_OF[s]] = 4;
+    for (const s of surfaces) {
+      const area = areaFor(s, 4);
+      if (area) areaTiers[area] = 4;
+    }
   }
 
   let reason = v.rationale;

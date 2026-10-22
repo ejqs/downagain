@@ -77,3 +77,18 @@ describe("score", () => {
     expect(s.grade).toBe("A+");
   });
 });
+
+describe("area grades", () => {
+  it("ignores area keys from before there were two areas", () => {
+    const from = new Date("2026-07-01T00:00:00Z");
+    const to = new Date("2026-10-01T00:00:00Z");
+    const s = score(
+      [{ startedAt: new Date("2026-09-01T00:00:00Z"), monitoringAt: null, resolvedAt: new Date("2026-09-01T01:00:00Z"), tier: 4, tierOverride: null, areaTiers: { dashboard: 4 } as never, surfaces: ["peripheral"], security: false }],
+      from,
+      to,
+    );
+    expect(Object.keys(s.areas)).toEqual(["production", "shipping"]);
+    expect(s.points).toBe(12);
+    expect(s.areas.shipping.points).toBe(0);
+  });
+});

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { safeSnapshot, type ProviderRow, type Snapshot } from "@/lib/data";
 import { communication, incidentsFor, monthlyTrend, scoreFor } from "@/lib/views";
 import { fmtDuration, fmtPct } from "@/lib/format";
-import { AREA_LABEL, type Area } from "@/lib/severity";
+import { AREA_LABEL, AREAS } from "@/lib/severity";
 import type { Score } from "@/lib/grading";
 import { Unavailable } from "@/components/Unavailable";
 import { pageMeta } from "@/lib/site";
@@ -103,7 +103,7 @@ export default async function ComparePage({ searchParams }: Props) {
       const v = f(c);
       return { value: v, text: v == null ? "–" : fmt(v) };
     });
-  const areas: Area[] = ["production", "shipping", "dashboard"];
+  const areas = AREAS;
   const pct = (v: number) => fmtPct(v);
   const dur = (v: number) => fmtDuration(v);
   const num = (v: number) => String(v);

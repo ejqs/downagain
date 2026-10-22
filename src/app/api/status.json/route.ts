@@ -20,7 +20,7 @@ export async function GET() {
           category: p.category,
           status: p.status,
           grade90d: s.grade,
-          areaGrades90d: { production: s.areas.production.grade, shipping: s.areas.shipping.grade, dashboard: s.areas.dashboard.grade },
+          areaGrades90d: { production: s.areas.production.grade, shipping: s.areas.shipping.grade },
           admittedUptime90d: Number(s.admittedUptime.toFixed(6)),
           incidents90d: s.incidentCount,
         };
