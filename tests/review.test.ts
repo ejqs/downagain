@@ -90,6 +90,7 @@ describe("reviewPending", () => {
     const id = await addIncident("a");
     const r = await reviewPending(database, { client, settings, now: NOW });
     expect(r).toMatchObject({ called: 1, failed: 0, changedProviders: ["vercel"] });
+    expect(r.disagreements).toEqual([{ provider: "vercel", title: "Elevated errors", rules: 1, claude: 2, why: "Errors in one region." }]);
     expect(await get(id)).toMatchObject({ tier: 2, gradedBy: "claude", scope: "regional", reason: "Errors in one region.", reviewedHash: expect.any(String) });
     const [rev] = await database.select().from(incidentReviews);
     expect(rev).toMatchObject({ incidentId: id, rulesTier: 1, tier: 2, costMicros: 200, error: null });

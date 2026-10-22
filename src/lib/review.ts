@@ -33,6 +33,8 @@ export interface ReviewReport {
   stoppedBecause?: string;
   spentThisMonthUsd: number;
   changedProviders: string[];
+  /** This run's fresh reads where Claude's tier differs from the rules, for the poll log. */
+  disagreements: { provider: string; title: string; rules: number; claude: number; why: string }[];
 }
 
 const monthStart = (now: Date) => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
@@ -110,7 +112,7 @@ export async function reviewPending(
 ): Promise<ReviewReport> {
   const settings = opts.settings ?? reviewSettings();
   const now = opts.now ?? new Date();
-  const report: ReviewReport = { enabled: settings.enabled, called: 0, fromCache: 0, failed: 0, pendingLeft: false, spentThisMonthUsd: 0, changedProviders: [] };
+  const report: ReviewReport = { enabled: settings.enabled, called: 0, fromCache: 0, failed: 0, pendingLeft: false, spentThisMonthUsd: 0, changedProviders: [], disagreements: [] };
   if (!settings.enabled || running) return report;
   running = true;
   try {
@@ -183,6 +185,9 @@ export async function reviewPending(
         verdict = out.ok ? out.verdict : null;
         if (!out.ok) report.failed++;
         const grade = finalGrade(rules, verdict);
+        if (grade.gradedBy === "claude" && grade.tier !== rules.tier) {
+          report.disagreements.push({ provider: r.slug, title: r.i.title.slice(0, 80), rules: rules.tier, claude: grade.tier, why: grade.reason ?? "" });
+        }
         await database
           .insert(incidentReviews)
           .values({
