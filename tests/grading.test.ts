@@ -92,3 +92,34 @@ describe("area grades", () => {
     expect(s.areas.shipping.points).toBe(0);
   });
 });
+
+describe("scope", () => {
+  const from = new Date("2026-07-01T00:00:00Z");
+  const to = new Date("2026-10-01T00:00:00Z");
+  const hour = (scope: string | null) => ({
+    startedAt: new Date("2026-09-01T00:00:00Z"),
+    monitoringAt: null,
+    resolvedAt: new Date("2026-09-01T01:00:00Z"),
+    tier: 2,
+    tierOverride: null,
+    areaTiers: { production: 2 },
+    surfaces: ["serving"],
+    security: false,
+    scope,
+  });
+
+  it("scales points by blast radius, overall and per area", () => {
+    const pts = (scope: string | null) => score([hour(scope)], from, to);
+    expect(pts(null).points).toBe(240);
+    expect(pts("global").points).toBe(240);
+    expect(pts("unclear").points).toBe(240);
+    expect(pts("regional").points).toBe(72);
+    expect(pts("subset").points).toBe(72);
+    expect(pts("local").points).toBe(24);
+    expect(pts("local").areas.production.points).toBeCloseTo(24);
+  });
+
+  it("never discounts the security penalty", () => {
+    expect(score([{ ...hour("local"), security: true }], from, to).points).toBe(624);
+  });
+});

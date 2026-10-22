@@ -8,14 +8,13 @@
 // whenever SYSTEM_PROMPT or the schema changes; every incident is then read again.
 import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
-import { areaFor, securityBump, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
+import { areaFor, type Scope, securityBump, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
-export const PROMPT_VERSION = 2;
+export const PROMPT_VERSION = 3;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 
 const SURFACES = ["serving", "data", "ship", "manage", "peripheral"] as const;
-const SCOPES = ["global", "regional", "subset", "unclear"] as const;
-export type Scope = (typeof SCOPES)[number];
+const SCOPES = ["global", "regional", "local", "subset", "unclear"] as const satisfies readonly Scope[];
 
 export interface Verdict {
   affected: { surface: Surface; tier: 1 | 2 | 3 | 4 }[];
@@ -73,7 +72,7 @@ Tier for each affected surface:
 - 3 Can't ship: ship broken or badly degraded, or manage broken in a way that blocks deploys, config changes or accounts.
 - 4 Papercut: a slow or partly broken dashboard that blocks nothing, any peripheral problem, or minor ship trouble such as slower builds or delayed logs.
 
-Scope is the blast radius: global (most customers or regions), regional (one or a few regions or data centres), subset (one plan, model, feature, or a small share of customers), unclear (the text doesn't say). Use it when choosing tiers: a full serving or data outage is Tier 1 only when it is global, or unclear but described as widespread.
+Scope is the blast radius: global (most customers or regions), regional (one region or country, or a few locations), local (a single data centre, point of presence or cell), subset (one plan, model, feature, or a small share of customers everywhere), unclear (the text doesn't say). Pick the narrowest scope the text supports; "some customers" in one region is regional. Use it when choosing tiers: a full serving or data outage is Tier 1 only when it is global, or unclear but described as widespread.
 
 Set not_counted to true only for scheduled maintenance that stayed inside its window with no unplanned impact, a false alarm, or an incident the provider says had no customer impact. Then affected may be empty.
 

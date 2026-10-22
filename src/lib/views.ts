@@ -18,6 +18,7 @@ export function gradeInput(i: IncidentRow): GradeInput {
     areaTiers: i.areaTiers,
     surfaces: i.surfaces,
     security: i.security,
+    scope: i.scope,
   };
 }
 

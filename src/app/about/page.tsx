@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { GRADES } from "@/lib/grading";
-import { SECURITY_PENALTY, TIER_BLURB, TIER_NAMES, TIER_WEIGHT } from "@/lib/severity";
+import { SCOPE_BLURB, SCOPE_WEIGHT, SECURITY_PENALTY, TIER_BLURB, TIER_NAMES, TIER_WEIGHT, type Scope } from "@/lib/severity";
 import { USER_AGENT } from "@/lib/fetcher";
 import { SITE, SITE_NAME, absUrl, pageMeta } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
 import { STALE_AFTER_DAYS, WORKLOADS, isPriced } from "@/lib/pricing";
 import { CATEGORIES } from "@/lib/providers";
+
+const SCOPE_ORDER: Scope[] = ["global", "unclear", "regional", "subset", "local"];
 
 export const metadata: Metadata = pageMeta({
   title: "How it works",
@@ -84,8 +86,26 @@ export default function About() {
 
         <h2 className="h2">Grades</h2>
         <p>
-          Each incident scores <strong>weight × minutes</strong>, from start until the provider says it&apos;s monitoring a fix or resolved. Grades total
-          the last 90 days, the same window for everyone.
+          Each incident scores <strong>weight × scope × minutes</strong>, from start until the provider says it&apos;s monitoring a fix or resolved.
+          Grades total the last 90 days, the same window for everyone.
+        </p>
+        <div className="tbl">
+          <table>
+            <tbody>
+              <tr><th>Scope</th><th>Who was hit</th><th>×</th></tr>
+              {SCOPE_ORDER.map((sc) => (
+                <tr key={sc}>
+                  <td><strong>{sc[0].toUpperCase() + sc.slice(1)}</strong></td>
+                  <td>{SCOPE_BLURB[sc]}</td>
+                  <td className="mono">{SCOPE_WEIGHT[sc]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          A hundred-location network that reports every local blip shouldn&apos;t score like one that went down everywhere. Security penalties
+          aren&apos;t scaled.
         </p>
         <div className="tbl">
           <table>

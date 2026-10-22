@@ -98,7 +98,7 @@ function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | 
 /** The grade to store: Claude's verdict for this exact version if we have a good one, else the rules. */
 export function finalGrade(rules: Classification, verdict: unknown, regions?: string[] | null) {
   const v = verdict == null ? null : parseVerdict(verdict);
-  if (!v) return { ...rules, gradedBy: "rules" as const, scope: null, summary: null };
+  if (!v) return { ...rules, gradedBy: "rules" as const, scope: rules.scope ?? null, summary: null };
   const refined = applyVerdict(rules, v);
   // The rules already hold single-region incidents; Claude's grade gets the same treatment.
   if (v.data_loss) return refined;

@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 const brand = (name: string) => name.replace(/ API$/, "");
 
-const SCOPE_LABEL: Record<string, string> = { regional: "regional", subset: "some customers" };
+const SCOPE_LABEL: Record<string, string> = { regional: "regional", local: "one location", subset: "some customers" };
 
 /** One short mono line: who graded it, how wide it was, which components. */
 function IncidentTags({ i }: { i: IncidentRow }) {

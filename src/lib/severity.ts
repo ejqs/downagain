@@ -18,7 +18,7 @@
 import type { Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
 
-export const CLASSIFIER_VERSION = 2;
+export const CLASSIFIER_VERSION = 3;
 
 // manage: dashboard, console, auth, billing. peripheral: docs, status page, consumer apps.
 export type Surface = "serving" | "data" | "ship" | "manage" | "peripheral";
@@ -42,6 +42,23 @@ export const TIER_BLURB: Record<number, string> = {
 };
 export const TIER_WEIGHT: Record<number, number> = { 0: 0, 1: 10, 2: 4, 3: 1, 4: 0.2 };
 export const SECURITY_PENALTY = 600; // same as an hour of Sev 1
+
+// Blast radius. The tier says how bad it was for whoever was hit; scope says how
+// many were hit, and scales the penalty points. A provider with hundreds of
+// locations that reports every local blip shouldn't score like one that went
+// down everywhere. Unclear counts in full: no discount without evidence.
+export type Scope = "global" | "regional" | "local" | "subset" | "unclear";
+export const SCOPE_WEIGHT: Record<Scope, number> = { global: 1, unclear: 1, regional: 0.3, subset: 0.3, local: 0.1 };
+export const SCOPE_BLURB: Record<Scope, string> = {
+  global: "Most customers or regions",
+  unclear: "The provider didn't say",
+  regional: "One region, country or a few locations",
+  subset: "One plan, model or feature, or a small share of customers",
+  local: "One data centre or point of presence",
+};
+export function scopeWeight(scope: string | null | undefined): number {
+  return SCOPE_WEIGHT[scope as Scope] ?? 1;
+}
 /** Best tier an incident confined to one cloud region can get (data loss excepted). */
 export const REGIONAL_FLOOR: Tier = 2;
 
@@ -169,6 +186,7 @@ export interface Classification {
   lowConfidence: boolean;
   reason: string;
   classifierVersion: number;
+  scope?: Scope | null;
 }
 
 export function classify(input: ClassifyInput, overrides?: Map<string, Surface>): Classification {
@@ -251,5 +269,5 @@ export function classify(input: ClassifyInput, overrides?: Map<string, Surface>)
     tier = bumped;
   }
 
-  return { tier, areaTiers, surfaces, security, lowConfidence, reason, classifierVersion: CLASSIFIER_VERSION };
+  return { tier, areaTiers, surfaces, security, lowConfidence, reason, classifierVersion: CLASSIFIER_VERSION, scope: region ? "regional" : null };
 }

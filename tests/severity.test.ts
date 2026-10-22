@@ -105,3 +105,11 @@ describe("classify", () => {
     expect(classify({ ...base, impact: "none", title: "Scheduled maintenance for databases" }).tier).toBe(0);
   });
 });
+
+describe("scope from the rules", () => {
+  it("marks an incident confined to one named region as regional", () => {
+    const one = classify({ title: "EC2 errors", impact: "major", components: ["Amazon Elastic Compute Cloud"], worstComponentStatus: null, regions: ["us-east-1"], categorySlug: "cloud" });
+    expect(one.scope).toBe("regional");
+    expect(classify({ title: "x", impact: "major", components: ["Edge Network"], worstComponentStatus: null }).scope).toBeNull();
+  });
+});

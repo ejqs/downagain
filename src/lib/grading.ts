@@ -1,6 +1,6 @@
 // Track-record math. Everyone is ranked on the same rolling window (90 days),
 // whatever history we hold for them.
-import { areaFor, SECURITY_PENALTY, TIER_WEIGHT, type Area, type Surface } from "@/lib/severity";
+import { areaFor, scopeWeight, SECURITY_PENALTY, TIER_WEIGHT, type Area, type Surface } from "@/lib/severity";
 
 export const WINDOW_DAYS = 90;
 const MIN = 60_000;
@@ -26,6 +26,7 @@ export interface GradeInput {
   areaTiers: Partial<Record<Area, number>> | null;
   surfaces: string[] | null;
   security: boolean;
+  scope?: string | null;
 }
 
 export const GRADES = [
@@ -70,7 +71,7 @@ export function penaltyMinutes(i: GradeInput, from: Date, to: Date): number {
 
 export function incidentPoints(i: GradeInput, from: Date, to: Date): number {
   const tier = effectiveTier(i);
-  let pts = TIER_WEIGHT[tier] * penaltyMinutes(i, from, to);
+  let pts = TIER_WEIGHT[tier] * scopeWeight(i.scope) * penaltyMinutes(i, from, to);
   if (i.security && i.startedAt >= from) pts += SECURITY_PENALTY;
   return pts;
 }
@@ -158,7 +159,7 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
     longest = Math.max(longest, durationMinutes(i, to));
     if (i.resolvedAt) resolveTimes.push(durationMinutes(i));
 
-    const minutes = penaltyMinutes(i, from, to);
+    const minutes = penaltyMinutes(i, from, to) * scopeWeight(i.scope);
     for (const [area, t] of Object.entries(areaTiersOf(i)) as [Area, number][]) {
       if (!t || !areas[area]) continue; // e.g. a "dashboard" key graded before there were two areas
       areas[area].points += TIER_WEIGHT[t] * minutes;

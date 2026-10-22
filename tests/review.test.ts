@@ -4,6 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { DB } from "@/db";
 import { incidentReviews, incidentUpdates, incidents, providers } from "@/db/schema";
 import { regradeAll } from "@/lib/regrade";
+import { PROMPT_VERSION } from "@/lib/ai-grade";
 import { reviewPending, reviewSettings, type ReviewSettings } from "@/lib/review";
 import { CLASSIFIER_VERSION } from "@/lib/severity";
 import { testDb } from "./helpers/db";
@@ -153,7 +154,7 @@ describe("summaries", () => {
     // Reviewed under an older prompt: picked up again (here the current prompt's read is already cached).
     await database.update(incidents).set({ reviewedPrompt: 1 }).where(eq(incidents.id, short));
     expect(await reviewPending(database, { client, settings, now: NOW })).toMatchObject({ called: 0, fromCache: 1 });
-    expect((await get(short)).reviewedPrompt).toBe(2);
+    expect((await get(short)).reviewedPrompt).toBe(PROMPT_VERSION);
   });
 });
 
