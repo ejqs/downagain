@@ -4,7 +4,7 @@
 import { unstable_cache } from "next/cache";
 import { and, asc, desc, eq, gte, inArray, isNotNull, or, isNull } from "drizzle-orm";
 import { db } from "@/db";
-import { categories, incidentUpdates, incidents, providerStatus, providers } from "@/db/schema";
+import { categories, incidentReviews, incidentUpdates, incidents, providerStatus, providers } from "@/db/schema";
 import type { Status } from "@/lib/types";
 import type { Area } from "@/lib/severity";
 import { httpUrl } from "@/lib/format";
@@ -166,6 +166,29 @@ export interface ProviderHistory {
   total: number;
   older: IncidentRow[]; // incidents before the recent window, newest first
   updates: Record<number, { status: string; body: string; postedAt: number }[]>; // recent incidents' updates
+  reviews: Record<number, ReviewTrace>; // Claude's read behind each AI-graded incident
+}
+
+/** What a reader needs to check an AI grade: who graded it, when, against what the rules said. */
+export interface ReviewTrace {
+  model: string;
+  promptVersion: number;
+  reviewedAt: number;
+  rulesTier: number | null;
+  rulesReason: string | null;
+  tier: number | null;
+  verdict: unknown;
+}
+
+/** The review whose verdict an incident currently shows, with what Claude read and answered. */
+export async function readReview(incidentId: number) {
+  const [r] = await db()
+    .select({ review: incidentReviews, title: incidents.title, provider: providers.slug, gradedBy: incidents.gradedBy })
+    .from(incidents)
+    .innerJoin(providers, eq(providers.id, incidents.providerId))
+    .innerJoin(incidentReviews, and(eq(incidentReviews.incidentId, incidents.id), eq(incidentReviews.inputHash, incidents.reviewedHash)))
+    .where(eq(incidents.id, incidentId));
+  return r ?? null;
 }
 
 async function readProviderHistory(slug: string): Promise<ProviderHistory | null> {
@@ -184,15 +207,35 @@ async function readProviderHistory(slug: string): Promise<ProviderHistory | null
     : [];
   const updates: ProviderHistory["updates"] = {};
   for (const u of ups) (updates[u.incidentId] ??= []).push({ status: u.status, body: u.body, postedAt: u.postedAt.getTime() });
+  const aiIds = all.filter((i) => i.gradedBy === "claude").map((i) => i.id);
+  const revs = aiIds.length
+    ? await database
+        .select({
+          incidentId: incidentReviews.incidentId,
+          model: incidentReviews.model,
+          promptVersion: incidentReviews.promptVersion,
+          createdAt: incidentReviews.createdAt,
+          rulesTier: incidentReviews.rulesTier,
+          rulesReason: incidentReviews.rulesReason,
+          tier: incidentReviews.tier,
+          verdict: incidentReviews.verdict,
+        })
+        .from(incidentReviews)
+        .innerJoin(incidents, and(eq(incidents.id, incidentReviews.incidentId), eq(incidents.reviewedHash, incidentReviews.inputHash)))
+        .where(inArray(incidentReviews.incidentId, aiIds))
+    : [];
+  const reviews: ProviderHistory["reviews"] = {};
+  for (const { createdAt, incidentId, ...r } of revs) reviews[incidentId] = { ...r, reviewedAt: createdAt.getTime() };
   return {
     total: all.length,
+    reviews,
     older: all.filter((i) => i.startedAt.getTime() < cutoff).map(toIncidentRow),
     updates,
   };
 }
 
 export function getProviderHistory(slug: string) {
-  return unstable_cache(() => readProviderHistory(slug), ["provider-history-v1", slug], {
+  return unstable_cache(() => readProviderHistory(slug), ["provider-history-v2", slug], {
     tags: ["status", `provider:${slug}`],
     revalidate: SAFETY_NET_SECONDS,
   })();

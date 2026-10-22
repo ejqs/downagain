@@ -248,8 +248,8 @@ export function costMicros(model: string, u: Usage): number {
 }
 
 export type ReviewOutcome =
-  | { ok: true; verdict: Verdict; usage: Usage }
-  | { ok: false; error: string; usage: Usage; retry: boolean };
+  | { ok: true; verdict: Verdict; usage: Usage; raw: string }
+  | { ok: false; error: string; usage: Usage; retry: boolean; raw?: string };
 
 const NO_USAGE: Usage = { input_tokens: 0, output_tokens: 0 };
 
@@ -286,9 +286,9 @@ export async function askClaude(client: Anthropic, model: string, rendered: stri
   try {
     parsed = JSON.parse(text);
   } catch {
-    return { ok: false, error: "response was not JSON", usage, retry: false };
+    return { ok: false, error: "response was not JSON", usage, retry: false, raw: text };
   }
   const verdict = parseVerdict(parsed);
-  if (!verdict) return { ok: false, error: "response did not match the schema", usage, retry: false };
-  return { ok: true, verdict, usage };
+  if (!verdict) return { ok: false, error: "response did not match the schema", usage, retry: false, raw: text };
+  return { ok: true, verdict, usage, raw: text };
 }

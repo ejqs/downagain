@@ -76,7 +76,9 @@ export default function About() {
         </p>
         <p>
           Rules grade first. Claude then reads every update the provider posted and refines it: what broke, how hard, how widely. One region or a
-          slice of customers counts less than everyone. Those incidents say &ldquo;graded by Claude&rdquo;. A manual review always wins.
+          slice of customers counts less than everyone. Those incidents are tagged AI-graded, and long ones get a short summary from Claude. Open
+          &ldquo;Why this grade&rdquo; on any of them for the rules&apos; call, Claude&apos;s call, the model and date, and the raw record: exactly what
+          Claude read and answered. A manual review always wins.
         </p>
 
         <h2 className="h2">Grades</h2>

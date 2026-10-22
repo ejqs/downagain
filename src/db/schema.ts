@@ -186,6 +186,9 @@ export const incidentReviews = pgTable(
     verdict: jsonb("verdict"),
     error: text("error"),
     rulesTier: integer("rules_tier"), // what the rules said, for spotting disagreements
+    rulesReason: text("rules_reason"),
+    input: text("input"), // exactly what Claude read (the rendered incident)
+    rawOutput: text("raw_output"), // exactly what Claude answered, before parsing
     tier: integer("tier"), // what we stored after applying the verdict
     inputTokens: integer("input_tokens").notNull().default(0),
     outputTokens: integer("output_tokens").notNull().default(0),

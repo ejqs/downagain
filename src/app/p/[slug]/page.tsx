@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProviderHistory, safeSnapshot, type IncidentRow, type ProviderRow } from "@/lib/data";
+import { getProviderHistory, safeSnapshot, type IncidentRow, type ProviderRow, type ReviewTrace } from "@/lib/data";
 import { brokenComponents, communication, dailyCells, downNow, incidentsFor, monthlyTrend, openIncidents, scoreFor, startHeatmap, tierOf, topComponents, valueBoard } from "@/lib/views";
 import { WORKLOADS, checkedMs, fmtUsd, isStale } from "@/lib/pricing";
 import { durationMinutes } from "@/lib/grading";
@@ -67,6 +67,42 @@ function IncidentTags({ i }: { i: IncidentRow }) {
   );
 }
 
+const MODEL_NAME: Record<string, string> = { "claude-haiku-5-5": "Claude Haiku 5.5", "claude-sonnet-5-5": "Claude Sonnet 5.5", "claude-opus-5-5": "Claude Opus 5.5" };
+
+/** The audit trail behind an AI grade: model, date, the rules' call next to Claude's, and a link to the raw record. */
+function WhyGrade({ i, review }: { i: IncidentRow; review: ReviewTrace }) {
+  const v = (review.verdict ?? {}) as { scope?: string; confidence?: string; security?: boolean; data_loss?: boolean; rationale?: string };
+  const flags = [v.scope, v.confidence ? `${v.confidence} confidence` : null, v.security ? "security" : null, v.data_loss ? "data loss" : null].filter(Boolean);
+  return (
+    <details className="updates">
+      <summary>Why this grade</summary>
+      <ol style={{ listStyle: "none", paddingLeft: 0 }}>
+        <li>
+          <span className="mono" style={{ fontSize: 12 }}>RULES · SEV {review.rulesTier ?? "?"}</span>
+          <br />
+          {review.rulesReason ?? "Not recorded"}
+        </li>
+        <li>
+          <span className="mono" style={{ fontSize: 12 }}>CLAUDE · SEV {review.tier ?? "?"}{flags.length ? ` · ${flags.join(" · ").toUpperCase()}` : ""}</span>
+          <br />
+          {v.rationale}
+        </li>
+        {i.tierOverride != null ? (
+          <li>
+            <span className="mono" style={{ fontSize: 12 }}>HAND REVIEW · SEV {i.tierOverride}</span>
+            <br />
+            {i.overrideNote ?? "Overrides both."}
+          </li>
+        ) : null}
+        <li className="mono" style={{ fontSize: 12 }}>
+          {MODEL_NAME[review.model] ?? review.model} · prompt v{review.promptVersion} · {fmtDate(review.reviewedAt)} ·{" "}
+          <a href={`/api/incidents/${i.id}/review`}>Raw record</a>
+        </li>
+      </ol>
+    </details>
+  );
+}
+
 function BrokenList({ p }: { p: ProviderRow }) {
   const b = brokenComponents(p);
   const n = b.items.length;
@@ -97,7 +133,7 @@ function BrokenList({ p }: { p: ProviderRow }) {
   );
 }
 
-function IncidentItem({ i, updates }: { i: IncidentRow; updates?: { status: string; body: string; postedAt: number }[] }) {
+function IncidentItem({ i, updates, review }: { i: IncidentRow; updates?: { status: string; body: string; postedAt: number }[]; review?: ReviewTrace }) {
   const tier = tierOf(i);
   const mins = durationMinutes(gradeInput(i));
   return (
@@ -113,6 +149,7 @@ function IncidentItem({ i, updates }: { i: IncidentRow; updates?: { status: stri
           {i.tierOverride != null ? `Sev ${i.tierOverride} (reviewed${i.overrideNote ? `: ${i.overrideNote}` : ""})` : (i.summary ?? i.reason)}
         </span>
         <IncidentTags i={i} />
+        {review && i.gradedBy === "claude" ? <WhyGrade i={i} review={review} /> : null}
         {updates?.length ? (
           <details className="updates">
             <summary>{plural(updates.length, "update")}</summary>
@@ -259,7 +296,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
           {open
             .filter((i) => tierOf(i) <= 3)
             .map((i) => (
-              <IncidentItem key={i.id} i={i} updates={history?.updates[i.id]} />
+              <IncidentItem key={i.id} i={i} updates={history?.updates[i.id]} review={history?.reviews[i.id]} />
             ))}
           <BrokenList p={p} />
         </section>
@@ -460,7 +497,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
         {shown.length ? (
           <div className="box">
             {shown.map((i) => (
-              <IncidentItem key={i.id} i={i} updates={history?.updates[i.id]} />
+              <IncidentItem key={i.id} i={i} updates={history?.updates[i.id]} review={history?.reviews[i.id]} />
             ))}
           </div>
         ) : (
