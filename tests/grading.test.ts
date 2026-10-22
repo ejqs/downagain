@@ -28,7 +28,11 @@ describe("penaltyMinutes", () => {
   });
   it("clips to the window and caps forgotten incidents", () => {
     expect(penaltyMinutes(inc({ startedAt: at("2026-10-21T23:00:00Z") }), from, to)).toBe(60);
-    expect(penaltyMinutes(inc({ startedAt: at("2026-09-01T00:00:00Z") }), from, to)).toBe(72 * 60);
+    expect(penaltyMinutes(inc({ startedAt: at("2026-09-01T00:00:00Z"), tier: 1 }), from, to)).toBe(72 * 60);
+  });
+  it("caps anything short of Sev 1 at a day", () => {
+    expect(penaltyMinutes(inc({ startedAt: at("2026-09-01T00:00:00Z"), tier: 2 }), from, to)).toBe(24 * 60);
+    expect(penaltyMinutes(inc({ startedAt: at("2026-09-01T00:00:00Z"), tier: 1, tierOverride: 3 }), from, to)).toBe(24 * 60);
   });
 });
 

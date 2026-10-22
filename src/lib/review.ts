@@ -7,7 +7,7 @@ import { and, asc, desc, eq, gte, inArray, isNull, lt, or, sql } from "drizzle-o
 import type { DB } from "@/db";
 import { categories, componentSurfaces, incidentReviews, incidentUpdates, incidents, providers } from "@/db/schema";
 import { DEFAULT_MODEL, PROMPT_VERSION, applyVerdict, isLongText, askClaude, costMicros, inputHash, parseVerdict, renderIncident } from "@/lib/ai-grade";
-import { MAX_PENALTY_MINUTES, WINDOW_DAYS } from "@/lib/grading";
+import { MAX_PENALTY_MINUTES, MAX_PENALTY_MINUTES_MILD, WINDOW_DAYS } from "@/lib/grading";
 import { TIER_WEIGHT, classify, holdToRegion, singleRegion, type Classification, type Surface } from "@/lib/severity";
 
 export interface ReviewSettings {
@@ -109,7 +109,7 @@ export function finalGrade(rules: Classification, verdict: unknown, regions?: st
 
 /**
  * Roughly how many penalty points the rules grade puts on the board: tier weight
- * times penalty minutes (to monitoring, capped at 72 h), zero outside the ranking
+ * times penalty minutes (to monitoring, capped at 72 h for Sev 1 and 24 h otherwise), zero outside the ranking
  * window. A long rules-graded incident can sink a grade on its own, so Claude
  * reads those before a pile of short recent ones.
  */
@@ -121,7 +121,8 @@ function gradeWeight(now: Date) {
   );
   return sql`case when ${incidents.startedAt} < ${from.toISOString()}::timestamptz then 0 else
     (case coalesce(${incidents.tierOverride}, ${incidents.tier}, 4) ${weight} else 0 end)
-    * least(extract(epoch from coalesce(${incidents.monitoringAt}, ${incidents.resolvedAt}, ${now.toISOString()}::timestamptz) - ${incidents.startedAt}), ${MAX_PENALTY_MINUTES * 60}::int)
+    * least(extract(epoch from coalesce(${incidents.monitoringAt}, ${incidents.resolvedAt}, ${now.toISOString()}::timestamptz) - ${incidents.startedAt}),
+      case when coalesce(${incidents.tierOverride}, ${incidents.tier}, 4) <= 1 then ${MAX_PENALTY_MINUTES * 60}::int else ${MAX_PENALTY_MINUTES_MILD * 60}::int end)
   end`;
 }
 

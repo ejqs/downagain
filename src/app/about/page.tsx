@@ -86,7 +86,7 @@ export default function About() {
 
         <h2 className="h2">Grades</h2>
         <p>
-          Each incident scores <strong>weight × scope × minutes</strong>, from start until the provider says it&apos;s monitoring a fix or resolved.
+          Each incident scores <strong>weight × scope × minutes</strong>, from start until the provider says it&apos;s monitoring a fix or resolved. Minutes stop counting after 3 days for Sev 1, 1 day for the rest.
           Grades total the last 90 days, the same window for everyone.
         </p>
         <div className="tbl">

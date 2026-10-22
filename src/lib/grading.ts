@@ -6,7 +6,10 @@ export const WINDOW_DAYS = 90;
 const MIN = 60_000;
 const DAY = 86_400_000;
 // An incident a provider forgot to close shouldn't sink them forever.
+/** Sev 1 counts for up to 3 days; anything milder for 1, so a slow issue left open can't outweigh an outage. */
 export const MAX_PENALTY_MINUTES = 72 * 60;
+export const MAX_PENALTY_MINUTES_MILD = 24 * 60;
+export const penaltyCap = (tier: number) => (tier <= 1 ? MAX_PENALTY_MINUTES : MAX_PENALTY_MINUTES_MILD);
 
 // A provider that leaves an incident open but posts nothing for a week has moved
 // on. We end it at its last update instead of counting it as ongoing for months.
@@ -65,7 +68,7 @@ export function durationMinutes(i: Pick<GradeInput, "startedAt" | "resolvedAt">,
 export function penaltyMinutes(i: GradeInput, from: Date, to: Date): number {
   const end = i.monitoringAt ?? i.resolvedAt ?? to;
   const s = Math.max(i.startedAt.getTime(), from.getTime());
-  const e = Math.min(end.getTime(), to.getTime(), i.startedAt.getTime() + MAX_PENALTY_MINUTES * MIN);
+  const e = Math.min(end.getTime(), to.getTime(), i.startedAt.getTime() + penaltyCap(effectiveTier(i)) * MIN);
   return Math.max(0, (e - s) / MIN);
 }
 
