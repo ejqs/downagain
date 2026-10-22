@@ -11,7 +11,7 @@ interface RwComponent {
   status?: string;
   components?: RwComponent[];
 }
-interface RwIncident {
+export interface RwIncident {
   id: string;
   slug?: string;
   title: string;
@@ -72,7 +72,7 @@ export function normalizeRwIncident(i: RwIncident, pageUrl: string): NormalizedI
     monitoringAt: updates.find((u) => u.status === "monitoring")?.postedAt ?? null,
     resolvedAt: i.resolvedAt ? new Date(i.resolvedAt) : null,
     sourceUpdatedAt: i.updatedAt ? new Date(i.updatedAt) : null,
-    url: pageUrl,
+    url: i.slug ? `${pageUrl.replace(/\/$/, "")}/incident/${i.slug}` : pageUrl,
     components: (i.components ?? []).map((c) => c.component.name),
     worstComponentStatus: worst === "operational" ? null : worst,
     postmortem: false,

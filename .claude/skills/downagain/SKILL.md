@@ -23,6 +23,10 @@ A read-only Next.js site that ranks hosting and AI providers by their own status
 4. Deploy, or locally: `bun run db:seed && bun run backfill --provider <slug>`.
 5. A provider is hidden until its source answers once, so check the poll route's `failed` list after deploying.
 
+## Railway history
+
+Railway's API (`api.railwaystatus.com/status`) only lists open incidents, and status.railway.com returns 403 to scripts. Past incidents live in `src/lib/archive/railway.json`, read by hand from status.railway.com/historical, and `bun run db:seed` (the preDeploy step) imports them idempotently. To extend it, add entries in the same shape; never re-import an incident the live poller already holds.
+
 ## Change the severity rubric
 
 1. Edit `src/lib/severity.ts` and bump `CLASSIFIER_VERSION`.

@@ -1,0 +1,1018 @@
+[
+ {
+  "slug": "JUA1PC5H",
+  "title": "New builds are temporarily paused",
+  "components": [
+   {
+    "name": "Builds (US West)",
+    "impact": "MAJOR_OUTAGE"
+   },
+   {
+    "name": "Builds (US East)",
+    "impact": "MAJOR_OUTAGE"
+   },
+   {
+    "name": "Builds (EU West)",
+    "impact": "MAJOR_OUTAGE"
+   },
+   {
+    "name": "Builds (Southeast Asia)",
+    "impact": "MAJOR_OUTAGE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-10-20T17:03:00Z",
+    "message": "An issue affecting builds was reported; new builds paused for most workspaces. Running services not affected."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-10-20T17:18:00Z",
+    "message": "Build issue identified, fix in progress. New builds paused for all workspaces."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-10-20T19:10:00Z",
+    "message": "Builds still paused for all workspaces; to return in stages."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-10-20T19:59:00Z",
+    "message": "Fix applied; builds resuming, starting with Enterprise workspaces."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-10-20T20:20:00Z",
+    "message": "Builds enabled for Pro workspaces."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-10-20T20:43:00Z",
+    "message": "Builds enabled for Hobby workspaces."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-10-20T20:56:00Z",
+    "message": "Builds resumed for all workspaces. Deploys made during the pause must be triggered again."
+   }
+  ]
+ },
+ {
+  "slug": "U3RALRQ7",
+  "title": "Builds are taking longer than usual",
+  "components": [
+   {
+    "name": "Builds (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-10-13T16:12:00Z",
+    "message": "Builds running longer than usual."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-10-13T16:35:00Z",
+    "message": "Issue in US West build infrastructure identified."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-10-13T16:39:00Z",
+    "message": "Root cause found; fix rolling out."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-10-13T16:45:00Z",
+    "message": "US West build times recovering."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-10-13T17:00:00Z",
+    "message": "Build times back to normal; queue cleared."
+   }
+  ]
+ },
+ {
+  "slug": "31JU4V10",
+  "title": "Central Station not loading for some users",
+  "components": [
+   {
+    "name": "Support & Community — station.railway.com",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-10-10T01:34:00Z",
+    "message": "station.railway.com reported unavailable."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-10-10T01:39:00Z",
+    "message": "Resolved."
+   }
+  ]
+ },
+ {
+  "slug": "O3D8H5MZ",
+  "title": "Builds and deployments failing to pull images from Docker Hub",
+  "components": [
+   {
+    "name": "Image Registry — Dockerhub",
+    "impact": "PARTIAL_OUTAGE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-10-09T21:29:00Z",
+    "message": "Builds and deploys using Docker Hub images hitting 429 errors."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-10-09T21:49:00Z",
+    "message": "Traced to an ongoing Docker Hub incident."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-10-09T22:03:00Z",
+    "message": "Docker Hub pulls succeeding again."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-10-09T22:07:00Z",
+    "message": "Resolved. Redeploy anything that failed."
+   }
+  ]
+ },
+ {
+  "slug": "8RELVRFI",
+  "title": "GitHub-triggered builds are delayed",
+  "components": [
+   {
+    "name": "Builds (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (US East)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (Southeast Asia)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "GitHub — Auto-Deploys",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-10-05T14:55:00Z",
+    "message": "GitHub-triggered builds queuing or starting slowly."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-10-05T15:40:00Z",
+    "message": "Issue identified; fix in progress."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-10-05T15:52:00Z",
+    "message": "Recovery underway; queue draining."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-10-05T16:13:00Z",
+    "message": "Build queue drained in all regions."
+   }
+  ]
+ },
+ {
+  "slug": "W5G4XFDQ",
+  "title": "Dashboard loading issues",
+  "components": [
+   {
+    "name": "Dashboard — railway.com",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-10-05T15:37:00Z",
+    "message": "Dashboard loading slowly or not at all for some users."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-10-05T15:57:00Z",
+    "message": "Dashboard response times recovering."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-10-05T16:12:00Z",
+    "message": "API pods had event loop delays; capacity scaled up."
+   }
+  ]
+ },
+ {
+  "slug": "A0O39CGE",
+  "title": "Slow attached storage for some users in US West",
+  "components": [
+   {
+    "name": "Storage (US West)",
+    "impact": "PARTIAL_OUTAGE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-10-04T02:47:00Z",
+    "message": "Cause of slow attached storage found; slow services, databases and deploys, some crash loops."
+   }
+  ]
+ },
+ {
+  "slug": "72DDHCC1",
+  "title": "Services and databases unavailable for some users in US West",
+  "components": [
+   {
+    "name": "Compute (US West)",
+    "impact": "PARTIAL_OUTAGE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-10-03T11:43:00Z",
+    "message": "Some US West hosts unresponsive; services and databases unreachable. Hosts being restarted."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-10-03T17:21:00Z",
+    "message": "Affected hosts restarted; services recovering."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-10-03T19:33:00Z",
+    "message": "US West outage affecting services and databases fixed."
+   }
+  ]
+ },
+ {
+  "slug": "IFBXJTGG",
+  "title": "Domain routing disruption",
+  "components": [
+   {
+    "name": "Networking — Public (US West)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Networking — Public (US East)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Networking — Public (EU West)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Networking — Public (Southeast Asia)",
+    "impact": "PARTIAL_OUTAGE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "MONITORING",
+    "at": "2026-09-30T07:48:00Z",
+    "message": "Domains on Railway returned 404s for about 5 minutes; mitigated."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-09-30T08:17:00Z",
+    "message": "A config rollout caused routing errors for about 5 minutes."
+   }
+  ]
+ },
+ {
+  "slug": "YYTG8I10",
+  "title": "API degradation causing slow or stuck deployments",
+  "components": [
+   {
+    "name": "Deployments (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (US East)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (Southeast Asia)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "API — backboard.railway.com",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-09-29T15:29:00Z",
+    "message": "API issue causing slow or stuck deployments."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-09-29T18:37:00Z",
+    "message": "Recovering; Hobby deployments re-enabled."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-09-29T19:15:00Z",
+    "message": "Deployment backlog cleared."
+   }
+  ]
+ },
+ {
+  "slug": "K8KROKKW",
+  "title": "Builds are slow in EU West",
+  "components": [
+   {
+    "name": "Builds (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-09-23T13:24:00Z",
+    "message": "Builds in EU West taking longer than expected."
+   },
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-09-23T13:53:00Z",
+    "message": "Possible deployment system issue queuing EU West builds."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-09-23T14:13:00Z",
+    "message": "Root cause found; fix in progress."
+   }
+  ]
+ },
+ {
+  "slug": "OR0KYYZU",
+  "title": "Storage bucket creation is degraded",
+  "components": [
+   {
+    "name": "Storage Buckets (US West)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Storage Buckets (US East)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Storage Buckets (EU West)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Storage Buckets (Southeast Asia)",
+    "impact": "PARTIAL_OUTAGE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-31T15:31:00Z",
+    "message": "Creating storage buckets and access keys may fail."
+   }
+  ]
+ },
+ {
+  "slug": "8GL2R2U5",
+  "title": "Deployments slow to start",
+  "components": [
+   {
+    "name": "Deployments (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (US East)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (Southeast Asia)",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-28T23:59:00Z",
+    "message": "Deployments starting slowly."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-08-29T00:20:00Z",
+    "message": "Networking fault on one host queued deployments; host removed."
+   },
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-29T00:37:00Z",
+    "message": "Some workers unstable while the queue drains."
+   },
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-29T03:05:00Z",
+    "message": "Working through the deployment backlog."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-08-29T03:33:00Z",
+    "message": "Most of the backlog cleared."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-08-29T03:38:00Z",
+    "message": "Deployment delays fixed; throughput normal."
+   }
+  ]
+ },
+ {
+  "slug": "Z5Y3WO06",
+  "title": "Storage and networking issues affecting some services in US West",
+  "components": [
+   {
+    "name": "Compute (US West)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Networking — Private (US West)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Storage Buckets (US West)",
+    "impact": "PARTIAL_OUTAGE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-29T01:38:00Z",
+    "message": "Some US West services unavailable, stuck restarting, or slow."
+   },
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-29T01:45:00Z",
+    "message": "Traced to US West storage; private networking degraded."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-08-29T02:08:00Z",
+    "message": "Hardware fault isolated; recovery underway."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-08-29T02:18:00Z",
+    "message": "Faulty hardware removed; services recovered."
+   }
+  ]
+ },
+ {
+  "slug": "VVL3A03V",
+  "title": "Deployments are slow",
+  "components": [
+   {
+    "name": "Deployments (US West)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Deployments (US East)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Deployments (EU West)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Deployments (Southeast Asia)",
+    "impact": "PARTIAL_OUTAGE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-20T15:27:00Z",
+    "message": "Deployments queuing and slow to start or finish."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-08-20T15:56:00Z",
+    "message": "Google Cloud infrastructure issue causing pipeline congestion."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-08-20T16:15:00Z",
+    "message": "Mitigation underway; deployments may be paused."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-08-20T17:29:00Z",
+    "message": "Throughput improving; still slow."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-08-20T17:31:00Z",
+    "message": "Deployment pause lifted; queue draining."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-08-20T18:20:00Z",
+    "message": "Deployments normal; queue cleared."
+   }
+  ]
+ },
+ {
+  "slug": "DU8F8R4G",
+  "title": "Delayed deploys in AMS",
+  "components": [
+   {
+    "name": "Deployments (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "MONITORING",
+    "at": "2026-08-20T18:43:00Z",
+    "message": "Deploys in AMS briefly delayed; back to normal."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-08-20T18:44:00Z",
+    "message": "Resolved."
+   }
+  ]
+ },
+ {
+  "slug": "YYU63JUO",
+  "title": "Deployments are slow to progress and are prone to timeout failure",
+  "components": [
+   {
+    "name": "Deployments (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (US East)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (Southeast Asia)",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-18T23:19:00Z",
+    "message": "Deployments stuck initializing longer than expected."
+   },
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-19T00:40:00Z",
+    "message": "Narrowing down the cause of delayed builds."
+   },
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-19T01:01:00Z",
+    "message": "Narrowing down the cause of delayed and failing builds."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-08-19T01:16:00Z",
+    "message": "Infrastructure load issue identified; Pro builds restored."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-08-19T01:47:00Z",
+    "message": "Build queues recovering; API slower meanwhile."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-08-19T02:17:00Z",
+    "message": "Builds and API back to normal."
+   }
+  ]
+ },
+ {
+  "slug": "7M7CBL9X",
+  "title": "Deployments are slow to progress",
+  "components": [
+   {
+    "name": "Deployments (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (US East)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (Southeast Asia)",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-18T21:45:00Z",
+    "message": "Deployments stuck initializing longer than usual."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-08-18T22:17:00Z",
+    "message": "Traced to task queue processing; revert underway."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-08-18T22:40:00Z",
+    "message": "Deployments back to normal speed."
+   }
+  ]
+ },
+ {
+  "slug": "W4MIGEVT",
+  "title": "GitHub is experiencing elevated error rates",
+  "components": [
+   {
+    "name": "GitHub — Auto-Deploys",
+    "impact": "PARTIAL_OUTAGE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-17T13:59:00Z",
+    "message": "Auto-deploys, PR environments and GitHub actions may be delayed or fail."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-08-17T16:46:00Z",
+    "message": "GitHub identified the cause."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-08-17T19:52:00Z",
+    "message": "GitHub recovering."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-08-17T21:29:00Z",
+    "message": "GitHub fully operational."
+   }
+  ]
+ },
+ {
+  "slug": "M2WMOGK3",
+  "title": "Deployments queued longer than usual",
+  "components": [
+   {
+    "name": "Deployments (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (US East)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (Southeast Asia)",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-17T19:50:00Z",
+    "message": "Deployments queued longer than normal."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-08-17T21:25:00Z",
+    "message": "Fix live; deployment times improving."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-08-17T21:52:00Z",
+    "message": "Deployment times normal in all regions."
+   }
+  ]
+ },
+ {
+  "slug": "4R20FOKZ",
+  "title": "Logs and Metrics Delays",
+  "components": [
+   {
+    "name": "Logs",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Metrics",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-14T16:05:00Z",
+    "message": "Logs and metrics may be delayed or missing."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-08-14T16:08:00Z",
+    "message": "Cause found."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-08-14T16:16:00Z",
+    "message": "Fix applied; full recovery seen."
+   }
+  ]
+ },
+ {
+  "slug": "RZNJOBXD",
+  "title": "Railpack builds may be delayed",
+  "components": [
+   {
+    "name": "Builds (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (US East)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (Southeast Asia)",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-11T18:52:00Z",
+    "message": "Some Railpack builds slow or failing."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-08-11T18:55:00Z",
+    "message": "Traced to Railpack deploys via railway up."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-08-11T19:24:00Z",
+    "message": "Fix in progress."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-08-11T19:47:00Z",
+    "message": "Fix rolled out."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-08-11T20:14:00Z",
+    "message": "Full recovery confirmed."
+   }
+  ]
+ },
+ {
+  "slug": "RL8FRJE6",
+  "title": "Connectivity issues in US West",
+  "components": [
+   {
+    "name": "Deployments (US West)",
+    "impact": "PARTIAL_OUTAGE"
+   },
+   {
+    "name": "Networking — Public (US West)",
+    "impact": "PARTIAL_OUTAGE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-10T03:39:00Z",
+    "message": "Intermittent connectivity and deployment delays in US West."
+   },
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-08-10T04:21:00Z",
+    "message": "Databases may be unreachable; deployments may fail or stall."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-08-10T04:27:00Z",
+    "message": "Traffic surge saturated network capacity in the region."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-08-10T04:37:00Z",
+    "message": "Services recovering."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-08-10T05:47:00Z",
+    "message": "US West back to normal; some services may need a redeploy."
+   }
+  ]
+ },
+ {
+  "slug": "LJT4X01X",
+  "title": "Dashboard slowness",
+  "components": [
+   {
+    "name": "Dashboard — railway.com",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "API — backboard.railway.com",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-07-31T11:08:00Z",
+    "message": "Reports of a slow dashboard."
+   },
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-07-31T11:09:00Z",
+    "message": "Raised to an incident."
+   }
+  ]
+ },
+ {
+  "slug": "OA5Z6SQY",
+  "title": "Builds and deployments are delayed",
+  "components": [
+   {
+    "name": "Builds (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (US East)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (Southeast Asia)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (US East)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (Southeast Asia)",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-07-30T16:32:00Z",
+    "message": "Build and deployment delays for Hobby and Pro."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-07-30T17:10:00Z",
+    "message": "Root cause found; Hobby and Trial deployments paused."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-07-30T17:43:00Z",
+    "message": "Hobby no longer queued; Pro clearing backlog."
+   },
+   {
+    "status": "MONITORING",
+    "at": "2026-07-30T17:47:00Z",
+    "message": "Full processing resumed."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-07-30T17:59:00Z",
+    "message": "Processing restored in all regions."
+   }
+  ]
+ },
+ {
+  "slug": "IJ0R4Q80",
+  "title": "Builds are delayed",
+  "components": [
+   {
+    "name": "Builds (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (US East)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Builds (Southeast Asia)",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-07-28T16:19:00Z",
+    "message": "Builds delayed; Trial builds disabled, Hobby and Pro slow."
+   }
+  ]
+ },
+ {
+  "slug": "US8W0QLQ",
+  "title": "Deployments are slow to progress",
+  "components": [
+   {
+    "name": "Deployments (US West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (US East)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (EU West)",
+    "impact": "DEGRADED_PERFORMANCE"
+   },
+   {
+    "name": "Deployments (Southeast Asia)",
+    "impact": "DEGRADED_PERFORMANCE"
+   }
+  ],
+  "updates": [
+   {
+    "status": "INVESTIGATING",
+    "at": "2026-07-22T21:10:00Z",
+    "message": "Deployments slow to progress; some pending."
+   },
+   {
+    "status": "IDENTIFIED",
+    "at": "2026-07-22T21:17:00Z",
+    "message": "Root cause found; fix deployed."
+   },
+   {
+    "status": "RESOLVED",
+    "at": "2026-07-22T21:28:00Z",
+    "message": "Deployments finish normally; queue cleared."
+   }
+  ]
+ }
+]

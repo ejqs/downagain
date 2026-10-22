@@ -125,6 +125,7 @@ export async function writeIncidents(
   list: NormalizedIncident[],
   origin: "backfill" | "live",
   now: Date,
+  opts: { closeVanished?: boolean } = {},
 ): Promise<{ inserted: number; updated: number }> {
   const overrides = new Map<string, Surface>(
     (await database.select().from(componentSurfaces).where(eq(componentSurfaces.providerId, p.id))).map((r) => [r.componentName, r.surface as Surface]),
@@ -207,7 +208,8 @@ export async function writeIncidents(
   // Feeds like Railway's only list current incidents. One that was open in our
   // records and is no longer listed has ended; we close it at the time we noticed.
   const seen = new Set(list.map((i) => i.externalId));
-  const vanished = [...existing.values()].filter((r) => !r.resolvedAt && !seen.has(r.externalId)).map((r) => r.id);
+  // An archive import is a partial list, so it never closes anything.
+  const vanished = opts.closeVanished === false ? [] : [...existing.values()].filter((r) => !r.resolvedAt && !seen.has(r.externalId)).map((r) => r.id);
   if (vanished.length) {
     await database
       .update(incidents)
