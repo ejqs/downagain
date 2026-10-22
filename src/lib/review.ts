@@ -116,12 +116,12 @@ export function finalGrade(rules: Classification, verdict: unknown, regions?: st
 function gradeWeight(now: Date) {
   const from = new Date(now.getTime() - WINDOW_DAYS * 86_400_000);
   const weight = sql.join(
-    Object.entries(TIER_WEIGHT).map(([t, w]) => sql`when ${Number(t)} then ${w}::float`),
+    Object.entries(TIER_WEIGHT).map(([t, w]) => sql`when ${Number(t)}::int then ${w}::float8`),
     sql` `,
   );
-  return sql`case when ${incidents.startedAt} < ${from} then 0 else
+  return sql`case when ${incidents.startedAt} < ${from.toISOString()}::timestamptz then 0 else
     (case coalesce(${incidents.tierOverride}, ${incidents.tier}, 4) ${weight} else 0 end)
-    * least(extract(epoch from coalesce(${incidents.monitoringAt}, ${incidents.resolvedAt}, ${now}) - ${incidents.startedAt}), ${MAX_PENALTY_MINUTES * 60})
+    * least(extract(epoch from coalesce(${incidents.monitoringAt}, ${incidents.resolvedAt}, ${now.toISOString()}::timestamptz) - ${incidents.startedAt}), ${MAX_PENALTY_MINUTES * 60}::int)
   end`;
 }
 
