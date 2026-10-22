@@ -24,6 +24,8 @@ export default defineRailway(() => {
     env: {
       DATABASE_URL: db.env.DATABASE_URL,
       CRON_SECRET: preserve(),
+      // Set by hand in Railway; without it incidents are graded by the rules only.
+      ANTHROPIC_API_KEY: preserve(),
       PORT: "8080",
       NEXT_PUBLIC_SITE_URL: "https://downagain.dev",
       NEXT_PUBLIC_UMAMI_WEBSITE_ID: "5f60967a-e8ec-4965-85ef-cbcf07e4c968",

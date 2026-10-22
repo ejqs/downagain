@@ -45,6 +45,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
+const SCOPE_LABEL: Record<string, string> = { regional: "regional, ", subset: "some customers, " };
+
 function IncidentItem({ i, updates }: { i: IncidentRow; updates?: { status: string; body: string; postedAt: number }[] }) {
   const tier = tierOf(i);
   const mins = durationMinutes(gradeInput(i));
@@ -59,6 +61,7 @@ function IncidentItem({ i, updates }: { i: IncidentRow; updates?: { status: stri
         <span style={{ fontSize: 16, fontWeight: 700 }}>{i.title}</span>
         <span className="muted" style={{ fontSize: 14 }}>
           {i.tierOverride != null ? `Sev ${i.tierOverride} (reviewed${i.overrideNote ? `: ${i.overrideNote}` : ""})` : i.reason}
+          {i.tierOverride == null && i.gradedBy === "claude" ? ` · ${SCOPE_LABEL[i.scope ?? ""] ?? ""}graded by Claude from the provider's updates` : ""}
           {i.components.length ? ` · ${i.components.slice(0, 4).join(", ")}${i.components.length > 4 ? "…" : ""}` : ""}
         </span>
         {updates?.length ? (

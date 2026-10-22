@@ -52,6 +52,11 @@ export default function About() {
           incidents move up one tier (Sev 2 at least) and add {SECURITY_PENALTY} penalty points. Confirmed data loss or exposure is always Sev 1.
           Every incident shows why it got its tier, and tiers can be corrected by hand.
         </p>
+        <p>
+          Status pages don&apos;t always label things fairly, so Claude also reads each new or updated incident, including every update the provider
+          posted, and judges which areas were hit, how hard, and how widely: a whole-platform outage counts for more than one region or a slice of
+          customers. Those incidents say &ldquo;graded by Claude&rdquo;. If Claude is unavailable, the rules above decide, and a manual review always wins.
+        </p>
 
         <h2 className="h2">Grades</h2>
         <p>

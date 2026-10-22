@@ -55,6 +55,8 @@ export interface IncidentRow {
   security: boolean;
   reason: string | null;
   overrideNote: string | null;
+  gradedBy: string;
+  scope: string | null;
 }
 
 export interface Snapshot {
@@ -86,6 +88,8 @@ const incidentColumns = {
   security: incidents.security,
   reason: incidents.reason,
   overrideNote: incidents.overrideNote,
+  gradedBy: incidents.gradedBy,
+  scope: incidents.scope,
 };
 
 type IncidentSelect = Awaited<ReturnType<typeof selectIncidents>>[number];

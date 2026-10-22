@@ -1,9 +1,14 @@
 import { eq } from "drizzle-orm";
 import type { DB } from "@/db";
 import { categories, componentSurfaces, incidentUpdates, incidents, providers } from "@/db/schema";
+import { finalGrade, gradeColumns, storedVerdict } from "@/lib/review";
 import { classify, type Surface } from "@/lib/severity";
 
-/** Re-run the classifier over every stored incident. Manual overrides are untouched. */
+/**
+ * Re-run the classifier over every stored incident and re-apply Claude's stored
+ * verdict where the incident hasn't changed since it was reviewed. No API calls.
+ * Manual overrides are untouched.
+ */
 export async function regradeAll(database: DB) {
   const rows = await database
     .select({ i: incidents, cat: categories.slug })
@@ -29,10 +34,9 @@ export async function regradeAll(database: DB) {
       },
       overrides.get(i.providerId),
     );
-    await database
-      .update(incidents)
-      .set({ tier: c.tier, areaTiers: c.areaTiers, surfaces: c.surfaces, security: c.security, lowConfidence: c.lowConfidence, reason: c.reason, classifierVersion: c.classifierVersion })
-      .where(eq(incidents.id, i.id));
+    const current = i.reviewedAt && i.reviewedAt >= i.updatedAt;
+    const grade = finalGrade(c, current ? await storedVerdict(database, i.id, i.reviewedHash) : null);
+    await database.update(incidents).set(gradeColumns(grade)).where(eq(incidents.id, i.id));
     n++;
   }
   return n;

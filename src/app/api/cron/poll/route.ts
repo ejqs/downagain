@@ -1,6 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { db } from "@/db";
 import { pollAll } from "@/lib/poller";
+import { reviewPending, type ReviewReport } from "@/lib/review";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -23,7 +24,16 @@ export async function POST(req: Request) {
     return Response.json({ error: err instanceof Error ? err.message : String(err) }, { status: 409 });
   }
 
-  const changed = results.filter((r) => r.changed).map((r) => r.slug);
+  // Claude refines the grades of new or changed incidents. Never fails the poll:
+  // without a key, budget or a working API the rules grade simply stands.
+  let review: ReviewReport | { error: string };
+  try {
+    review = await reviewPending(db(), { slugs, deadlineMs: 45_000 });
+  } catch (err) {
+    review = { error: err instanceof Error ? err.message : String(err) };
+  }
+
+  const changed = [...new Set([...results.filter((r) => r.changed).map((r) => r.slug), ...("changedProviders" in review ? review.changedProviders : [])])];
   if (changed.length || url.searchParams.has("revalidate")) {
     // Next visitor gets fresh data immediately; outages are exactly when stale pages hurt.
     revalidateTag("status", { expire: 0 });
@@ -32,6 +42,7 @@ export async function POST(req: Request) {
   return Response.json({
     changed,
     failed: results.filter((r) => !r.ok).map((r) => ({ slug: r.slug, error: r.error })),
+    review,
     results: results.map(({ slug, status, newIncidents, updatedIncidents }) => ({ slug, status, newIncidents, updatedIncidents })),
   });
 }

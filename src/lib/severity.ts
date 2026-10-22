@@ -101,6 +101,11 @@ const MATRIX: Record<Surface, Record<Level, Tier>> = {
   peripheral: { minor: 4, partial: 4, full: 3 },
 };
 
+/** Security moves an incident up one tier, with Sev 2 as the floor. */
+export function securityBump(tier: Tier): Tier {
+  return Math.max(1, Math.min(tier - 1, 2)) as Tier;
+}
+
 export interface ClassifyInput {
   title: string;
   impact: Impact;
@@ -180,7 +185,7 @@ export function classify(input: ClassifyInput, overrides?: Map<string, Surface>)
     areaTiers.production = 1;
     reason = "Sev 1 because the provider reported data loss or exposure";
   } else if (security) {
-    const bumped = Math.max(1, Math.min(tier - 1, 2)) as Tier;
+    const bumped = securityBump(tier);
     if (bumped !== tier) reason += `, raised to Sev ${bumped} for security`;
     tier = bumped;
   }

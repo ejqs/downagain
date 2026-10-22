@@ -181,6 +181,9 @@ export async function writeIncidents(
       lowConfidence: c.lowConfidence,
       reason: c.reason,
       classifierVersion: c.classifierVersion,
+      // The rules grade goes in first; reviewPending refines it with Claude afterwards.
+      gradedBy: "rules",
+      scope: null,
       sourceUpdatedAt: inc.sourceUpdatedAt,
       updatedAt: now,
     };

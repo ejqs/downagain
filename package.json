@@ -19,9 +19,11 @@
     "backfill": "bun scripts/backfill.ts",
     "regrade": "bun scripts/regrade.ts",
     "cron": "bun scripts/cron-trigger.mjs",
-    "dev:sample": "bun scripts/dev-sample.ts"
+    "dev:sample": "bun scripts/dev-sample.ts",
+    "ai-review": "bun scripts/ai-review.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "1.1.0",
     "drizzle-kit": "0.31.11",
     "drizzle-orm": "0.45.4",
     "next": "16.4.2",

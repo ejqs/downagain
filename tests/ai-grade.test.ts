@@ -1,0 +1,126 @@
+import { describe, expect, it } from "vitest";
+import { applyVerdict, costMicros, inputHash, parseVerdict, renderIncident, type ReviewInput, type Verdict } from "@/lib/ai-grade";
+import { finalGrade } from "@/lib/review";
+import { classify } from "@/lib/severity";
+
+const rules = classify({ title: "Elevated errors", impact: "major", components: ["Edge Network"], worstComponentStatus: "partial_outage" });
+
+const verdict = (v: Partial<Verdict> = {}): Verdict => ({
+  affected: [{ surface: "serving", tier: 2 }],
+  not_counted: false,
+  scope: "regional",
+  security: false,
+  data_loss: false,
+  confidence: "high",
+  rationale: "Requests failed in iad1 for 30 minutes.",
+  ...v,
+});
+
+const incident: ReviewInput = {
+  provider: "Vercel",
+  category: "hosting",
+  title: "Elevated errors",
+  impact: "major",
+  status: "resolved",
+  startedAt: new Date("2026-10-01T10:00:00Z"),
+  resolvedAt: new Date("2026-10-01T10:30:00Z"),
+  components: ["Edge Network"],
+  worstComponentStatus: "partial_outage",
+  updates: [
+    { status: "resolved", body: "Fixed.", postedAt: new Date("2026-10-01T10:30:00Z") },
+    { status: "investigating", body: "Errors in iad1.", postedAt: new Date("2026-10-01T10:00:00Z") },
+  ],
+};
+
+describe("applyVerdict", () => {
+  it("lets a regional outage come down from Sev 1 to Sev 2", () => {
+    expect(rules.tier).toBe(1);
+    const g = applyVerdict(rules, verdict());
+    expect(g).toMatchObject({ tier: 2, areaTiers: { production: 2 }, surfaces: ["serving"], scope: "regional", gradedBy: "claude" });
+    expect(g.reason).toBe("Requests failed in iad1 for 30 minutes.");
+  });
+
+  it("takes the worst surface for the overall tier and the worst per area", () => {
+    const g = applyVerdict(rules, verdict({ affected: [{ surface: "ship", tier: 3 }, { surface: "data", tier: 1 }, { surface: "serving", tier: 2 }] }));
+    expect(g.tier).toBe(1);
+    expect(g.areaTiers).toEqual({ shipping: 3, production: 1 });
+  });
+
+  it("applies the security bump itself, with Sev 2 as the floor", () => {
+    const g = applyVerdict(rules, verdict({ affected: [{ surface: "peripheral", tier: 4 }], security: true }));
+    expect(g.tier).toBe(2);
+    expect(g.security).toBe(true);
+    expect(g.reason).toMatch(/Raised to Sev 2 for security/);
+  });
+
+  it("makes data loss Sev 1", () => {
+    expect(applyVerdict(rules, verdict({ data_loss: true })).tier).toBe(1);
+  });
+
+  it("can mark an incident as not counted, unless it was a security incident", () => {
+    expect(applyVerdict(rules, verdict({ not_counted: true, affected: [] })).tier).toBe(0);
+    const sec = applyVerdict(rules, verdict({ not_counted: true, affected: [], security: true }));
+    expect(sec.tier).toBe(2);
+    expect(sec.surfaces).toEqual(["serving"]);
+  });
+
+  it("flags low confidence for the review list", () => {
+    expect(applyVerdict(rules, verdict({ confidence: "low" })).lowConfidence).toBe(true);
+  });
+});
+
+describe("parseVerdict", () => {
+  it("accepts a well-formed verdict", () => {
+    expect(parseVerdict(verdict())).toEqual(verdict());
+  });
+  it.each([
+    ["unknown surface", { affected: [{ surface: "vibes", tier: 2 }] }],
+    ["tier out of range", { affected: [{ surface: "serving", tier: 0 }] }],
+    ["nothing affected but counted", { affected: [] }],
+    ["unknown scope", { scope: "planet" }],
+    ["empty rationale", { rationale: " " }],
+  ])("rejects %s", (_, patch) => {
+    expect(parseVerdict({ ...verdict(), ...patch })).toBeNull();
+  });
+});
+
+describe("finalGrade", () => {
+  it("falls back to the rules when there is no usable verdict", () => {
+    expect(finalGrade(rules, null)).toMatchObject({ tier: 1, gradedBy: "rules", scope: null });
+    expect(finalGrade(rules, { junk: true })).toMatchObject({ tier: 1, gradedBy: "rules" });
+    expect(finalGrade(rules, verdict())).toMatchObject({ tier: 2, gradedBy: "claude" });
+  });
+});
+
+describe("renderIncident and inputHash", () => {
+  it("orders updates oldest first and is stable", () => {
+    const text = renderIncident(incident);
+    expect(text.indexOf("Errors in iad1")).toBeLessThan(text.indexOf("Fixed."));
+    expect(inputHash(text, "claude-haiku-5-5")).toBe(inputHash(renderIncident({ ...incident, updates: [...incident.updates].reverse() }), "claude-haiku-5-5"));
+  });
+
+  it("changes when the incident or the model changes", () => {
+    const text = renderIncident(incident);
+    expect(inputHash(text, "claude-haiku-5-5")).not.toBe(inputHash(text, "claude-sonnet-5-5"));
+    expect(inputHash(renderIncident({ ...incident, status: "monitoring" }), "claude-haiku-5-5")).not.toBe(inputHash(text, "claude-haiku-5-5"));
+  });
+
+  it("keeps the first and latest updates of a very long incident", () => {
+    const updates = Array.from({ length: 200 }, (_, k) => ({ status: "update", body: `note ${k} ${"x".repeat(200)}`, postedAt: new Date(Date.UTC(2026, 9, 1, 0, k)) }));
+    const text = renderIncident({ ...incident, updates });
+    expect(text).toContain("note 0 ");
+    expect(text).toContain("note 199 ");
+    expect(text).toMatch(/\[\d+ middle updates left out for length\]/);
+    expect(text.length).toBeLessThan(14_000);
+  });
+});
+
+describe("costMicros", () => {
+  it("prices Haiku 5.5 per million tokens, including cache reads and writes", () => {
+    expect(costMicros("claude-haiku-5-5", { input_tokens: 1_000, output_tokens: 400 })).toBe(300);
+    expect(costMicros("claude-haiku-5-5", { input_tokens: 1_000, output_tokens: 0, cache_read_input_tokens: 1_000, cache_creation_input_tokens: 1_000 })).toBe(235);
+  });
+  it("prices unknown models high so the budget errs safe", () => {
+    expect(costMicros("some-new-model", { input_tokens: 1_000, output_tokens: 0 })).toBe(5_000);
+  });
+});

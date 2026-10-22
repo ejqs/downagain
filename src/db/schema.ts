@@ -111,6 +111,10 @@ export const incidents = pgTable(
     tierOverride: integer("tier_override"),
     overrideNote: text("override_note"),
     classifierVersion: integer("classifier_version"),
+    gradedBy: text("graded_by").notNull().default("rules"), // "rules" | "claude"
+    scope: text("scope"), // Claude's read: global | regional | subset | unclear
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }), // last Claude review; pending while updatedAt is newer
+    reviewedHash: text("reviewed_hash"), // input hash of that review, see incident_reviews
     sourceUpdatedAt: timestamp("source_updated_at", { withTimezone: true }),
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -163,4 +167,28 @@ export const componentSurfaces = pgTable(
     surface: text("surface").notNull(), // serving | data | ship | peripheral
   },
   (t) => [primaryKey({ columns: [t.providerId, t.componentName] })],
+);
+
+// One Claude read per incident version (input hash), kept forever. A review that
+// failed has no verdict and keeps the rules grade until the incident changes.
+export const incidentReviews = pgTable(
+  "incident_reviews",
+  {
+    id: serial("id").primaryKey(),
+    incidentId: integer("incident_id")
+      .notNull()
+      .references(() => incidents.id),
+    inputHash: text("input_hash").notNull(),
+    model: text("model").notNull(),
+    promptVersion: integer("prompt_version").notNull(),
+    verdict: jsonb("verdict"),
+    error: text("error"),
+    rulesTier: integer("rules_tier"), // what the rules said, for spotting disagreements
+    tier: integer("tier"), // what we stored after applying the verdict
+    inputTokens: integer("input_tokens").notNull().default(0),
+    outputTokens: integer("output_tokens").notNull().default(0),
+    costMicros: integer("cost_micros").notNull().default(0), // millionths of a US dollar
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("reviews_incident_hash").on(t.incidentId, t.inputHash), index("reviews_created").on(t.createdAt)],
 );
