@@ -33,6 +33,11 @@ export function gradeFor(points: number): Grade {
   return GRADES.find((g) => points <= g.max)!.grade;
 }
 
+/** 0 for A+, up to 5 for F. */
+export function gradeRank(grade: Grade): number {
+  return GRADES.findIndex((g) => g.grade === grade);
+}
+
 export function effectiveTier(i: Pick<GradeInput, "tier" | "tierOverride">): number {
   return i.tierOverride ?? i.tier ?? 4;
 }

@@ -7,6 +7,7 @@ import { AlsoTracking, Board } from "@/components/Board";
 import { Stat } from "@/components/ui";
 import { Unavailable } from "@/components/Unavailable";
 import { GLOSSARY } from "@/lib/glossary";
+import { ValueBoard } from "@/components/Value";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({ path: "/" });
@@ -46,6 +47,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
       </section>
 
       <Board snap={snap} category={first} sort={sort === "best" ? "best" : "worst"} basePath="/" />
+      <ValueBoard snap={snap} category={first} />
       <AlsoTracking snap={snap} current={first} />
     </main>
   );

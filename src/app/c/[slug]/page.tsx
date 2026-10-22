@@ -5,6 +5,7 @@ import { AlsoTracking, Board } from "@/components/Board";
 import { Unavailable } from "@/components/Unavailable";
 import { JsonLd } from "@/components/JsonLd";
 import { absUrl, pageMeta } from "@/lib/site";
+import { ValueBoard } from "@/components/Value";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         }}
       />
       <Board snap={snap} category={slug} sort={sort === "best" ? "best" : "worst"} basePath={`/c/${slug}`} />
+      <ValueBoard snap={snap} category={slug} />
       <AlsoTracking snap={snap} current={slug} />
     </main>
   );

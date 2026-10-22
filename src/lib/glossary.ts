@@ -21,5 +21,7 @@ export const GLOSSARY = {
   updatesPer: "Status page updates per incident, on average.",
   sinceLast: "Time since the last counted incident was resolved.",
   heatmap: "Severity weight × minutes per UTC day, every provider shown. Same points as grades.",
+  cost: "One reference workload a month, priced from the provider's own pricing page. ~ is an estimate.",
+  bestValue: "Nobody else here costs the same or less with the same or better grade.",
   dns: "Incidents with DNS in the title or components, 90 days.",
 } as const;

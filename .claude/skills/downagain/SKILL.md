@@ -40,6 +40,15 @@ A read-only Next.js site that ranks hosting and AI providers by their own status
 
 `src/lib/grading.ts` holds the weights, window and cut-offs. Change cut-offs only after looking at the real spread of points, so the board isn't all A's or all F's.
 
+## Prices (cost and "best value")
+
+Prices are the one hand-curated dataset: `PRICES` and `WORKLOADS` in `src/lib/pricing.ts`, one reference workload per category, priced from each provider's official pricing page.
+
+1. `bun run prices` lists entries oldest-checked first with their source links. Re-check monthly; the site flags anything older than `STALE_AFTER_DAYS` (90).
+2. Edit the `lines` so they add up to the monthly total, keep any assumption in `note` (and `estimate: true` if usage-billed), set `checked` to today.
+3. A new provider needs a `PRICES` entry (the test enforces it). With no like-for-like price, use `lines: []` and explain why in `note`.
+4. Don't blend price and grade into one score. "Best value" is the frontier: nobody else is cheaper-or-equal with a better-or-equal grade.
+
 ## Local development
 
 ```bash

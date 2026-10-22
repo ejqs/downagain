@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { Snapshot } from "@/lib/data";
-import { leaderboard, downNow, scoreFor } from "@/lib/views";
+import { leaderboard, downNow, scoreFor, valueBoard } from "@/lib/views";
 import { fmtDuration, fmtPct } from "@/lib/format";
 import { AREA_SHORT, AREAS } from "@/lib/severity";
+import { priceText } from "./Value";
 import { DayStrip, GradeTile, StripLegend } from "./ui";
 
 
@@ -33,6 +34,7 @@ export function CategoryTabs({ snap, active }: { snap: Snapshot; active: string 
 export function Board({ snap, category, sort, basePath }: { snap: Snapshot; category: string; sort: "worst" | "best"; basePath: string }) {
   const cat = snap.categories.find((c) => c.slug === category);
   const rows = leaderboard(snap, category, sort);
+  const value = new Map(valueBoard(snap, category).map((v) => [v.provider.slug, v]));
   return (
     <section className="stack" style={{ ["--gap" as string]: "14px" }}>
       <CategoryTabs snap={snap} active={category} />
@@ -60,6 +62,7 @@ export function Board({ snap, category, sort, basePath }: { snap: Snapshot; cate
                   <div className="row" style={{ ["--gap" as string]: "8px" }}>
                     <Link href={`/p/${r.provider.slug}`}>{r.provider.name}</Link>
                     {r.down ? <span className="pill down">DOWN NOW</span> : null}
+                    {value.get(r.provider.slug)?.bestValue ? <a href="#value" className="pill value" style={{ textDecoration: "none" }}>BEST VALUE</a> : null}
                   </div>
                   <span className="muted" style={{ fontSize: 14 }}>{r.provider.kind}</span>
                 </div>
@@ -76,6 +79,7 @@ export function Board({ snap, category, sort, basePath }: { snap: Snapshot; cate
                 <div className="metric"><b>{fmtPct(r.score.admittedUptime)}</b><span>ADMITTED UPTIME</span></div>
                 <div className="metric"><b>{r.score.incidentCount}</b><span>INCIDENTS</span></div>
                 <div className="metric"><b>{r.score.longestMinutes ? fmtDuration(r.score.longestMinutes) : "–"}</b><span>LONGEST</span></div>
+                <PriceMetric v={value.get(r.provider.slug)} />
               </div>
               <DayStrip cells={r.cells} label={`${r.provider.name}, last 60 days`} />
             </div>
@@ -87,6 +91,15 @@ export function Board({ snap, category, sort, basePath }: { snap: Snapshot; cate
         PROD = your users hit. SHIP = you can&apos;t deploy or manage. <Link href="/about">How grades work</Link>
       </p>
     </section>
+  );
+}
+
+function PriceMetric({ v }: { v: ReturnType<typeof valueBoard>[number] | undefined }) {
+  return (
+    <div className="metric">
+      <b>{priceText(v)}</b>
+      <span>COST/MO</span>
+    </div>
   );
 }
 

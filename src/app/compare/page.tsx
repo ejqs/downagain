@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { safeSnapshot, type ProviderRow, type Snapshot } from "@/lib/data";
-import { communication, incidentsFor, monthlyTrend, scoreFor } from "@/lib/views";
+import { communication, incidentsFor, monthlyTrend, scoreFor, valueBoard, type ValueRow } from "@/lib/views";
+import { WORKLOADS } from "@/lib/pricing";
+import { priceText } from "@/components/Value";
 import { fmtDuration, fmtPct } from "@/lib/format";
 import { AREA_LABEL, AREAS } from "@/lib/severity";
 import type { Score } from "@/lib/grading";
@@ -40,6 +42,7 @@ interface Col {
   s1y: Score;
   trend: { count: number }[];
   comms: ReturnType<typeof communication>;
+  value: ValueRow | undefined;
 }
 
 type Cell = { text: string; value: number | null };
@@ -95,6 +98,7 @@ export default async function ComparePage({ searchParams }: Props) {
       s1y: scoreFor(snap, p.id, 365),
       trend: monthlyTrend(list, now),
       comms: communication(list.filter((i) => i.startedAt >= now - 90 * 86_400_000), {}),
+      value: valueBoard(snap, p.category).find((v) => v.provider.id === p.id),
     };
   });
   const cell = (f: (c: Col) => number | null, fmt: (v: number) => string): Cell[] =>
@@ -107,6 +111,7 @@ export default async function ComparePage({ searchParams }: Props) {
   const dur = (v: number) => fmtDuration(v);
   const num = (v: number) => String(v);
 
+  const sameCategory = cols.every((c) => c.p.category === cols[0]?.p.category);
   const byPoints = [...cols].sort((a, b) => a.s90.points - b.s90.points);
   const byMttr = [...cols].filter((c) => c.s90.medianResolveMinutes != null).sort((a, b) => a.s90.medianResolveMinutes! - b.s90.medianResolveMinutes!);
   const options = snap.categories.map((c) => ({ cat: c, provs: snap.providers.filter((p) => p.category === c.slug) }));
@@ -179,6 +184,20 @@ export default async function ComparePage({ searchParams }: Props) {
                 better="low"
               />
               <Row hint={GLOSSARY.postmortems} label="Sev 1–2 postmortems" cells={cols.map((c) => ({ text: `${c.comms.postmortems} of ${c.comms.serious}`, value: c.comms.serious ? c.comms.postmortems / c.comms.serious : null }))} better="high" />
+            </div>
+          </section>
+
+          <section className="stack" style={{ ["--gap" as string]: "8px" }}>
+            <h2 className="h2">Cost</h2>
+            <div className="box">
+              <Row
+                hint={sameCategory ? WORKLOADS[cols[0].p.category]?.summary : "Each category prices a different workload."}
+                label="Per month"
+                cells={cols.map((c) => ({ text: priceText(c.value), value: sameCategory ? c.value?.usd ?? null : null }))}
+                better="low"
+              />
+              <Row label="Plan or model" cells={cols.map((c) => ({ text: c.value?.price?.plan ?? "–", value: null }))} />
+              <Row hint={GLOSSARY.bestValue} label="Best value" cells={cols.map((c) => ({ text: c.value?.usd == null ? "–" : c.value.bestValue ? "Yes" : "No", value: null }))} />
             </div>
           </section>
 

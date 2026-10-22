@@ -3,6 +3,8 @@ import { GRADES } from "@/lib/grading";
 import { SECURITY_PENALTY, TIER_BLURB, TIER_NAMES, TIER_WEIGHT } from "@/lib/severity";
 import { USER_AGENT } from "@/lib/fetcher";
 import { pageMeta } from "@/lib/site";
+import { STALE_AFTER_DAYS, WORKLOADS } from "@/lib/pricing";
+import { CATEGORIES } from "@/lib/providers";
 
 export const metadata: Metadata = pageMeta({
   title: "How it works",
@@ -79,6 +81,28 @@ export default function About() {
           Two area grades use the same scale. <strong>PROD</strong>: your users are hit. <strong>SHIP</strong>: you can&apos;t deploy, build or
           manage, including dashboard, auth and billing outages. Papercuts count toward the overall grade only. <strong>Admitted uptime</strong> counts only Sev 1 time the provider posted
           itself, so it&apos;s a best case. Providers grade their own homework; we just add it up.
+        </p>
+
+        <h2 className="h2" id="cost">Cost and bang for buck</h2>
+        <p>
+          Status pages don&apos;t publish prices, so cost is the one number here we curate by hand. For each category we price one reference workload
+          against every provider&apos;s own public pricing page:
+        </p>
+        <ul>
+          {CATEGORIES.map((c) => (
+            <li key={c.slug}>
+              <strong>{c.name}: {WORKLOADS[c.slug]?.title}.</strong> {WORKLOADS[c.slug]?.summary}
+            </li>
+          ))}
+        </ul>
+        <p>
+          Every provider page shows the line-by-line working, the source link and the date we last checked it. Usage-billed totals are marked as
+          estimates with the assumption spelled out. A price older than {STALE_AFTER_DAYS} days is flagged as possibly out of date.
+        </p>
+        <p>
+          We don&apos;t blend price and reliability into one score, because any weighting would be our opinion dressed up as data. Instead, a provider
+          is <strong>best value</strong> when no other provider in its category costs the same or less with the same or better 90-day grade. Everyone
+          else gets told who beats them. AI prices compare the model each provider offers as its everyday default, not equal quality.
         </p>
 
         <h2 className="h2">The obvious question</h2>

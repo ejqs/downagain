@@ -18,6 +18,7 @@
     "poll": "bun scripts/poll-once.ts",
     "backfill": "bun scripts/backfill.ts",
     "regrade": "bun scripts/regrade.ts",
+    "prices": "bun scripts/prices.ts",
     "cron": "bun scripts/cron-trigger.mjs",
     "dev:sample": "bun scripts/dev-sample.ts",
     "ai-review": "bun scripts/ai-review.ts"

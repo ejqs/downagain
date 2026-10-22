@@ -1,6 +1,7 @@
 // Pure functions that turn the cached snapshot into what each page shows.
-import { durationMinutes, effectiveTier, penaltyMinutes, score, windowBounds, type GradeInput, type Score } from "@/lib/grading";
+import { durationMinutes, effectiveTier, gradeRank, penaltyMinutes, score, windowBounds, type GradeInput, type Score } from "@/lib/grading";
 import { SECURITY_PENALTY, TIER_WEIGHT } from "@/lib/severity";
+import { PRICES, monthlyUsd, valueFrontier, type Price } from "@/lib/pricing";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
 import { isProblem } from "@/lib/status";
 import type { Status } from "@/lib/types";
@@ -222,4 +223,30 @@ export function communication(list: IncidentRow[], updates: Record<number, { pos
     serious: serious.length,
     medianResolveMinutes: resolved.length ? resolved.map((i) => durationMinutes(gradeInput(i))).sort((a, b) => a - b)[Math.floor(resolved.length / 2)] : null,
   };
+}
+
+export interface ValueRow {
+  provider: ProviderRow;
+  score: Score;
+  price: Price | undefined;
+  usd: number | null;
+  bestValue: boolean;
+  beatenBy: ProviderRow | null;
+}
+
+/** A category's providers by reference-workload price, cheapest first, with the value frontier marked. */
+export function valueBoard(snap: Snapshot, category: string): ValueRow[] {
+  const provs = snap.providers.filter((p) => p.category === category);
+  const rows = provs.map((p) => {
+    const price = PRICES[p.slug];
+    const score = scoreFor(snap, p.id);
+    return { provider: p, score, price, usd: monthlyUsd(price) };
+  });
+  const frontier = valueFrontier(rows.map((r) => ({ id: r.provider.slug, usd: r.usd, gradeRank: gradeRank(r.score.grade) })));
+  return rows
+    .map((r) => {
+      const v = frontier[r.provider.slug];
+      return { ...r, bestValue: v?.bestValue ?? false, beatenBy: provs.find((p) => p.slug === v?.beatenBy) ?? null };
+    })
+    .sort((a, b) => (a.usd ?? Infinity) - (b.usd ?? Infinity) || gradeRank(a.score.grade) - gradeRank(b.score.grade) || a.provider.name.localeCompare(b.provider.name));
 }

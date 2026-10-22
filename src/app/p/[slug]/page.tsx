@@ -2,17 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProviderHistory, safeSnapshot, type IncidentRow } from "@/lib/data";
-import { communication, dailyCells, downNow, incidentsFor, monthlyTrend, openIncidents, scoreFor, startHeatmap, tierOf, topComponents } from "@/lib/views";
+import { communication, dailyCells, downNow, incidentsFor, monthlyTrend, openIncidents, scoreFor, startHeatmap, tierOf, topComponents, valueBoard } from "@/lib/views";
+import { WORKLOADS, checkedMs, fmtUsd, isStale } from "@/lib/pricing";
 import { durationMinutes } from "@/lib/grading";
 import { fmtAgo, fmtDate, fmtDuration, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
 import { AREA_BLURB, AREA_LABEL, AREA_SHORT, AREAS, TIER_NAMES, TIER_BLURB } from "@/lib/severity";
 import { STATUS_LABEL, isProblem } from "@/lib/status";
 import { gradeInput } from "@/lib/views";
-import { DayStrip, GradeTile, SevPill, Stat, StripLegend } from "@/components/ui";
+import { DayStrip, GradeTile, SevPill, Hint, Stat, StripLegend } from "@/components/ui";
 import { Unavailable } from "@/components/Unavailable";
 import { JsonLd } from "@/components/JsonLd";
 import { SITE, absUrl, pageMeta } from "@/lib/site";
 import { GLOSSARY } from "@/lib/glossary";
+import { beatText, priceText } from "@/components/Value";
 
 export const dynamic = "force-dynamic";
 
@@ -119,6 +121,11 @@ export default async function ProviderPage({ params, searchParams }: Props) {
     .map((x) => ({ x, s: scoreFor(snap, x.id) }))
     .sort((a, b) => a.s.points - b.s.points);
   const shown = all ? list : list.slice(0, 20);
+  const value = valueBoard(snap, p.category);
+  const cost = value.find((v) => v.provider.id === p.id);
+  const work = WORKLOADS[p.category];
+  const beaten = value.find((v) => v.provider.id === cost?.beatenBy?.id);
+  const cheaper = cost?.usd != null ? value.filter((v) => v.usd != null && v.usd < cost.usd!).length : 0;
   const badge = `[![${p.slug} on downagain.dev](${SITE}/badge/${p.slug}.svg)](${SITE}/p/${p.slug})`;
   const catPath = cat && cat.slug !== snap.categories[0]?.slug ? `/c/${cat.slug}` : "/";
 
@@ -247,6 +254,48 @@ export default async function ProviderPage({ params, searchParams }: Props) {
         </div>
         <StripLegend />
       </section>
+
+      {cost?.price && work ? (
+        <section id="cost" className="stack">
+          <div className="stack" style={{ ["--gap" as string]: "6px" }}>
+            <h2 className="h2">What it costs</h2>
+            <div className="body">
+              <Hint label={`${work.title}, per month`}>{work.summary}</Hint>
+            </div>
+          </div>
+          <div className="box">
+            <div className="list-row" style={{ justifyContent: "space-between" }}>
+              <div className="stack" style={{ ["--gap" as string]: "2px", minWidth: 0 }}>
+                <strong style={{ fontSize: 18 }}>{cost.price.plan}</strong>
+                <span className="muted" style={{ fontSize: 14 }}>
+                  {cost.usd == null ? cost.price.note : `${cheaper} of ${value.filter((v) => v.usd != null).length} cheaper${beaten ? ` · ${beatText(cost, beaten)}` : ""}`}
+                </span>
+              </div>
+              <div className="row" style={{ ["--gap" as string]: "8px" }}>
+                {cost.bestValue ? <span className="pill value">BEST VALUE</span> : null}
+                {cost.usd != null ? (
+                  <span className="mono" style={{ fontSize: 28, fontWeight: 800 }}>
+                    {priceText(cost)}
+                    <span style={{ fontSize: 14 }}>/mo</span>
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            {cost.price.lines.map((l) => (
+              <div key={l.label} className="list-row" style={{ justifyContent: "space-between", flexWrap: "nowrap", padding: "8px 16px", fontSize: 15 }}>
+                <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>{l.label}</span>
+                <span className="mono">{fmtUsd(l.usd)}</span>
+              </div>
+            ))}
+          </div>
+          <p className="muted" style={{ fontSize: 13 }}>
+            {cost.usd != null && cost.price.note ? `${cost.price.note} ` : ""}
+            <a href={cost.price.source} data-umami-event="pricing-outbound">{new URL(cost.price.source).host}</a> · checked {fmtDate(checkedMs(cost.price))}
+            {isStale(cost.price, now) ? " · may be out of date" : ""} ·{" "}
+            <a href={`https://github.com/ejqs/downagain/issues/new?title=${encodeURIComponent(`Price for ${p.name}`)}`}>Wrong price?</a>
+          </p>
+        </section>
+      ) : null}
 
       <section className="split">
         <div className="main stack">
@@ -380,6 +429,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
               <span>{fmtPct(ps.admittedUptime)} up</span>
               <span>{plural(ps.incidentCount, "incident")}</span>
               <span>MTTR {ps.medianResolveMinutes != null ? fmtDuration(ps.medianResolveMinutes) : "–"}</span>
+              <span>{priceText(value.find((v) => v.provider.id === x.id))}/mo</span>
             </Link>
           ))}
         </div>
