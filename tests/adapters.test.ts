@@ -20,7 +20,8 @@ describe("statuspage adapter", () => {
       { slug: "vercel", sourceKind: "statuspage", sourceUrl: "https://www.vercel-status.com", statusPageUrl: "https://www.vercel-status.com" },
       makeGetter({}),
     );
-    expect(snap.status).toBe("partial_outage");
+    // The page says "minor" overall even though one edge city is in partial outage; the indicator wins.
+    expect(snap.status).toBe("degraded");
     expect(snap.components?.map((c) => c.name)).toEqual(["iad1 - Washington, D.C., USA", "Builds", "Dashboard"]);
     expect(snap.components?.[0].group).toBe("Edge Network");
 

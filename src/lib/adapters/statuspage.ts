@@ -155,7 +155,11 @@ export async function fetchStatuspage(base: string, pageUrl: string, get: Getter
     if (!s || !Array.isArray(s.components)) throw new Error("summary.json: unexpected shape");
     const components = normalizeSpComponents(s.components);
     snap.components = components;
-    snap.status = worstStatus([indicatorStatus(s.status?.indicator), ...components.map((c) => c.status)]);
+    // The page's own indicator is the provider's overall call. Big pages (Cloudflare has a component
+    // per city) nearly always have one component down, so the worst component would read as a
+    // permanent outage. Components still count when the page publishes no indicator.
+    const indicator = indicatorStatus(s.status?.indicator);
+    snap.status = indicator !== "unknown" ? indicator : worstStatus(components.map((c) => c.status));
     snap.raw!.summary = s;
   }
 
