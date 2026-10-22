@@ -8,6 +8,15 @@ const DAY = 86_400_000;
 // An incident a provider forgot to close shouldn't sink them forever.
 const MAX_PENALTY_MINUTES = 72 * 60;
 
+// A provider that leaves an incident open but posts nothing for a week has moved
+// on. We end it at its last update instead of counting it as ongoing for months.
+export const STALE_OPEN_DAYS = 7;
+
+/** When an open incident should be treated as over, or null while it is still live. */
+export function staleEnd(lastActivity: number, now: number): number | null {
+  return now - lastActivity > STALE_OPEN_DAYS * DAY ? lastActivity : null;
+}
+
 export interface GradeInput {
   startedAt: Date;
   monitoringAt: Date | null;

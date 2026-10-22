@@ -2,12 +2,13 @@
 // Entries are tagged "status" (and "provider:<slug>"); the poll route revalidates
 // those tags only when something changed, so page traffic doesn't reach Postgres.
 import { unstable_cache } from "next/cache";
-import { and, asc, desc, eq, gte, inArray, isNotNull, or, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNotNull, or, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { categories, incidentReviews, incidentUpdates, incidents, providerStatus, providers } from "@/db/schema";
 import type { Status } from "@/lib/types";
 import type { Area } from "@/lib/severity";
 import { httpUrl } from "@/lib/format";
+import { staleEnd } from "@/lib/grading";
 
 const SAFETY_NET_SECONDS = 600;
 const DAY = 86_400_000;
@@ -59,6 +60,8 @@ export interface IncidentRow {
   gradedBy: string;
   scope: string | null;
   summary: string | null;
+  /** Left open by the provider with no update for a week; resolvedAt is then its last update. */
+  stale: boolean;
 }
 
 export interface Snapshot {
@@ -93,18 +96,25 @@ const incidentColumns = {
   gradedBy: incidents.gradedBy,
   scope: incidents.scope,
   summary: incidents.summary,
+  sourceUpdatedAt: incidents.sourceUpdatedAt,
+  lastUpdateAt: sql<Date | string | null>`(select max(${incidentUpdates.postedAt}) from ${incidentUpdates} where ${incidentUpdates.incidentId} = ${incidents.id})`,
 };
 
 type IncidentSelect = Awaited<ReturnType<typeof selectIncidents>>[number];
 const selectIncidents = () => db().select(incidentColumns).from(incidents);
 
-function toIncidentRow(r: IncidentSelect): IncidentRow {
+export function toIncidentRow(r: IncidentSelect, now = Date.now()): IncidentRow {
+  const { sourceUpdatedAt, lastUpdateAt, ...rest } = r;
+  const startedAt = r.startedAt.getTime();
+  const lastActivity = Math.max(startedAt, ms(r.monitoringAt) ?? 0, ms(sourceUpdatedAt) ?? 0, lastUpdateAt ? new Date(lastUpdateAt).getTime() : 0);
+  const end = r.resolvedAt ? null : staleEnd(lastActivity, now);
   return {
-    ...r,
+    ...rest,
     url: httpUrl(r.url),
-    startedAt: r.startedAt.getTime(),
+    startedAt,
     monitoringAt: ms(r.monitoringAt),
-    resolvedAt: ms(r.resolvedAt),
+    resolvedAt: ms(r.resolvedAt) ?? end,
+    stale: end != null,
   };
 }
 

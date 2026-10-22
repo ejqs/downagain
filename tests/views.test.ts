@@ -49,6 +49,7 @@ function inc(providerId: number, p: Partial<IncidentRow> & { startedAt: number }
     gradedBy: "rules",
     scope: null,
     summary: null,
+    stale: false,
     ...p,
   };
 }

@@ -148,6 +148,7 @@ function IncidentItem({ i, updates, review }: { i: IncidentRow; updates?: { stat
         <span style={{ fontSize: 16, fontWeight: 700 }}>{i.title}</span>
         <span className="muted" style={{ fontSize: 14 }}>
           {i.tierOverride != null ? `Sev ${i.tierOverride} (reviewed${i.overrideNote ? `: ${i.overrideNote}` : ""})` : (i.summary ?? i.reason)}
+          {i.stale ? " Never closed by the provider; counted to its last update." : ""}
         </span>
         <IncidentTags i={i} />
         {review && i.gradedBy === "claude" ? <WhyGrade i={i} review={review} /> : null}
