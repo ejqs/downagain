@@ -17,7 +17,7 @@ export const MONO = "JetBrains Mono";
 export async function card(body: React.ReactNode, footer: string, tape: "hazard" | "down" = "hazard") {
   const [display, mono] = await fonts;
   const stripe = tape === "down" ? BRAND.down : BRAND.hazard;
-  return new ImageResponse(
+  const image = new ImageResponse(
     (
       <div
         style={{
@@ -54,8 +54,17 @@ export async function card(body: React.ReactNode, footer: string, tape: "hazard"
         { name: DISPLAY, data: display, weight: 800, style: "normal" },
         { name: MONO, data: mono, weight: 700, style: "normal" },
       ],
-      // Crawlers fetch these rarely; let a CDN or the crawler hold them briefly.
-      headers: { "Cache-Control": "public, max-age=300, s-maxage=300" },
     },
   );
+  // Send the whole PNG with a Content-Length instead of a chunked stream; some
+  // link-preview crawlers give up on streamed images and fall back to a small card.
+  const png = await image.arrayBuffer();
+  return new Response(png, {
+    headers: {
+      "Content-Type": "image/png",
+      "Content-Length": String(png.byteLength),
+      // Crawlers fetch these rarely; let a CDN or the crawler hold them briefly.
+      "Cache-Control": "public, max-age=300, s-maxage=300",
+    },
+  });
 }
