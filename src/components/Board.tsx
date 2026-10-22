@@ -4,6 +4,7 @@ import { leaderboard, downNow, liveCount, liveLevel, LIVE_LABEL, scoreFor, value
 import { fmtDuration, fmtPct } from "@/lib/format";
 import { AREA_SHORT, AREAS } from "@/lib/severity";
 import { priceText } from "./Value";
+import { isPriced } from "@/lib/pricing";
 import { DayStrip, GradeTile, StripLegend } from "./ui";
 import { JsonLd } from "./JsonLd";
 import { absUrl } from "@/lib/site";
@@ -104,7 +105,7 @@ export function Board({
                 <div className="metric"><b>{fmtPct(r.score.admittedUptime)}</b><span>ADMITTED UPTIME</span></div>
                 <div className="metric"><b>{r.score.incidentCount}</b><span>INCIDENTS</span></div>
                 <div className="metric"><b>{r.score.longestMinutes ? fmtDuration(r.score.longestMinutes) : "–"}</b><span>LONGEST</span></div>
-                <PriceMetric v={value.get(r.provider.slug)} />
+                {isPriced(category) ? <PriceMetric v={value.get(r.provider.slug)} /> : null}
               </div>
               <DayStrip cells={r.cells} label={`${r.provider.name}, last 60 days`} />
             </div>

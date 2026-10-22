@@ -15,16 +15,15 @@ export interface Workload {
   unit: string;
 }
 
-/** The same imaginary customer for every provider in a category. */
+/**
+ * The same imaginary customer for every provider in a category. A category is
+ * only priced when that comparison is fair: AI APIs are left out on purpose,
+ * because models differ too much in capability for price alone to mean much.
+ */
 export const WORKLOADS: Record<string, Workload> = {
   hosting: {
     title: "One small production web app",
     summary: "512 MB app on all month, 1M requests, 100 GB out, commercial use, one seat. Cheapest plan that runs it.",
-    unit: "/mo",
-  },
-  ai: {
-    title: "An everyday LLM workload",
-    summary: "30M input and 10M output tokens a month on each provider's everyday model, standard rates. Models differ in quality.",
     unit: "/mo",
   },
   cloud: {
@@ -51,14 +50,6 @@ export interface Price {
   /** Date (UTC, YYYY-MM-DD) someone last read `source` and confirmed these lines. */
   checked: string;
 }
-
-// AI workload in millions of tokens.
-const IN = 30;
-const OUT = 10;
-const tokens = (inPerM: number, outPerM: number): PriceLine[] => [
-  { label: `${IN}M input tokens at $${inPerM}/M`, usd: IN * inPerM },
-  { label: `${OUT}M output tokens at $${outPerM}/M`, usd: OUT * outPerM },
-];
 
 export const PRICES: Record<string, Price> = {
   // Hosting
@@ -135,40 +126,6 @@ export const PRICES: Record<string, Price> = {
     checked: "2026-10-22",
   },
 
-  // AI APIs
-  openai: {
-    plan: "gpt-6.1-sol",
-    lines: tokens(2, 10),
-    source: "https://developers.openai.com/api/docs/pricing",
-    checked: "2026-10-22",
-  },
-  anthropic: {
-    plan: "Claude Sonnet 5.5",
-    lines: tokens(2, 10),
-    source: "https://platform.claude.com/docs/en/about-claude/pricing",
-    checked: "2026-10-22",
-  },
-  groq: {
-    plan: "gpt-oss-120b",
-    lines: tokens(0.15, 0.6),
-    note: "Groq serves open-weight models; this is a smaller model than the others here.",
-    source: "https://console.groq.com/docs/models",
-    checked: "2026-10-22",
-  },
-  cohere: {
-    plan: "Command A",
-    lines: tokens(2.5, 10),
-    source: "https://docs.cohere.com/docs/command-a",
-    checked: "2026-10-22",
-  },
-  replicate: {
-    plan: "Billed by GPU time",
-    lines: [],
-    note: "Most Replicate models are billed per second of GPU time, so there's no like-for-like token price.",
-    source: "https://replicate.com/pricing",
-    checked: "2026-10-22",
-  },
-
   // Cloud: 730 hours a month, on-demand list prices.
   aws: {
     plan: "EC2 t4g.medium, us-east-1",
@@ -214,6 +171,11 @@ const DAY = 86_400_000;
 export function monthlyUsd(p: Price | undefined): number | null {
   if (!p || p.lines.length === 0) return null;
   return Math.round(p.lines.reduce((n, l) => n + l.usd, 0) * 100) / 100;
+}
+
+/** Whether a category shows cost at all. */
+export function isPriced(category: string): boolean {
+  return category in WORKLOADS;
 }
 
 export function checkedMs(p: Price): number {

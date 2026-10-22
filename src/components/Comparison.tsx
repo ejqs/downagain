@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ProviderRow, Snapshot } from "@/lib/data";
 import { communication, incidentsFor, monthlyTrend, scoreFor, valueBoard, type ValueRow } from "@/lib/views";
-import { WORKLOADS } from "@/lib/pricing";
+import { WORKLOADS, isPriced } from "@/lib/pricing";
 import { priceText } from "@/components/Value";
 import { fmtDuration, fmtPct } from "@/lib/format";
 import { AREA_LABEL, AREAS } from "@/lib/severity";
@@ -143,19 +143,21 @@ export function Comparison({ snap, slugs, heading }: { snap: Snapshot; slugs: st
             </div>
           </section>
 
+          {sameCategory && isPriced(cols[0].p.category) ? (
           <section className="stack" style={{ ["--gap" as string]: "8px" }}>
             <h2 className="h2">Cost</h2>
             <div className="box">
               <Row
-                hint={sameCategory ? WORKLOADS[cols[0].p.category]?.summary : "Each category prices a different workload."}
+                hint={WORKLOADS[cols[0].p.category]?.summary}
                 label="Per month"
-                cells={cols.map((c) => ({ text: priceText(c.value), value: sameCategory ? c.value?.usd ?? null : null }))}
+                cells={cols.map((c) => ({ text: priceText(c.value), value: c.value?.usd ?? null }))}
                 better="low"
               />
               <Row label="Plan or model" cells={cols.map((c) => ({ text: c.value?.price?.plan ?? "–", value: null }))} />
               <Row hint={GLOSSARY.bestValue} label="Best value" cells={cols.map((c) => ({ text: c.value?.usd == null ? "–" : c.value.bestValue ? "Yes" : "No", value: null }))} />
             </div>
           </section>
+          ) : null}
 
           <section className="verdict">
             <span className="eyebrow">Verdict</span>

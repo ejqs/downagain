@@ -4,7 +4,7 @@ import { SECURITY_PENALTY, TIER_BLURB, TIER_NAMES, TIER_WEIGHT } from "@/lib/sev
 import { USER_AGENT } from "@/lib/fetcher";
 import { SITE, SITE_NAME, absUrl, pageMeta } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
-import { STALE_AFTER_DAYS, WORKLOADS } from "@/lib/pricing";
+import { STALE_AFTER_DAYS, WORKLOADS, isPriced } from "@/lib/pricing";
 import { CATEGORIES } from "@/lib/providers";
 
 export const metadata: Metadata = pageMeta({
@@ -112,7 +112,7 @@ export default function About() {
           against every provider&apos;s own public pricing page:
         </p>
         <ul>
-          {CATEGORIES.map((c) => (
+          {CATEGORIES.filter((c) => isPriced(c.slug)).map((c) => (
             <li key={c.slug}>
               <strong>{c.name}: {WORKLOADS[c.slug]?.title}.</strong> {WORKLOADS[c.slug]?.summary}
             </li>
@@ -125,7 +125,7 @@ export default function About() {
         <p>
           We don&apos;t blend price and reliability into one score, because any weighting would be our opinion dressed up as data. Instead, a provider
           is <strong>best value</strong> when no other provider in its category costs the same or less with the same or better 90-day grade. Everyone
-          else gets told who beats them. AI prices compare the model each provider offers as its everyday default, not equal quality.
+          else gets told who beats them. AI APIs have no cost on purpose: models differ too much in capability for price alone to be fair.
         </p>
 
         <h2 className="h2">The obvious question</h2>

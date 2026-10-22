@@ -569,7 +569,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
               <span>{fmtPct(ps.admittedUptime)} up</span>
               <span>{plural(ps.incidentCount, "incident")}</span>
               <span>MTTR {ps.medianResolveMinutes != null ? fmtDuration(ps.medianResolveMinutes) : "–"}</span>
-              <span>{priceText(value.find((v) => v.provider.id === x.id))}/mo</span>
+              {work ? <span>{priceText(value.find((v) => v.provider.id === x.id))}/mo</span> : null}
             </Link>
           ))}
         </div>

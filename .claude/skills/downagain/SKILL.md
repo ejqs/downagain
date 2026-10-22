@@ -50,7 +50,7 @@ Prices are the one hand-curated dataset: `PRICES` and `WORKLOADS` in `src/lib/pr
 
 1. `bun run prices` lists entries oldest-checked first with their source links. Re-check monthly; the site flags anything older than `STALE_AFTER_DAYS` (90).
 2. Edit the `lines` so they add up to the monthly total, keep any assumption in `note` (and `estimate: true` if usage-billed), set `checked` to today.
-3. A new provider needs a `PRICES` entry (the test enforces it). With no like-for-like price, use `lines: []` and explain why in `note`.
+3. A new provider in a priced category (one with a `WORKLOADS` entry) needs a `PRICES` entry (the test enforces it). AI APIs are deliberately unpriced: models differ too much for a price-only comparison. With no like-for-like price, use `lines: []` and explain why in `note`.
 4. Don't blend price and grade into one score. "Best value" is the frontier: nobody else is cheaper-or-equal with a better-or-equal grade.
 
 ## Local development

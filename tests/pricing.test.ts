@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { PRICES, STALE_AFTER_DAYS, WORKLOADS, checkedMs, isStale, monthlyUsd, valueFrontier } from "@/lib/pricing";
-import { CATEGORIES, PROVIDERS } from "@/lib/providers";
+import { PRICES, STALE_AFTER_DAYS, checkedMs, isPriced, isStale, monthlyUsd, valueFrontier } from "@/lib/pricing";
+import { PROVIDERS } from "@/lib/providers";
 
 describe("price data", () => {
-  it("covers every tracked provider and category", () => {
-    for (const p of PROVIDERS) expect(PRICES[p.slug], p.slug).toBeDefined();
-    for (const c of CATEGORIES) expect(WORKLOADS[c.slug], c.slug).toBeDefined();
+  it("prices every provider in a priced category, and only those", () => {
+    for (const p of PROVIDERS) expect(Boolean(PRICES[p.slug]), p.slug).toBe(isPriced(p.category));
+    expect(isPriced("hosting")).toBe(true);
+    expect(isPriced("ai")).toBe(false);
   });
   it("has a real source and a check date for every entry", () => {
     for (const [slug, p] of Object.entries(PRICES)) {
@@ -23,8 +24,7 @@ describe("monthlyUsd", () => {
   it("adds the lines, credits included", () => {
     expect(monthlyUsd(PRICES.railway)).toBe(12);
     expect(monthlyUsd(PRICES.render)).toBe(21.25);
-    expect(monthlyUsd(PRICES.anthropic)).toBe(160);
-    expect(monthlyUsd(PRICES.replicate)).toBeNull();
+    expect(monthlyUsd({ ...PRICES.fly, lines: [] })).toBeNull();
     expect(monthlyUsd(undefined)).toBeNull();
   });
 });
