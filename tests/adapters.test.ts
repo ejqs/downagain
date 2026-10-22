@@ -2,6 +2,8 @@ import path from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { readProvider } from "@/lib/adapters";
 import { fixtureName, makeGetter } from "@/lib/fetcher";
+import { CATEGORIES, PROVIDERS } from "@/lib/providers";
+import type { Surface } from "@/lib/severity";
 
 beforeAll(() => {
   process.env.STATUS_FIXTURES_DIR = path.join(__dirname, "fixtures");
@@ -83,5 +85,85 @@ describe("heroku adapter", () => {
     expect(i.externalId).toBe("2901");
     expect(i.impact).toBe("critical");
     expect(i.components).toEqual(["Apps (runtime)"]);
+  });
+});
+
+describe("adapter edge cases", () => {
+  const sp = { slug: "x", sourceKind: "statuspage" as const, sourceUrl: "https://x.test/", statusPageUrl: "https://x.test/" };
+  const serve = (bodies: Record<string, unknown>) => async (url: string) => ({ notModified: false as const, body: bodies[new URL(url).pathname] });
+
+  it("statuspage: no indicator falls back to the worst component, and dates fall back sensibly", async () => {
+    const snap = await readProvider(
+      sp,
+      serve({
+        "/api/v2/summary.json": { components: [{ id: "a", name: "API", status: "major_outage" }, { id: "b", name: "Docs", status: "something_new" }] },
+        "/api/v2/incidents.json": {
+          incidents: [
+            {
+              id: "i1",
+              name: "API down",
+              status: "resolved",
+              impact: "surprise",
+              created_at: "2026-10-01T10:00:00Z",
+              resolved_at: "2026-10-01T11:00:00Z",
+              incident_updates: [
+                { id: "a", status: "monitoring", body: null, created_at: "2026-10-01T10:45:00Z" },
+                { id: "b", status: "investigating", body: "x", created_at: "2026-10-01T10:00:00Z", affected_components: [{ name: "API", new_status: "major_outage", old_status: "operational" }] },
+              ],
+            },
+          ],
+        },
+      }),
+    );
+    expect(snap.status).toBe("major_outage");
+    expect(snap.components?.[1].status).toBe("unknown");
+    const [i] = snap.incidents!;
+    expect(i.startedAt.toISOString()).toBe("2026-10-01T10:00:00.000Z");
+    expect(i.monitoringAt?.toISOString()).toBe("2026-10-01T10:45:00.000Z");
+    expect(i.impact).toBe("none");
+    expect(i.components).toEqual(["API"]);
+    expect(i.worstComponentStatus).toBe("major_outage");
+    expect(i.url).toBe("https://x.test/incidents/i1");
+    expect(i.updates[1].body).toBe("");
+  });
+
+  it("railway: a maintenance in progress shows, a 304 keeps everything, junk throws", async () => {
+    const rw = { slug: "railway", sourceKind: "railway" as const, sourceUrl: "https://rw.test/status", statusPageUrl: "https://status.railway.com" };
+    const snap = await readProvider(rw, async () => ({
+      notModified: false,
+      body: { components: [{ id: "a", name: "API", status: "OPERATIONAL" }], incidents: [], maintenances: [{ status: "IN_PROGRESS" }] },
+    }));
+    expect(snap.status).toBe("maintenance");
+    expect(await readProvider(rw, async () => ({ notModified: true }))).toEqual({});
+    await expect(readProvider(rw, async () => ({ notModified: false, body: {} }))).rejects.toThrow(/unexpected shape/);
+  });
+
+  it("heroku: resolved incidents and unknown systems", async () => {
+    const hk = { slug: "heroku", sourceKind: "heroku" as const, sourceUrl: "https://hk.test", statusPageUrl: "https://hk.test" };
+    const snap = await readProvider(hk, async () => ({
+      notModified: false,
+      body: {
+        status: [{ system: "Apps", status: "green" }, { system: "Other", status: "blue" }],
+        incidents: [{ id: 7, title: "Done", created_at: "2026-10-01T00:00:00Z", resolved: true, systems: [{ name: "Tools", status: "yellow" }], updates: [] }],
+      },
+    }));
+    expect(snap.status).toBe("maintenance");
+    expect(snap.components?.[1]).toEqual({ name: "Other", status: "maintenance" });
+    expect(snap.incidents![0]).toMatchObject({ status: "resolved", impact: "minor", components: ["Tools (deploys, dashboard, CLI)"], url: null });
+  });
+});
+
+describe("provider registry", () => {
+  it("has unique slugs, known categories and https sources", () => {
+    const SURFACES: Surface[] = ["serving", "data", "ship", "peripheral"];
+    const slugs = PROVIDERS.map((p) => p.slug);
+    expect(new Set(slugs).size).toBe(slugs.length);
+    const cats = new Set(CATEGORIES.map((c) => c.slug));
+    for (const p of PROVIDERS) {
+      expect(cats.has(p.category), p.slug).toBe(true);
+      expect(p.slug).toMatch(/^[a-z0-9-]+$/);
+      for (const url of [p.sourceUrl, p.statusPageUrl, p.homepageUrl]) expect(new URL(url).protocol, `${p.slug} ${url}`).toBe("https:");
+      for (const s of Object.values(p.surfaces ?? {})) expect(SURFACES, p.slug).toContain(s);
+    }
   });
 });

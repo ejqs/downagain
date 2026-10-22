@@ -42,3 +42,9 @@ bun run dev:sample                 # made-up incidents, localhost only; --clear 
 STATUS_FIXTURES_DIR=tests/fixtures bun run poll vercel railway heroku   # poll from fixtures
 bun run dev
 ```
+
+## Tests
+
+- `bun run test`: adapters (fixtures in `tests/fixtures/`), severity, grading, views, the poller (write-on-change, unknown after 15 min, vanished incidents, overrides kept) and the API routes (auth, which tags get revalidated). Poller and route tests use `tests/helpers/db.ts`, an in-process PGlite with the real migrations, so no Postgres is needed. To simulate a provider changing, copy fixtures with `fixtureDir()` and `edit()` them between polls.
+- `bun run test:e2e`: Playwright smoke tests in `e2e/` on desktop and 390px mobile: every page renders, no console errors, no sideways scroll, banner and 404s. Run `bun run e2e:prepare` (local DB only) and `bun run build` first.
+- CI runs both on every PR and push to main. A bug in the poller or rubric gets a test that fails first.

@@ -51,7 +51,8 @@ Useful scripts:
 | `STATUS_FIXTURES_DIR=tests/fixtures bun run poll vercel railway heroku` | Same, reading saved fixtures instead of the network |
 | `bun run backfill [--provider slug]` | Seed, then pull whatever history each status API exposes (marked `origin = backfill`) |
 | `bun run regrade` | Re-run the classifier over every stored incident after changing the rubric |
-| `bun run test` / `bun run lint` | Unit tests (adapters, severity, grading) / typecheck |
+| `bun run test` / `bun run lint` | Unit and integration tests / typecheck. Needs no database: poller and route tests run on an in-process Postgres (PGlite) with the real migrations |
+| `bun run e2e:prepare && bun run build && bun run test:e2e` | Playwright smoke tests (desktop and 390px mobile) against a production build. Needs a local `DATABASE_URL`; fills it with fixtures and sample data |
 | `bun run db:generate` | New migration after editing `src/db/schema.ts` |
 | `bun scripts/make-icons.ts` | Re-render the favicon and app icons after editing `assets/icon.svg` |
 
