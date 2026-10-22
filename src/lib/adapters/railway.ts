@@ -73,7 +73,7 @@ export function normalizeRwIncident(i: RwIncident, pageUrl: string): NormalizedI
     resolvedAt: i.resolvedAt ? new Date(i.resolvedAt) : null,
     sourceUpdatedAt: i.updatedAt ? new Date(i.updatedAt) : null,
     url: i.slug ? `${pageUrl.replace(/\/$/, "")}/incident/${i.slug}` : pageUrl,
-    components: (i.components ?? []).map((c) => c.component.name),
+    components: [...new Set((i.components ?? []).map((c) => c.component.name))],
     worstComponentStatus: worst === "operational" ? null : worst,
     postmortem: false,
     updates,

@@ -226,8 +226,14 @@ describe("dailyLoad", () => {
     expect(days[2].points).toBe(4 * 12 * 60); // midnight to now
   });
 
-  it("buckets points into five heat steps", () => {
-    expect([0, 1, 60, 61, 600, 601, 3000, 3001].map(heatLevel)).toEqual([0, 1, 1, 2, 2, 3, 3, 4]);
+  it("colours a day by its worst tier and keeps that day's worst incident", () => {
+    expect([1, 2, 3, 4, 5].map(heatLevel)).toEqual([3, 2, 1, 1, 0]);
+    const short = inc(1, { startedAt: ago(0, 3), resolvedAt: ago(0, 2.5), tier: 1 });
+    const long = inc(2, { startedAt: ago(0, 4), resolvedAt: ago(0, 1), tier: 1 });
+    const minor = inc(3, { startedAt: ago(0, 5), tier: 3 });
+    const [today] = dailyLoad([short, minor, long], 1, NOW);
+    expect(today.top?.id).toBe(long.id);
+    expect(dailyLoad([], 1, NOW)[0].top).toBeNull();
   });
 });
 

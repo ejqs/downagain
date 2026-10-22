@@ -20,7 +20,7 @@ export const GLOSSARY = {
   updateGap: "Median time between status page updates during an incident.",
   updatesPer: "Status page updates per incident, on average.",
   sinceLast: "Time since the last counted incident was resolved.",
-  heatmap: "Severity weight × minutes per UTC day, every provider shown. Same points as grades.",
+  heatmap: "One square per UTC day, coloured by the worst incident that day. Ongoing incidents count today.",
   cost: "One reference workload a month, priced from the provider's own pricing page. ~ is an estimate.",
   bestValue: "Nobody else here costs the same or less with the same or better grade.",
   dns: "Incidents with DNS in the title or components, 90 days.",

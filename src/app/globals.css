@@ -214,11 +214,17 @@ details.updates li { overflow-wrap: anywhere; }
 .cal-d:hover { outline: 2px solid var(--ink); outline-offset: 1px; }
 .cal-d[aria-current] { outline: 3px solid var(--ink); outline-offset: 1px; }
 .heat-0 { background: #e6e6e0; }
-.heat-1 { background: #f6a066; }
+.heat-1 { background: var(--minor); }
 .heat-2 { background: var(--down); }
-.heat-3 { background: #b8410a; }
-.heat-4 { background: #7c2d12; }
-.legend i[class^="heat-"] { width: 14px; height: 14px; border-radius: 3px; }
+.heat-3 { background: var(--ink); }
+.cal-d.today { position: relative; }
+.cal-d.today::after { content: ""; position: absolute; inset: 30%; border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); }
+.cal-pick { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding-top: 12px; border-top: 2px solid var(--ink); font-size: 16px; }
+.cal-pick .mono { font-size: 14px; font-weight: 700; }
+.cal-x { margin-left: auto; min-width: 44px; min-height: 44px; display: inline-grid; place-items: center; margin-block: -10px; font: 700 22px var(--font-mono); text-decoration: none; }
+.prov-select select { min-height: 44px; max-width: 100%; padding: 0 8px; border: 3px solid var(--ink); background: var(--paper); font: 700 15px var(--font-display); color: var(--ink); }
+.prov-select { display: flex; gap: 6px; }
+.legend i[class^="heat-"] { border-radius: 3px; }
 .day-head { font-size: 22px; font-weight: 800; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin: 0 0 8px; }
 
 /* Compare */

@@ -62,20 +62,23 @@ export interface DayLoad {
   points: number; // severity weight x penalty minutes inside the day, same scale as grades
   incidents: number;
   worst: number; // best (lowest) tier that touched the day, 5 when none
+  top: IncidentRow | null; // the day's worst incident: lowest tier, then longest
 }
 
-/** Severity-weighted trouble per UTC day across every incident given, oldest first. */
+/** Trouble per UTC day across every incident given, oldest first. */
 export function dailyLoad(list: IncidentRow[], days: number, now: number): DayLoad[] {
   const today = Math.floor(now / DAY) * DAY;
+  const long = (i: IncidentRow) => (i.resolvedAt ?? now) - i.startedAt;
   const out: DayLoad[] = [];
   for (let d = days - 1; d >= 0; d--) {
     const start = today - d * DAY;
     const end = Math.min(start + DAY, now);
-    const cell: DayLoad = { day: start, points: 0, incidents: 0, worst: 5 };
+    const cell: DayLoad = { day: start, points: 0, incidents: 0, worst: 5, top: null };
     for (const i of list) {
       const t = tierOf(i);
       if (t === 0 || i.startedAt >= start + DAY || (i.resolvedAt ?? now) < start) continue;
       cell.incidents++;
+      if (t < cell.worst || (t === cell.worst && cell.top && long(i) > long(cell.top))) cell.top = i;
       cell.worst = Math.min(cell.worst, t);
       cell.points += TIER_WEIGHT[t] * penaltyMinutes(gradeInput(i), new Date(start), new Date(end));
       if (i.security && i.startedAt >= start) cell.points += SECURITY_PENALTY;
@@ -86,11 +89,9 @@ export function dailyLoad(list: IncidentRow[], days: number, now: number): DayLo
   return out;
 }
 
-/** Heat steps for a day's points: 0 is clean, 4 is roughly six hours of Sev 1. */
-export const HEAT_STEPS = [0, 60, 600, 3000] as const;
-export function heatLevel(points: number): 0 | 1 | 2 | 3 | 4 {
-  if (points <= 0) return 0;
-  return (HEAT_STEPS.filter((s) => points > s).length) as 1 | 2 | 3 | 4;
+/** Calendar colour step for a day's worst tier: 0 clean, 1 Sev 3–4, 2 Sev 2, 3 Sev 1. */
+export function heatLevel(worst: number): 0 | 1 | 2 | 3 {
+  return worst <= 1 ? 3 : worst === 2 ? 2 : worst <= 4 ? 1 : 0;
 }
 
 export function openIncidents(list: IncidentRow[]): IncidentRow[] {

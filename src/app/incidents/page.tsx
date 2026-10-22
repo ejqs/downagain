@@ -9,6 +9,7 @@ import { SevPill } from "@/components/ui";
 import { pageMeta } from "@/lib/site";
 import { Unavailable } from "@/components/Unavailable";
 import { Heatmap, dayKey } from "@/components/Heatmap";
+import { ProviderSelect } from "@/components/ProviderSelect";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({
@@ -20,13 +21,14 @@ export const metadata: Metadata = pageMeta({
 const PAGE_DAYS = 14;
 const DAY = 86_400_000;
 
-type Props = { searchParams: Promise<{ cat?: string; sev?: string; days?: string; day?: string }> };
+type Props = { searchParams: Promise<{ cat?: string; sev?: string; days?: string; day?: string; p?: string }> };
 
 export default async function IncidentsPage({ searchParams }: Props) {
   const snap = await safeSnapshot();
   if (!snap) return <Unavailable />;
   const q = await searchParams;
   const cat = snap.categories.some((c) => c.slug === q.cat) ? q.cat! : "all";
+  const only = snap.providers.find((p) => p.slug === q.p && (cat === "all" || p.category === cat)) ?? null;
   const sev = ["1", "2", "3", "4"].includes(q.sev ?? "") ? Number(q.sev) : 0;
   const days = Math.min(400, Math.max(PAGE_DAYS, Number(q.days) || PAGE_DAYS));
   const byId = new Map(snap.providers.map((p) => [p.id, p]));
@@ -38,12 +40,12 @@ export default async function IncidentsPage({ searchParams }: Props) {
 
   const keep = (i: (typeof snap.incidents)[number]) => {
     const p = byId.get(i.providerId);
-    return p && (cat === "all" || p.category === cat) && (sev === 0 ? tierOf(i) > 0 : tierOf(i) === sev);
+    return p && (cat === "all" || p.category === cat) && (!only || p.id === only.id) && (sev === 0 ? tierOf(i) > 0 : tierOf(i) === sev);
   };
   const ongoing = openIncidents(snap.incidents).filter(keep);
   const heat = dailyLoad(snap.incidents.filter(keep), WINDOW_DAYS, now);
   const past = snap.incidents.filter((i) =>
-    keep(i) && i.resolvedAt && (day === null ? i.startedAt >= now - days * DAY : i.startedAt < day + DAY && i.resolvedAt >= day),
+    keep(i) && (day === null ? i.resolvedAt && i.startedAt >= now - days * DAY : i.startedAt < day + DAY && (i.resolvedAt ?? now) >= day),
   );
 
   const groups = new Map<number, typeof past>();
@@ -69,6 +71,7 @@ export default async function IncidentsPage({ searchParams }: Props) {
     const c = o.cat ?? cat;
     const s = o.sev ?? sev;
     if (c !== "all") sp.set("cat", c);
+    if (only && o.cat === undefined) sp.set("p", only.slug);
     if (s) sp.set("sev", String(s));
     const d = o.day === undefined ? day : o.day;
     if (d !== null) sp.set("day", dayKey(d));
@@ -99,6 +102,14 @@ export default async function IncidentsPage({ searchParams }: Props) {
             </Link>
           ))}
         </div>
+        <ProviderSelect
+          value={only?.slug ?? ""}
+          keep={Object.fromEntries([...(cat !== "all" ? [["cat", cat]] : []), ...(sev ? [["sev", String(sev)]] : [])])}
+          groups={snap.categories
+            .filter((c) => cat === "all" || c.slug === cat)
+            .map((c) => ({ name: c.name, provs: snap.providers.filter((p) => p.category === c.slug).map((p) => ({ slug: p.slug, name: p.name })) }))
+            .filter((g) => g.provs.length)}
+        />
       </div>
 
       <section aria-label="Ongoing" className="box">
@@ -126,12 +137,7 @@ export default async function IncidentsPage({ searchParams }: Props) {
 
       <section className="split">
         <div className="main stack" style={{ ["--gap" as string]: "24px" }}>
-          <Heatmap days={heat} selected={day} hrefFor={(d) => href({ day: d })} />
-          {day !== null ? (
-            <Link href={href({ day: null })} className="chip small" style={{ alignSelf: "flex-start" }} scroll={false}>
-              {fmtDay(day)} ×
-            </Link>
-          ) : null}
+          <Heatmap days={heat} selected={day} now={now} hrefFor={(d) => href({ day: d })} nameOf={(id) => byId.get(id)?.name ?? ""} />
           {groups.size === 0 ? <div className="empty">{day === null ? `Nothing in the last ${days} days.` : "Clean day."}</div> : null}
           {[...groups.entries()].map(([day, items]) => (
             <div key={day}>

@@ -55,7 +55,7 @@ export function normalizeHkIncident(i: HkIncident): NormalizedIncident {
     resolvedAt: i.resolved_at ? new Date(i.resolved_at) : null,
     sourceUpdatedAt: i.updated_at ? new Date(i.updated_at) : null,
     url: i.full_url ?? null,
-    components: (i.systems ?? []).map((s) => SYSTEM_NAMES[s.name] ?? s.name),
+    components: [...new Set((i.systems ?? []).map((s) => SYSTEM_NAMES[s.name] ?? s.name))],
     worstComponentStatus: worst === "operational" ? null : worst,
     postmortem: false,
     updates,

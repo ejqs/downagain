@@ -111,6 +111,8 @@ export function toIncidentRow(r: IncidentSelect, now = Date.now()): IncidentRow 
   return {
     ...rest,
     url: httpUrl(r.url),
+    // Some status pages list a component once per group it sits in.
+    components: [...new Set(r.components ?? [])],
     startedAt,
     monitoringAt: ms(r.monitoringAt),
     resolvedAt: ms(r.resolvedAt) ?? end,

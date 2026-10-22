@@ -90,3 +90,10 @@ test("the sitemap lists provider and matchup pages", async ({ request }) => {
   expect(xml).toContain("/p/vercel</loc>");
   expect(xml).toContain("/compare/railway-vs-vercel</loc>");
 });
+
+test("the provider picker narrows the incidents page", async ({ page }) => {
+  await page.goto("/incidents");
+  await page.getByLabel("Provider", { exact: true }).selectOption("vercel");
+  await expect(page).toHaveURL(/[?&]p=vercel/);
+  await expect(page.locator(".cal a.cal-d")).toHaveCount(90);
+});
