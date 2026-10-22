@@ -11,7 +11,7 @@ A scoreboard, not a manual. The numbers do the talking.
 3. **Explain on demand.** A metric that needs a definition gets a "?" hint with one line (`src/lib/glossary.ts`). The full method lives on /about. Never put an explainer paragraph under a section.
 4. **Wink sparingly.** Humour goes in headings, empty states and the odd aside, about one per screen. Data, labels and incident text stay straight.
 5. **Laugh at the situation, not the provider.** Outages are funny; the people fixing them aren't. We're on Railway, so we're fair game too.
-6. **Quote providers, don't paraphrase them.** Incident titles and updates appear as posted.
+6. **Quote providers, don't paraphrase them.** Incident titles and updates appear as posted. The one exception is Claude's short summary of a long incident, shown in place of the reason line and marked by the AI-graded tag.
 7. **Numbers first.** "3 incidents", not "There were 3 incidents".
 8. **No hedging stacks.** One caveat, where it matters (the "admitted" in admitted uptime), explained once on /about.
 

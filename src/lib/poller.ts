@@ -186,6 +186,7 @@ export async function writeIncidents(
       // The rules grade goes in first; reviewPending refines it with Claude afterwards.
       gradedBy: "rules",
       scope: null,
+      summary: null,
       sourceUpdatedAt: inc.sourceUpdatedAt,
       updatedAt: now,
     };

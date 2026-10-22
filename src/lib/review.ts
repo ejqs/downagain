@@ -6,7 +6,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { and, asc, desc, eq, gte, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import type { DB } from "@/db";
 import { categories, componentSurfaces, incidentReviews, incidentUpdates, incidents, providers } from "@/db/schema";
-import { DEFAULT_MODEL, PROMPT_VERSION, applyVerdict, askClaude, costMicros, inputHash, parseVerdict, renderIncident } from "@/lib/ai-grade";
+import { DEFAULT_MODEL, PROMPT_VERSION, applyVerdict, isLongText, askClaude, costMicros, inputHash, parseVerdict, renderIncident } from "@/lib/ai-grade";
 import { classify, type Classification, type Surface } from "@/lib/severity";
 
 export interface ReviewSettings {
@@ -79,7 +79,7 @@ function rulesFor(r: Row, updates: { body: string }[], overrides: Map<number, Ma
   );
 }
 
-function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | null }) {
+function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | null; summary?: string | null }, longText = false) {
   return {
     tier: c.tier,
     areaTiers: c.areaTiers,
@@ -90,13 +90,14 @@ function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | 
     classifierVersion: c.classifierVersion,
     gradedBy: c.gradedBy ?? "rules",
     scope: c.scope ?? null,
+    summary: longText && c.summary ? c.summary : null,
   };
 }
 
 /** The grade to store: Claude's verdict for this exact version if we have a good one, else the rules. */
 export function finalGrade(rules: Classification, verdict: unknown) {
   const v = verdict == null ? null : parseVerdict(verdict);
-  return v ? applyVerdict(rules, v) : { ...rules, gradedBy: "rules" as const, scope: null };
+  return v ? applyVerdict(rules, v) : { ...rules, gradedBy: "rules" as const, scope: null, summary: null };
 }
 
 let running = false;
@@ -121,7 +122,11 @@ export async function reviewPending(
     const client = opts.client ?? new Anthropic({ timeout: 20_000, maxRetries: 1 });
     let spent = await spentThisMonth(database, now);
 
-    const pending = or(isNull(incidents.reviewedAt), sql`${incidents.updatedAt} > ${incidents.reviewedAt}`);
+    const pending = or(
+      isNull(incidents.reviewedAt),
+      sql`${incidents.updatedAt} > ${incidents.reviewedAt}`,
+      sql`coalesce(${incidents.reviewedPrompt}, 0) < ${PROMPT_VERSION}`,
+    );
     const rows: Row[] = await database
       .select({ i: incidents, provider: providers.name, slug: providers.slug, cat: categories.slug })
       .from(incidents)
@@ -212,7 +217,7 @@ export async function reviewPending(
       // (JS dates drop Postgres's microseconds, hence the 1 ms window.)
       await database
         .update(incidents)
-        .set({ ...gradeColumns(grade), reviewedAt: sql`${incidents.updatedAt}`, reviewedHash: hash })
+        .set({ ...gradeColumns(grade, isLongText(updates)), reviewedAt: sql`${incidents.updatedAt}`, reviewedHash: hash, reviewedPrompt: PROMPT_VERSION })
         .where(and(eq(incidents.id, r.i.id), lt(incidents.updatedAt, new Date(r.i.updatedAt.getTime() + 1))));
       if (grade.tier !== r.i.tier || grade.reason !== r.i.reason || grade.gradedBy !== r.i.gradedBy) changed.add(r.slug);
     }

@@ -58,6 +58,7 @@ export interface IncidentRow {
   overrideNote: string | null;
   gradedBy: string;
   scope: string | null;
+  summary: string | null;
 }
 
 export interface Snapshot {
@@ -91,6 +92,7 @@ const incidentColumns = {
   overrideNote: incidents.overrideNote,
   gradedBy: incidents.gradedBy,
   scope: incidents.scope,
+  summary: incidents.summary,
 };
 
 type IncidentSelect = Awaited<ReturnType<typeof selectIncidents>>[number];

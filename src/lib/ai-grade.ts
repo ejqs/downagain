@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { areaFor, securityBump, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
-export const PROMPT_VERSION = 1;
+export const PROMPT_VERSION = 2;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 
 const SURFACES = ["serving", "data", "ship", "manage", "peripheral"] as const;
@@ -25,12 +25,13 @@ export interface Verdict {
   data_loss: boolean;
   confidence: "high" | "medium" | "low";
   rationale: string;
+  summary: string;
 }
 
 const VERDICT_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["affected", "not_counted", "scope", "security", "data_loss", "confidence", "rationale"],
+  required: ["affected", "not_counted", "scope", "security", "data_loss", "confidence", "rationale", "summary"],
   properties: {
     affected: {
       type: "array",
@@ -51,6 +52,7 @@ const VERDICT_SCHEMA = {
     data_loss: { type: "boolean" },
     confidence: { type: "string", enum: ["high", "medium", "low"] },
     rationale: { type: "string" },
+    summary: { type: "string" },
   },
 } as const;
 
@@ -81,7 +83,9 @@ Give each surface the tier for its impact alone. Do not raise tiers for security
 
 The provider's own impact label is a hint, not the answer. Providers often call a total outage "minor" or a small blip "major"; the update text wins. Judge only from what the text says and do not guess at details it leaves out. Lower your confidence when the text is thin.
 
-rationale: one plain, factual sentence of at most 25 words that a reader of the site will see under the incident, naming what broke and how widely, for example "API requests failed in us-east-1 for about 40 minutes; other regions were fine." No jokes, no tier numbers.`;
+rationale: one plain, factual sentence of at most 25 words that a reader of the site will see under the incident, naming what broke and how widely, for example "API requests failed in us-east-1 for about 40 minutes; other regions were fine." No jokes, no tier numbers.
+
+summary: the whole incident in plain words, at most 50 words, for a developer skimming a long thread of updates: what broke, who was affected, for how long, and the cause and fix if the provider gave them. Use the provider's facts only; no speculation, no jokes, no tier numbers.`;
 
 export interface ReviewInput {
   provider: string;
@@ -168,17 +172,24 @@ export function parseVerdict(v: unknown): Verdict | null {
     data_loss: o.data_loss,
     confidence: o.confidence as Verdict["confidence"],
     rationale: o.rationale.trim().slice(0, 300),
+    summary: typeof o.summary === "string" ? o.summary.trim().slice(0, 600) : "",
   };
 }
 
+/** Provider text long enough that a short summary helps; short incidents show as posted. */
+export function isLongText(updates: { body: string }[]): boolean {
+  return updates.length >= 4 || updates.reduce((n, u) => n + u.body.length, 0) > 500;
+}
+
 export interface Refined extends Classification {
+  summary: string;
   gradedBy: "claude";
   scope: Scope;
 }
 
 /** Turn Claude's verdict into our grade, with the same security and data-loss rules as severity.ts. */
 export function applyVerdict(rules: Classification, v: Verdict): Refined {
-  const base = { classifierVersion: rules.classifierVersion, gradedBy: "claude" as const, scope: v.scope };
+  const base = { classifierVersion: rules.classifierVersion, gradedBy: "claude" as const, scope: v.scope, summary: v.summary };
   if (v.not_counted && !v.security && !v.data_loss) {
     return { ...base, tier: 0, areaTiers: {}, surfaces: [], security: false, lowConfidence: v.confidence === "low", reason: v.rationale };
   }

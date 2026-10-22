@@ -1,6 +1,7 @@
 import { eq, isNull, lt, or } from "drizzle-orm";
 import type { DB } from "@/db";
 import { categories, componentSurfaces, incidentUpdates, incidents, providers } from "@/db/schema";
+import { isLongText } from "@/lib/ai-grade";
 import { finalGrade, gradeColumns, storedVerdict } from "@/lib/review";
 import { CLASSIFIER_VERSION, classify, type Surface } from "@/lib/severity";
 
@@ -41,7 +42,7 @@ export async function regradeAll(database: DB, opts: { staleOnly?: boolean; limi
     );
     const current = i.reviewedAt && i.reviewedAt >= i.updatedAt;
     const grade = finalGrade(c, current ? await storedVerdict(database, i.id, i.reviewedHash) : null);
-    await database.update(incidents).set(gradeColumns(grade)).where(eq(incidents.id, i.id));
+    await database.update(incidents).set(gradeColumns(grade, isLongText(updates))).where(eq(incidents.id, i.id));
     n++;
   }
   return n;

@@ -13,6 +13,7 @@ const verdict = (v: Partial<Verdict> = {}): Verdict => ({
   data_loss: false,
   confidence: "high",
   rationale: "Requests failed in iad1 for 30 minutes.",
+  summary: "Edge requests in iad1 returned errors for 30 minutes after a bad config push, fixed by a rollback.",
   ...v,
 });
 

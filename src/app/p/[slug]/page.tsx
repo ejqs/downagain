@@ -110,7 +110,7 @@ function IncidentItem({ i, updates }: { i: IncidentRow; updates?: { status: stri
       <div className="stack" style={{ flex: "1 1 320px", minWidth: 0, ["--gap" as string]: "3px" }}>
         <span style={{ fontSize: 16, fontWeight: 700 }}>{i.title}</span>
         <span className="muted" style={{ fontSize: 14 }}>
-          {i.tierOverride != null ? `Sev ${i.tierOverride} (reviewed${i.overrideNote ? `: ${i.overrideNote}` : ""})` : i.reason}
+          {i.tierOverride != null ? `Sev ${i.tierOverride} (reviewed${i.overrideNote ? `: ${i.overrideNote}` : ""})` : (i.summary ?? i.reason)}
         </span>
         <IncidentTags i={i} />
         {updates?.length ? (

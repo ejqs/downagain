@@ -113,8 +113,10 @@ export const incidents = pgTable(
     classifierVersion: integer("classifier_version"),
     gradedBy: text("graded_by").notNull().default("rules"), // "rules" | "claude"
     scope: text("scope"), // Claude's read: global | regional | subset | unclear
+    summary: text("summary"), // Claude's plain recap, only for long provider text
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }), // last Claude review; pending while updatedAt is newer
     reviewedHash: text("reviewed_hash"), // input hash of that review, see incident_reviews
+    reviewedPrompt: integer("reviewed_prompt"), // PROMPT_VERSION of that review; older ones are read again
     sourceUpdatedAt: timestamp("source_updated_at", { withTimezone: true }),
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

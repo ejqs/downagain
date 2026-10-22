@@ -20,7 +20,7 @@ const client = {
       calls++;
       if (mode === "down") throw new Anthropic.APIConnectionError({ message: "connection reset" });
       if (mode === "refuse") return { stop_reason: "refusal", stop_details: { category: "general_harms" }, content: [], usage: { input_tokens: 800, output_tokens: 5 } };
-      const verdict = { affected: [{ surface: "serving", tier: 2 }], not_counted: false, scope: "regional", security: false, data_loss: false, confidence: "high", rationale: "Errors in one region." };
+      const verdict = { affected: [{ surface: "serving", tier: 2 }], not_counted: false, scope: "regional", security: false, data_loss: false, confidence: "high", rationale: "Errors in one region.", summary: "Edge errors in iad1 for an hour, fixed by a rollback." };
       return { stop_reason: "end_turn", content: [{ type: "text", text: JSON.stringify(verdict) }], usage: { input_tokens: 1000, output_tokens: 200 } };
     },
   },
@@ -135,6 +135,25 @@ describe("reviewPending", () => {
     expect(await get(id)).toMatchObject({ tier: 1, gradedBy: "rules", reviewedAt: null });
     mode = "ok";
     expect((await reviewPending(database, { client, settings, now: NOW })).called).toBe(1);
+  });
+});
+
+describe("summaries", () => {
+  it("are stored only when the provider's text is long, and an older prompt version is read again", async () => {
+    const short = await addIncident("short");
+    const long = await addIncident("long");
+    const [inc] = await database.select().from(incidents).where(eq(incidents.id, long));
+    await database.insert(incidentUpdates).values(
+      [2, 3, 4].map((k) => ({ incidentId: long, externalId: `long-u${k}`, status: "update", body: `Still looking, step ${k}.`, postedAt: new Date(inc.startedAt.getTime() + k * 60_000) })),
+    );
+    await reviewPending(database, { client, settings, now: NOW });
+    expect((await get(short)).summary).toBeNull();
+    expect((await get(long)).summary).toBe("Edge errors in iad1 for an hour, fixed by a rollback.");
+
+    // Reviewed under an older prompt: picked up again (here the current prompt's read is already cached).
+    await database.update(incidents).set({ reviewedPrompt: 1 }).where(eq(incidents.id, short));
+    expect(await reviewPending(database, { client, settings, now: NOW })).toMatchObject({ called: 0, fromCache: 1 });
+    expect((await get(short)).reviewedPrompt).toBe(2);
   });
 });
 
