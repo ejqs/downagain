@@ -5,7 +5,7 @@ description: Working on downagain.dev - adding or fixing a tracked provider, cha
 
 # downagain.dev
 
-A read-only Next.js site that ranks hosting and AI providers by their own status-page history. Read `README.md` first; this is the checklist for the common changes.
+A read-only Next.js site that ranks hosting, cloud and AI providers by their own status-page history. Read `README.md` first; this is the checklist for the common changes.
 
 ## Ground rules
 
@@ -17,7 +17,7 @@ A read-only Next.js site that ranks hosting and AI providers by their own status
 
 ## Add a provider
 
-1. Find the status page and confirm the source format by reading the live endpoint (e.g. `https://status.example.com/api/v2/summary.json`). Statuspage-compatible pages (including many incident.io pages) use `sourceKind: "statuspage"` with the page root as `sourceUrl`.
+1. Find the status page and confirm the source format by reading the live endpoint (e.g. `https://status.example.com/api/v2/summary.json`). Statuspage-compatible pages (including many incident.io pages) use `sourceKind: "statuspage"` with the page root as `sourceUrl`. The big clouds have their own adapters (`gcp`, `aws`, `azure`); a cloud adapter should fill `regions` on each incident so a one-region incident is held to Sev 2 (`holdToRegion` in `severity.ts`).
 2. Add an entry to `PROVIDERS` in `src/lib/providers.ts` (category, kind, URLs, `verified` date). Add `surfaces` overrides for component names the rules in `src/lib/severity.ts` get wrong.
 3. Save a real response as a fixture in `tests/fixtures/` (file name from `fixtureName()`), add an adapter test if the format is new, run `bun run test`.
 4. Deploy, or locally: `bun run db:seed && bun run backfill --provider <slug>`.

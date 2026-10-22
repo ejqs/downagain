@@ -4,6 +4,7 @@
 // A provider only appears on the site once its status source has answered at
 // least once, so an entry with a wrong endpoint stays hidden instead of showing
 // as broken. Check the poll route's output after deploying.
+import type { SourceKind } from "@/db/schema";
 import type { Surface } from "@/lib/severity";
 
 export interface CategorySeed {
@@ -19,7 +20,7 @@ export interface ProviderSeed {
   kind: string;
   homepageUrl: string;
   statusPageUrl: string;
-  sourceKind: "statuspage" | "railway" | "heroku";
+  sourceKind: SourceKind;
   sourceUrl: string;
   sortOrder?: number;
   /** Component names the regex rules get wrong. */
@@ -31,6 +32,7 @@ export interface ProviderSeed {
 export const CATEGORIES: CategorySeed[] = [
   { slug: "hosting", name: "Hosting", sortOrder: 1 },
   { slug: "ai", name: "AI APIs", sortOrder: 2 },
+  { slug: "cloud", name: "Cloud", sortOrder: 3 },
 ];
 
 export const PROVIDERS: ProviderSeed[] = [
@@ -174,5 +176,43 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://www.replicatestatus.com",
     sourceKind: "statuspage",
     sourceUrl: "https://www.replicatestatus.com",
+  },
+
+  // Cloud. None of the three uses Statuspage, and all three only post incidents
+  // publicly when they're broad; narrower ones go to affected accounts only.
+  // An incident in a single region is held to Sev 2 (see severity.ts).
+  {
+    slug: "aws",
+    name: "AWS",
+    category: "cloud",
+    kind: "Public cloud",
+    homepageUrl: "https://aws.amazon.com",
+    statusPageUrl: "https://health.aws.amazon.com/health/status",
+    sourceKind: "aws",
+    // Open events; the adapter also reads the year of history behind the same page.
+    sourceUrl: "https://health.aws.amazon.com/health/public/currentevents",
+    verified: "2026-10-22",
+  },
+  {
+    slug: "gcp",
+    name: "Google Cloud",
+    category: "cloud",
+    kind: "Public cloud",
+    homepageUrl: "https://cloud.google.com",
+    statusPageUrl: "https://status.cloud.google.com",
+    sourceKind: "gcp",
+    sourceUrl: "https://status.cloud.google.com",
+    verified: "2026-10-22",
+  },
+  {
+    slug: "azure",
+    name: "Microsoft Azure",
+    category: "cloud",
+    kind: "Public cloud",
+    homepageUrl: "https://azure.microsoft.com",
+    statusPageUrl: "https://azure.status.microsoft/en-us/status",
+    sourceKind: "azure",
+    sourceUrl: "https://azure.status.microsoft/en-us/status/feed/",
+    verified: "2026-10-22",
   },
 ];

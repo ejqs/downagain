@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:a10="http://www.w3.org/2005/Atom" version="2.0">
+  <channel>
+    <title>Azure Status</title>
+    <link>https://azure.status.microsoft/en-us/status/</link>
+    <description>Azure Status</description>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 22 Oct 2026 14:40:00 Z</lastBuildDate>
+    <item>
+      <guid isPermaLink="false">azure-fd-eus2</guid>
+      <link>https://azure.status.microsoft/en-us/status</link>
+      <title>Active - Azure Front Door - Connectivity issues in East US 2</title>
+      <description>&lt;p&gt;&lt;strong&gt;Impact Statement:&lt;/strong&gt; Starting at 14:05 UTC on 22 Oct 2026, customers using Azure Front Door in East US 2 may experience connection failures &amp;amp; timeouts.&lt;/p&gt;&lt;p&gt;We will provide an update within 60 minutes.&lt;/p&gt;</description>
+      <pubDate>Thu, 22 Oct 2026 14:40:00 Z</pubDate>
+    </item>
+    <item>
+      <guid isPermaLink="false">azure-sql-multi</guid>
+      <link>https://azure.status.microsoft/en-us/status</link>
+      <title><![CDATA[Mitigated - Azure SQL Database - Degraded performance in multiple regions]]></title>
+      <description><![CDATA[<p>Impact Statement: Starting at 09:30 UTC on 22 Oct 2026, a subset of customers using Azure SQL Database in West Europe and North Europe saw slower queries.</p><p>This issue is now mitigated.</p>]]></description>
+      <pubDate>Thu, 22 Oct 2026 11:15:00 Z</pubDate>
+    </item>
+  </channel>
+</rss>

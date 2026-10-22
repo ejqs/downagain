@@ -35,13 +35,14 @@ export async function regradeAll(database: DB, opts: { staleOnly?: boolean; limi
         impact: i.impact,
         components: i.components,
         worstComponentStatus: i.worstComponentStatus,
+        regions: i.regions,
         updateText: updates.map((u) => u.body).join("\n"),
         categorySlug: cat,
       },
       overrides.get(i.providerId),
     );
     const current = i.reviewedAt && i.reviewedAt >= i.updatedAt;
-    const grade = finalGrade(c, current ? await storedVerdict(database, i.id, i.reviewedHash) : null);
+    const grade = finalGrade(c, current ? await storedVerdict(database, i.id, i.reviewedHash) : null, i.regions);
     await database.update(incidents).set(gradeColumns(grade, isLongText(updates))).where(eq(incidents.id, i.id));
     n++;
   }

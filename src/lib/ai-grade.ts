@@ -97,6 +97,8 @@ export interface ReviewInput {
   resolvedAt: Date | null;
   components: string[];
   worstComponentStatus: string | null;
+  /** Cloud regions the provider named; left out of the prompt when empty so other incidents keep their hashes. */
+  regions?: string[] | null;
   updates: { status: string; body: string; postedAt: Date }[];
 }
 
@@ -137,6 +139,7 @@ export function renderIncident(i: ReviewInput): string {
     `Resolved: ${i.resolvedAt ? i.resolvedAt.toISOString() : "not yet"}`,
     `Affected components: ${i.components.length ? clip(i.components.join(", "), MAX_COMPONENTS_CHARS) : "none listed"}`,
     `Worst component status: ${clip(i.worstComponentStatus ?? "not given", 40)}`,
+    ...(i.regions?.length ? [`Regions named by the provider: ${clip(i.regions.join(", "), MAX_COMPONENTS_CHARS)}`] : []),
     `Updates:`,
     kept.length ? kept.join("\n") : "(none posted)",
     `</incident>`,

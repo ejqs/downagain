@@ -29,6 +29,13 @@
       "when": 1792687653688,
       "tag": "0003_lush_wither",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792687917314,
+      "tag": "0004_nappy_jack_power",
+      "breakpoints": true
     }
   ]
 }

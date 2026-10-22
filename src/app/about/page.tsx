@@ -16,9 +16,9 @@ export const metadata: Metadata = pageMeta({
 const DATASET_LD = {
   "@context": "https://schema.org",
   "@type": "Dataset",
-  name: "Hosting and AI API incident history",
+  name: "Hosting, cloud and AI API incident history",
   description:
-    "Incidents posted on the official status pages of hosting platforms and AI APIs, polled every 5 minutes, with a severity tier, duration and 90-day grade for each provider.",
+    "Incidents posted on the official status pages of hosting platforms, clouds and AI APIs, polled every 5 minutes, with a severity tier, duration and 90-day grade for each provider.",
   url: absUrl("/about"),
   creator: { "@type": "Person", name: "ejqs", url: "https://ejqs.net" },
   includedInDataCatalog: { "@type": "DataCatalog", name: SITE_NAME, url: `${SITE}/` },
@@ -72,6 +72,7 @@ export default function About() {
         <p>
           Tiers follow impact, not component names: a billing outage that freezes accounts can&apos;t ship, a slow docs page is a papercut. Security
           incidents move up one tier (Sev 2 at least) and add {SECURITY_PENALTY} penalty points. Confirmed data loss or exposure is always Sev 1.
+          A cloud incident the provider confines to one region tops out at Sev 2.
           Every incident shows why it got its tier, and tiers can be corrected by hand.
         </p>
         <p>

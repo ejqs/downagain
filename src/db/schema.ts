@@ -20,7 +20,7 @@ export const status = pgEnum("status", [
   "maintenance",
   "unknown",
 ]);
-export const sourceKind = pgEnum("source_kind", ["statuspage", "railway", "heroku"]);
+export const sourceKind = pgEnum("source_kind", ["statuspage", "railway", "heroku", "gcp", "aws", "azure"]);
 export const impact = pgEnum("impact", ["none", "minor", "major", "critical"]);
 
 export type Status = (typeof status.enumValues)[number];
@@ -97,6 +97,7 @@ export const incidents = pgTable(
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
     url: text("url"),
     components: text("components").array().notNull().default([]),
+    regions: text("regions").array(), // cloud regions named by the provider; null = global or not stated
     worstComponentStatus: status("worst_component_status"),
     postmortem: boolean("postmortem").notNull().default(false),
     raw: jsonb("raw"),

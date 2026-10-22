@@ -1,0 +1,37 @@
+[
+ {
+  "date": "1792652400",
+  "arn": "arn:aws:health:me-central-1::event/MULTIPLE_SERVICES/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE_ME1",
+  "region_name": "UAE",
+  "service": "multipleservices-me-central-1",
+  "service_name": "Multiple services",
+  "status": "3",
+  "summary": "Increased Error Rates and Latencies",
+  "event_log": [
+   {
+    "summary": "Increased Error Rates and Latencies",
+    "message": "We are investigating a power issue affecting one Availability Zone (mec1-az2) in the ME-CENTRAL-1 Region.",
+    "status": 2,
+    "timestamp": 1792652400
+   },
+   {
+    "summary": "Increased Error Rates and Latencies",
+    "message": "Two Availability Zones are now impaired. We recommend customers fail over to other AWS Regions.",
+    "status": 3,
+    "timestamp": 1792656000
+   }
+  ],
+  "impacted_services": {
+   "ec2-me-central-1": {
+    "service_name": "Amazon Elastic Compute Cloud",
+    "current": "3",
+    "max": "3"
+   },
+   "s3-me-central-1": {
+    "service_name": "Amazon Simple Storage Service",
+    "current": "2",
+    "max": "3"
+   }
+  }
+ }
+]

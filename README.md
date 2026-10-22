@@ -1,9 +1,9 @@
 # downagain.dev
 
-**Is it down again?** Live status and 90-day track records for the hosting platforms and AI APIs your apps run on, pulled from each provider's own public status page.
+**Is it down again?** Live status and 90-day track records for the hosting platforms, clouds and AI APIs your apps run on, pulled from each provider's own public status page.
 
 - A **down right now** banner on every page.
-- A leaderboard per category (Hosting first, then AI APIs), graded A+ to F on the same 90-day window for everyone.
+- A leaderboard per category (Hosting first, then AI APIs and Cloud), graded A+ to F on the same 90-day window for everyone.
 - Provider pages with admitted uptime for 30d / 90d / 1y, PROD and SHIP area grades, severity mix, 12-month trend, when incidents start, what breaks, how the provider communicates, full incident history, peers and a README badge.
 - An incident feed, a head-to-head compare page and a public `/api/status.json`.
 - Share cards per provider (`/p/<slug>/opengraph-image`) and for the site, drawn live from the same data.
@@ -20,7 +20,7 @@ Railway cron (*/5) ──POST──▶ web: /api/cron/poll ──GET (ETag)─�
                                    └──── revalidateTag("status") on change ────┘
 ```
 
-- **Adapters** (`src/lib/adapters/`) turn Atlassian Statuspage JSON (most providers, including incident.io pages with the compatible API), Railway's status API and Heroku's status API into one shape.
+- **Adapters** (`src/lib/adapters/`) turn Atlassian Statuspage JSON (most providers, including incident.io pages with the compatible API), Railway's status API, Heroku's status API, Google Cloud's `incidents.json`, the AWS Health Dashboard feeds and the Azure status RSS into one shape.
 - **Poller** (`src/lib/poller.ts`) diffs each provider against what's stored, upserts incidents and their updates, records status transitions and raw documents when they change, and reports which providers changed. Nothing is ever deleted.
 - **Severity** (`src/lib/severity.ts`) is our own rubric: Sev 1 Lights out, Sev 2 Bleeding, Sev 3 Can't ship, Sev 4 Papercut. Graded by impact: PROD when end users are hit, SHIP when you can't deploy, build or manage (dashboard, auth and billing outages included); papercuts only count overall. Security bumps a tier (floor Sev 2); data loss is always Sev 1. `tier_override` wins.
 - **Claude grading** (`src/lib/ai-grade.ts`, `src/lib/review.ts`): after each poll, Claude Haiku 5.5 reads new or changed incidents (title, components and every update) and refines the rule grade: tier per surface, blast radius (global, regional, subset), security, data loss. One review per incident version is stored in `incident_reviews` and reused. At most 15 calls per poll and `AI_MONTHLY_BUDGET_USD` (default $5) per month; with no key, no budget or an API error the rules grade stands.
@@ -79,6 +79,7 @@ See `.claude/skills/downagain/SKILL.md`. In short: confirm the status API format
 
 - The status-page history crawler for incidents older than what the APIs return.
 - Databases, dev tools and other categories.
+- Azure's incident history: its RSS only lists open incidents, so older ones need the history crawler.
 - Alerts by email.
 - Share-card images.
 

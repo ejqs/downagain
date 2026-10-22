@@ -24,7 +24,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
     <main className="wrap">
       <section className="hero">
         <div className="hero-copy">
-          <div className="eyebrow">Hosting &amp; AI APIs</div>
+          <div className="eyebrow">Hosting, cloud &amp; AI APIs</div>
           <h1 className="h1">
             Is it down <span className="highlight">again?</span>
           </h1>

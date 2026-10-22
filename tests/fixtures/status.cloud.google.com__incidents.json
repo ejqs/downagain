@@ -1,0 +1,161 @@
+[
+ {
+  "id": "gcpOpenRegional",
+  "number": "111",
+  "begin": "2026-10-22T13:10:00+00:00",
+  "created": "2026-10-22T13:25:00+00:00",
+  "modified": "2026-10-22T14:05:00+00:00",
+  "external_desc": "Google Compute Engine instances in us-central1 may fail to start",
+  "severity": "medium",
+  "status_impact": "SERVICE_DISRUPTION",
+  "affected_products": [
+   {
+    "title": "Google Compute Engine",
+    "id": "L3ggmi3Jy4xJmgodFA9K"
+   }
+  ],
+  "currently_affected_locations": [
+   {
+    "title": "Iowa (us-central1)",
+    "id": "us-central1"
+   }
+  ],
+  "previously_affected_locations": [],
+  "updates": [
+   {
+    "created": "2026-10-22T13:25:00+00:00",
+    "modified": "2026-10-22T13:25:00+00:00",
+    "when": "2026-10-22T13:25:00+00:00",
+    "status": "SERVICE_DISRUPTION",
+    "text": "We are investigating elevated failures starting new VMs in us-central1.",
+    "affected_locations": [
+     {
+      "title": "Iowa (us-central1)",
+      "id": "us-central1"
+     }
+    ]
+   },
+   {
+    "created": "2026-10-22T14:05:00+00:00",
+    "modified": "2026-10-22T14:05:00+00:00",
+    "when": "2026-10-22T14:05:00+00:00",
+    "status": "SERVICE_DISRUPTION",
+    "text": "Mitigation is in progress. Running VMs are not affected.",
+    "affected_locations": [
+     {
+      "title": "Iowa (us-central1)",
+      "id": "us-central1"
+     }
+    ]
+   }
+  ],
+  "most_recent_update": {
+   "created": "2026-10-22T14:05:00+00:00",
+   "when": "2026-10-22T14:05:00+00:00",
+   "status": "SERVICE_DISRUPTION",
+   "text": "Mitigation is in progress. Running VMs are not affected."
+  },
+  "service_key": "zall",
+  "service_name": "Multiple Products",
+  "uri": "incidents/gcpOpenRegional"
+ },
+ {
+  "id": "gcpGlobalOutage",
+  "number": "222",
+  "begin": "2026-09-30T18:00:00+00:00",
+  "created": "2026-09-30T18:12:00+00:00",
+  "end": "2026-09-30T19:30:00+00:00",
+  "modified": "2026-10-03T10:00:00+00:00",
+  "external_desc": "Multiple Google Cloud products are experiencing elevated error rates\n\nMore detail in the updates.",
+  "severity": "high",
+  "status_impact": "SERVICE_OUTAGE",
+  "affected_products": [
+   {
+    "title": "Identity and Access Management",
+    "id": "a"
+   },
+   {
+    "title": "Cloud Spanner",
+    "id": "b"
+   },
+   {
+    "title": "Google Cloud Console",
+    "id": "c"
+   }
+  ],
+  "currently_affected_locations": [],
+  "previously_affected_locations": [
+   {
+    "title": "Global",
+    "id": "global"
+   },
+   {
+    "title": "Iowa (us-central1)",
+    "id": "us-central1"
+   }
+  ],
+  "updates": [
+   {
+    "created": "2026-10-03T10:00:00+00:00",
+    "when": "2026-10-03T10:00:00+00:00",
+    "status": "AVAILABLE",
+    "text": "# Incident Report\n\nA bad quota policy push caused API requests to fail globally.",
+    "affected_locations": []
+   },
+   {
+    "created": "2026-09-30T19:30:00+00:00",
+    "when": "2026-09-30T19:30:00+00:00",
+    "status": "AVAILABLE",
+    "text": "The issue is resolved for all products.",
+    "affected_locations": []
+   },
+   {
+    "created": "2026-09-30T18:12:00+00:00",
+    "when": "2026-09-30T18:12:00+00:00",
+    "status": "SERVICE_OUTAGE",
+    "text": "Requests to many Google Cloud APIs are failing worldwide.",
+    "affected_locations": [
+     {
+      "title": "Global",
+      "id": "global"
+     }
+    ]
+   }
+  ],
+  "uri": "incidents/gcpGlobalOutage"
+ },
+ {
+  "id": "gcpMultiRegion",
+  "number": "333",
+  "begin": "2026-08-10T08:00:00+00:00",
+  "created": "2026-08-10T08:05:00+00:00",
+  "end": "2026-08-10T09:00:00+00:00",
+  "modified": "2026-08-10T09:00:00+00:00",
+  "external_desc": "BigQuery queries slower than usual in the US multi-region",
+  "severity": "low",
+  "status_impact": "SERVICE_INFORMATION",
+  "affected_products": [
+   {
+    "title": "Google BigQuery",
+    "id": "d"
+   }
+  ],
+  "currently_affected_locations": [],
+  "previously_affected_locations": [
+   {
+    "title": "Multi-region: us",
+    "id": "us"
+   }
+  ],
+  "updates": [
+   {
+    "created": "2026-08-10T09:00:00+00:00",
+    "when": "2026-08-10T09:00:00+00:00",
+    "status": "AVAILABLE",
+    "text": "Query latency is back to normal.",
+    "affected_locations": []
+   }
+  ],
+  "uri": "incidents/gcpMultiRegion"
+ }
+]

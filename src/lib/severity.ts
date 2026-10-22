@@ -42,6 +42,8 @@ export const TIER_BLURB: Record<number, string> = {
 };
 export const TIER_WEIGHT: Record<number, number> = { 0: 0, 1: 10, 2: 4, 3: 1, 4: 0.2 };
 export const SECURITY_PENALTY = 600; // same as an hour of Sev 1
+/** Best tier an incident confined to one cloud region can get (data loss excepted). */
+export const REGIONAL_FLOOR: Tier = 2;
 
 /** Which area grade an affected surface counts against, if any. A papercut counts only overall. */
 export function areaFor(surface: Surface, tier: number): Area | null {
@@ -80,9 +82,23 @@ const BLOCKED_RE = /(?:unable|can(?:no|')t|could not|couldn't|fail(?:ed|ing|s)?)
 const HOSTING_CONTROL_PLANE_RE = /\bapi\b|backboard|control plane/i;
 const HOSTING_SERVING_RE = /edge|runtime|function|customer|ingress|egress|proxy|network/i;
 
+// Cloud product names ("Amazon Elastic Compute Cloud", "Cloud Spanner", "Azure Front
+// Door") mostly miss the generic rules, so clouds get their own list first.
+// IAM and identity count as serving: when sign-in breaks, running workloads break.
+const CLOUD_SURFACE_RULES: [Surface, RegExp][] = [
+  ["peripheral", /support|marketplace|health dashboard|personal health|documentation/i],
+  ["manage", /console|portal|billing|cost (?:explorer|management)|resource manager|\barm\b/i],
+  ["data", /\bsql\b|spanner|bigtable|bigquery|firestore|datastore|dynamo|aurora|\brds\b|relational database|\bs3\b|simple storage|elasticache|memorystore|cosmos|blob|\bdisks?\b|\bebs\b|\befs\b|filestore|file storage|storage|database|pub\/?sub|\bsqs\b|\bsns\b|kinesis|event hubs|service bus|redshift|backup/i],
+  ["ship", /cloud build|codebuild|codepipeline|codedeploy|cloudformation|deployment manager|artifact registry|container registry|\becr\b|devops|cloud shell|provisioning|quota/i],
+  ["serving", /compute|\bec2\b|lambda|functions?|cloud run|app engine|kubernetes|\b[gea]ks\b|\becs\b|fargate|load balanc|\belb\b|cloudfront|\bcdn\b|dns|route ?53|network|\bvpc\b|interconnect|api gateway|apigee|identity|\biam\b|\bsts\b|cognito|entra|active directory|vertex|bedrock|openai|gemini|virtual machines?|app service|front door|multiple (?:products|services)/i],
+];
+
 export function surfaceForComponent(name: string, overrides?: Map<string, Surface>, categorySlug?: string): Surface | null {
   const o = overrides?.get(name);
   if (o) return o;
+  if (categorySlug === "cloud") {
+    for (const [surface, re] of CLOUD_SURFACE_RULES) if (re.test(name)) return surface;
+  }
   for (const [surface, re] of SURFACE_RULES) {
     if (!re.test(name)) continue;
     if (surface === "serving" && categorySlug === "hosting" && HOSTING_CONTROL_PLANE_RE.test(name) && !HOSTING_SERVING_RE.test(name)) {
@@ -118,11 +134,29 @@ export function securityBump(tier: Tier): Tier {
   return Math.max(1, Math.min(tier - 1, 2)) as Tier;
 }
 
+export function singleRegion(regions: string[] | null | undefined): string | null {
+  return regions?.length === 1 ? regions[0] : null;
+}
+
+/**
+ * Clouds run dozens of regions. One region going dark hurts the people in it, but
+ * it isn't the provider going dark, so an incident confined to one region tops out
+ * at Sev 2. Applied to the rules grade and to Claude's; data loss is never held.
+ */
+export function holdToRegion<C extends { tier: Tier; areaTiers: Partial<Record<Area, Tier>> }>(c: C, regions: string[] | null | undefined): C {
+  if (!singleRegion(regions) || c.tier === 0 || c.tier >= REGIONAL_FLOOR) return c;
+  const areaTiers = { ...c.areaTiers };
+  for (const a of Object.keys(areaTiers) as Area[]) areaTiers[a] = Math.max(areaTiers[a]!, REGIONAL_FLOOR) as Tier;
+  return { ...c, tier: REGIONAL_FLOOR, areaTiers };
+}
+
 export interface ClassifyInput {
   title: string;
   impact: Impact;
   components: string[];
   worstComponentStatus: Status | null;
+  /** Affected cloud regions; exactly one caps the tier at REGIONAL_FLOOR. */
+  regions?: string[] | null;
   updateText?: string;
   categorySlug?: string;
 }
@@ -194,10 +228,17 @@ export function classify(input: ClassifyInput, overrides?: Map<string, Surface>)
     }
   }
 
+  const region = singleRegion(input.regions);
+  const held = holdToRegion({ tier, areaTiers }, input.regions);
+  const capped = held.tier !== tier;
+  tier = held.tier;
+  Object.assign(areaTiers, held.areaTiers);
+
   const levelWord = level === "full" ? "a major outage" : level === "partial" ? "a partial outage" : "degraded performance";
   let reason = fromTitle
     ? `Sev ${tier} from the incident title (no components listed)`
     : `Sev ${tier} because ${bySurface.get(worstSurface)} had ${levelWord}`;
+  if (region) reason += capped ? `, held to Sev ${REGIONAL_FLOOR} as only ${region} was hit` : ` in ${region}`;
 
   const security = SECURITY_RE.test(text);
   if (DATA_LOSS_RE.test(text)) {

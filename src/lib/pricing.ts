@@ -27,6 +27,11 @@ export const WORKLOADS: Record<string, Workload> = {
     summary: "30M input and 10M output tokens a month on each provider's everyday model, standard rates. Models differ in quality.",
     unit: "/mo",
   },
+  cloud: {
+    title: "One small always-on VM",
+    summary: "2 vCPU (burstable) and 4 GB Linux VM on all month, 30 GB SSD disk, a public IPv4, 100 GB out. On-demand, cheapest US region, no commitments.",
+    unit: "/mo",
+  },
 };
 
 export interface PriceLine {
@@ -161,6 +166,44 @@ export const PRICES: Record<string, Price> = {
     lines: [],
     note: "Most Replicate models are billed per second of GPU time, so there's no like-for-like token price.",
     source: "https://replicate.com/pricing",
+    checked: "2026-10-22",
+  },
+
+  // Cloud: 730 hours a month, on-demand list prices.
+  aws: {
+    plan: "EC2 t4g.medium, us-east-1",
+    lines: [
+      { label: "t4g.medium (2 vCPU, 4 GiB) at $0.0336/hr", usd: 24.53 },
+      { label: "30 GB gp3 EBS at $0.08/GB", usd: 2.4 },
+      { label: "Public IPv4 at $0.005/hr", usd: 3.65 },
+      { label: "100 GB out (first 100 GB a month free)", usd: 0 },
+    ],
+    note: "Graviton (Arm). The x86 t3.medium is $0.0416/hr.",
+    source: "https://aws.amazon.com/ec2/pricing/on-demand/",
+    checked: "2026-10-22",
+  },
+  gcp: {
+    plan: "Compute Engine e2-medium, us-central1",
+    lines: [
+      { label: "e2-medium (2 shared vCPU, 4 GB) at $0.0335/hr", usd: 24.46 },
+      { label: "30 GB balanced persistent disk at $0.10/GB", usd: 3 },
+      { label: "External IPv4 at $0.005/hr", usd: 3.65 },
+      { label: "100 GB out at $0.12/GB (Premium tier)", usd: 12 },
+    ],
+    estimate: true,
+    note: "Egress price depends on where the traffic goes; Standard tier is cheaper.",
+    source: "https://cloud.google.com/compute/vm-instance-pricing",
+    checked: "2026-10-22",
+  },
+  azure: {
+    plan: "Virtual Machines B2s, East US",
+    lines: [
+      { label: "B2s (2 vCPU, 4 GiB) at $0.0416/hr", usd: 30.37 },
+      { label: "32 GiB Standard SSD (E4)", usd: 2.4 },
+      { label: "Standard public IPv4 at $0.005/hr", usd: 3.65 },
+      { label: "100 GB out (first 100 GB a month free)", usd: 0 },
+    ],
+    source: "https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/",
     checked: "2026-10-22",
   },
 };

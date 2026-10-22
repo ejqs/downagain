@@ -7,7 +7,7 @@ import { and, asc, desc, eq, gte, inArray, isNull, lt, or, sql } from "drizzle-o
 import type { DB } from "@/db";
 import { categories, componentSurfaces, incidentReviews, incidentUpdates, incidents, providers } from "@/db/schema";
 import { DEFAULT_MODEL, PROMPT_VERSION, applyVerdict, isLongText, askClaude, costMicros, inputHash, parseVerdict, renderIncident } from "@/lib/ai-grade";
-import { classify, type Classification, type Surface } from "@/lib/severity";
+import { classify, holdToRegion, singleRegion, type Classification, type Surface } from "@/lib/severity";
 
 export interface ReviewSettings {
   enabled: boolean;
@@ -72,6 +72,7 @@ function rulesFor(r: Row, updates: { body: string }[], overrides: Map<number, Ma
       impact: r.i.impact,
       components: r.i.components,
       worstComponentStatus: r.i.worstComponentStatus,
+      regions: r.i.regions,
       updateText: updates.map((u) => u.body).join("\n"),
       categorySlug: r.cat,
     },
@@ -95,9 +96,14 @@ function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | 
 }
 
 /** The grade to store: Claude's verdict for this exact version if we have a good one, else the rules. */
-export function finalGrade(rules: Classification, verdict: unknown) {
+export function finalGrade(rules: Classification, verdict: unknown, regions?: string[] | null) {
   const v = verdict == null ? null : parseVerdict(verdict);
-  return v ? applyVerdict(rules, v) : { ...rules, gradedBy: "rules" as const, scope: null, summary: null };
+  if (!v) return { ...rules, gradedBy: "rules" as const, scope: null, summary: null };
+  const refined = applyVerdict(rules, v);
+  // The rules already hold single-region incidents; Claude's grade gets the same treatment.
+  if (v.data_loss) return refined;
+  const held = holdToRegion(refined, regions);
+  return held === refined ? held : { ...held, reason: `${held.reason} Held to Sev ${held.tier} as only ${singleRegion(regions)} was hit.` };
 }
 
 let running = false;
@@ -156,6 +162,7 @@ export async function reviewPending(
         resolvedAt: r.i.resolvedAt,
         components: r.i.components,
         worstComponentStatus: r.i.worstComponentStatus,
+        regions: r.i.regions,
         updates,
       });
       const hash = inputHash(rendered, settings.model);
@@ -189,7 +196,7 @@ export async function reviewPending(
         }
         verdict = out.ok ? out.verdict : null;
         if (!out.ok) report.failed++;
-        const grade = finalGrade(rules, verdict);
+        const grade = finalGrade(rules, verdict, r.i.regions);
         if (grade.gradedBy === "claude" && grade.tier !== rules.tier) {
           report.disagreements.push({ provider: r.slug, title: r.i.title.slice(0, 80), rules: rules.tier, claude: grade.tier, why: grade.reason ?? "" });
         }
@@ -215,7 +222,7 @@ export async function reviewPending(
           .onConflictDoNothing();
       }
 
-      const grade = finalGrade(rules, verdict);
+      const grade = finalGrade(rules, verdict, r.i.regions);
       // Only touch the row if the poller hasn't changed it again since we read it.
       // (JS dates drop Postgres's microseconds, hence the 1 ms window.)
       await database

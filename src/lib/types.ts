@@ -1,6 +1,6 @@
-import type { Impact, Status } from "@/db/schema";
+import type { Impact, SourceKind, Status } from "@/db/schema";
 
-export type { Impact, Status };
+export type { Impact, SourceKind, Status };
 
 export interface NormalizedComponent {
   name: string;
@@ -26,6 +26,11 @@ export interface NormalizedIncident {
   sourceUpdatedAt: Date | null;
   url: string | null;
   components: string[];
+  /**
+   * Cloud regions the provider said were affected ("us-east-1"). Empty or missing
+   * means global or not stated. A single region caps the severity, see severity.ts.
+   */
+  regions?: string[];
   worstComponentStatus: Status | null;
   postmortem: boolean;
   updates: NormalizedUpdate[];
@@ -45,9 +50,18 @@ export interface ProviderSnapshot {
 
 export interface ProviderSource {
   slug: string;
-  sourceKind: "statuspage" | "railway" | "heroku";
+  sourceKind: SourceKind;
   sourceUrl: string;
   statusPageUrl: string;
 }
 
-export type Getter = (url: string) => Promise<{ notModified: true } | { notModified: false; body: unknown }>;
+export interface GetOptions {
+  /** "text" returns the body as a string (RSS); default parses JSON. */
+  as?: "json" | "text";
+  /** Skip If-None-Match: for small feeds the adapter needs in full every poll. */
+  fresh?: boolean;
+  /** Allow a longer timeout for multi-MB history files. */
+  large?: boolean;
+}
+
+export type Getter = (url: string, opts?: GetOptions) => Promise<{ notModified: true } | { notModified: false; body: unknown }>;
