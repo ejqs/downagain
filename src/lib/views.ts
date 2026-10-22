@@ -1,5 +1,6 @@
 // Pure functions that turn the cached snapshot into what each page shows.
-import { durationMinutes, effectiveTier, score, windowBounds, type GradeInput, type Score } from "@/lib/grading";
+import { durationMinutes, effectiveTier, penaltyMinutes, score, windowBounds, type GradeInput, type Score } from "@/lib/grading";
+import { SECURITY_PENALTY, TIER_WEIGHT } from "@/lib/severity";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
 import { isProblem } from "@/lib/status";
 import type { Status } from "@/lib/types";
@@ -52,6 +53,42 @@ export function dailyCells(list: IncidentRow[], days: number, now: number, since
     cells.push(worst <= 2 ? "major" : worst <= 4 ? "minor" : "up");
   }
   return cells;
+}
+
+export interface DayLoad {
+  day: number; // UTC midnight
+  points: number; // severity weight x penalty minutes inside the day, same scale as grades
+  incidents: number;
+  worst: number; // best (lowest) tier that touched the day, 5 when none
+}
+
+/** Severity-weighted trouble per UTC day across every incident given, oldest first. */
+export function dailyLoad(list: IncidentRow[], days: number, now: number): DayLoad[] {
+  const today = Math.floor(now / DAY) * DAY;
+  const out: DayLoad[] = [];
+  for (let d = days - 1; d >= 0; d--) {
+    const start = today - d * DAY;
+    const end = Math.min(start + DAY, now);
+    const cell: DayLoad = { day: start, points: 0, incidents: 0, worst: 5 };
+    for (const i of list) {
+      const t = tierOf(i);
+      if (t === 0 || i.startedAt >= start + DAY || (i.resolvedAt ?? now) < start) continue;
+      cell.incidents++;
+      cell.worst = Math.min(cell.worst, t);
+      cell.points += TIER_WEIGHT[t] * penaltyMinutes(gradeInput(i), new Date(start), new Date(end));
+      if (i.security && i.startedAt >= start) cell.points += SECURITY_PENALTY;
+    }
+    cell.points = Math.round(cell.points);
+    out.push(cell);
+  }
+  return out;
+}
+
+/** Heat steps for a day's points: 0 is clean, 4 is roughly six hours of Sev 1. */
+export const HEAT_STEPS = [0, 60, 600, 3000] as const;
+export function heatLevel(points: number): 0 | 1 | 2 | 3 | 4 {
+  if (points <= 0) return 0;
+  return (HEAT_STEPS.filter((s) => points > s).length) as 1 | 2 | 3 | 4;
 }
 
 export function openIncidents(list: IncidentRow[]): IncidentRow[] {

@@ -60,3 +60,14 @@ test("public JSON and badges", async ({ request }) => {
   expect(badge.headers()["content-type"]).toContain("image/svg+xml");
   expect(await badge.text()).toContain("vercel");
 });
+
+test("the incident calendar filters the list to one day", async ({ page }) => {
+  await page.goto("/incidents");
+  const cells = page.locator(".cal a.cal-d");
+  await expect(cells).toHaveCount(90);
+  const hot = page.locator(".cal a.cal-d:not(.heat-0)").first();
+  await hot.click();
+  await expect(page).toHaveURL(/[?&]day=\d{4}-\d{2}-\d{2}/);
+  await expect(page.locator('.cal a[aria-current="date"]')).toHaveCount(1);
+  await expect(page.locator(".incident").first()).toBeVisible();
+});

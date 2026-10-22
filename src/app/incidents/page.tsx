@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { safeSnapshot } from "@/lib/data";
-import { gradeInput, openIncidents, tierOf } from "@/lib/views";
-import { durationMinutes } from "@/lib/grading";
+import { dailyLoad, gradeInput, openIncidents, tierOf } from "@/lib/views";
+import { WINDOW_DAYS, durationMinutes } from "@/lib/grading";
 import { fmtDay, fmtDuration, fmtTime, plural } from "@/lib/format";
 import { TIER_BLURB, TIER_NAMES } from "@/lib/severity";
 import { SevPill } from "@/components/ui";
 import { pageMeta } from "@/lib/site";
 import { Unavailable } from "@/components/Unavailable";
+import { Heatmap, dayKey } from "@/components/Heatmap";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({
@@ -19,7 +20,7 @@ export const metadata: Metadata = pageMeta({
 const PAGE_DAYS = 14;
 const DAY = 86_400_000;
 
-type Props = { searchParams: Promise<{ cat?: string; sev?: string; days?: string }> };
+type Props = { searchParams: Promise<{ cat?: string; sev?: string; days?: string; day?: string }> };
 
 export default async function IncidentsPage({ searchParams }: Props) {
   const snap = await safeSnapshot();
@@ -31,19 +32,25 @@ export default async function IncidentsPage({ searchParams }: Props) {
   const byId = new Map(snap.providers.map((p) => [p.id, p]));
   const catName = new Map(snap.categories.map((c) => [c.slug, c.name]));
   const now = snap.generatedAt;
+  const today = Math.floor(now / DAY) * DAY;
+  const picked = /^\d{4}-\d{2}-\d{2}$/.test(q.day ?? "") ? Date.parse(`${q.day}T00:00:00Z`) : NaN;
+  const day = picked <= today && picked > today - WINDOW_DAYS * DAY ? picked : null;
 
   const keep = (i: (typeof snap.incidents)[number]) => {
     const p = byId.get(i.providerId);
     return p && (cat === "all" || p.category === cat) && (sev === 0 ? tierOf(i) > 0 : tierOf(i) === sev);
   };
   const ongoing = openIncidents(snap.incidents).filter(keep);
-  const past = snap.incidents.filter((i) => keep(i) && i.resolvedAt && i.startedAt >= now - days * DAY);
+  const heat = dailyLoad(snap.incidents.filter(keep), WINDOW_DAYS, now);
+  const past = snap.incidents.filter((i) =>
+    keep(i) && i.resolvedAt && (day === null ? i.startedAt >= now - days * DAY : i.startedAt < day + DAY && i.resolvedAt >= day),
+  );
 
   const groups = new Map<number, typeof past>();
   for (const i of past) {
-    const day = Math.floor(i.startedAt / DAY) * DAY;
-    if (!groups.has(day)) groups.set(day, []);
-    groups.get(day)!.push(i);
+    const start = Math.floor(i.startedAt / DAY) * DAY;
+    if (!groups.has(start)) groups.set(start, []);
+    groups.get(start)!.push(i);
   }
 
   const week = snap.providers
@@ -57,13 +64,15 @@ export default async function IncidentsPage({ searchParams }: Props) {
     .sort((a, b) => b.minutes - a.minutes)
     .slice(0, 5);
 
-  const href = (o: { cat?: string; sev?: number; days?: number }) => {
+  const href = (o: { cat?: string; sev?: number; days?: number; day?: number | null }) => {
     const sp = new URLSearchParams();
     const c = o.cat ?? cat;
     const s = o.sev ?? sev;
     if (c !== "all") sp.set("cat", c);
     if (s) sp.set("sev", String(s));
-    if (o.days) sp.set("days", String(o.days));
+    const d = o.day === undefined ? day : o.day;
+    if (d !== null) sp.set("day", dayKey(d));
+    else if (o.days) sp.set("days", String(o.days));
     const str = sp.toString();
     return `/incidents${str ? `?${str}` : ""}`;
   };
@@ -117,7 +126,13 @@ export default async function IncidentsPage({ searchParams }: Props) {
 
       <section className="split">
         <div className="main stack" style={{ ["--gap" as string]: "24px" }}>
-          {groups.size === 0 ? <div className="empty">Nothing in the last {days} days.</div> : null}
+          <Heatmap days={heat} selected={day} hrefFor={(d) => href({ day: d })} />
+          {day !== null ? (
+            <Link href={href({ day: null })} className="chip small" style={{ alignSelf: "flex-start" }} scroll={false}>
+              {fmtDay(day)} ×
+            </Link>
+          ) : null}
+          {groups.size === 0 ? <div className="empty">{day === null ? `Nothing in the last ${days} days.` : "Clean day."}</div> : null}
           {[...groups.entries()].map(([day, items]) => (
             <div key={day}>
               <h2 className="day-head">
@@ -153,7 +168,7 @@ export default async function IncidentsPage({ searchParams }: Props) {
               })}
             </div>
           ))}
-          {days < 400 ? (
+          {day === null && days < 400 ? (
             <Link href={href({ days: days + 30 })} className="btn" style={{ alignSelf: "flex-start" }} scroll={false}>
               Older
             </Link>

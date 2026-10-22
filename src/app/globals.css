@@ -201,6 +201,20 @@ details.updates li { overflow-wrap: anywhere; }
 .incident .when { flex: 0 0 auto; display: flex; gap: 10px; align-items: center; }
 .incident .what { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .incident .dur { flex: 0 0 auto; font-family: var(--font-mono); font-size: 15px; font-weight: 700; }
+/* Incident calendar: weeks across, Monday on top */
+.cal { display: grid; grid-template-columns: 28px repeat(var(--weeks), minmax(0, 1fr)); gap: 3px; max-width: 540px; }
+.cal-m, .cal-w { font-family: var(--font-mono); font-size: 11px; color: var(--muted); line-height: 1; white-space: nowrap; }
+.cal-m { padding-bottom: 4px; }
+.cal-w { align-self: center; }
+.cal-d { aspect-ratio: 1; border-radius: 3px; min-width: 0; }
+.cal-d:hover { outline: 2px solid var(--ink); outline-offset: 1px; }
+.cal-d[aria-current] { outline: 3px solid var(--ink); outline-offset: 1px; }
+.heat-0 { background: #e6e6e0; }
+.heat-1 { background: #f6a066; }
+.heat-2 { background: var(--down); }
+.heat-3 { background: #b8410a; }
+.heat-4 { background: #7c2d12; }
+.legend i[class^="heat-"] { width: 14px; height: 14px; border-radius: 3px; }
 .day-head { font-size: 22px; font-weight: 800; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin: 0 0 8px; }
 
 /* Compare */

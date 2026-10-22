@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
-import { communication, dailyCells, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals } from "@/lib/views";
+import { communication, dailyCells, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals } from "@/lib/views";
 
 const DAY = 86_400_000;
 const NOW = Date.parse("2026-10-22T12:00:00Z");
@@ -173,5 +173,35 @@ describe("summaries", () => {
       [b.id]: [{ postedAt: 0 }],
     });
     expect(c).toEqual({ medianGapMinutes: 30, updatesPerIncident: 2, postmortems: 1, serious: 1, medianResolveMinutes: 60 });
+  });
+});
+
+describe("dailyLoad", () => {
+  it("weights each UTC day by severity x minutes, splitting incidents across midnight", () => {
+    const days = dailyLoad(
+      [
+        inc(1, { startedAt: ago(1, 2), tier: 1 }), // 1h Sev 1 yesterday
+        inc(2, { startedAt: ago(2, 13), resolvedAt: ago(2, 11), tier: 3 }), // 23:00 to 01:00
+        inc(1, { startedAt: ago(5), tier: 0 }), // not counted
+      ],
+      4,
+      NOW,
+    );
+    expect(days.map((d) => d.points)).toEqual([60, 60, 600, 0]);
+    expect(days.map((d) => d.incidents)).toEqual([1, 1, 1, 0]);
+    expect(days[2].worst).toBe(1);
+    expect(days[3].worst).toBe(5);
+    expect(days[3].day).toBe(Math.floor(NOW / DAY) * DAY);
+  });
+
+  it("adds the security penalty once, on the start day, and runs open incidents up to now", () => {
+    const days = dailyLoad([inc(1, { startedAt: ago(1, 0), resolvedAt: null, tier: 2, security: true })], 3, NOW);
+    expect(days[0].points).toBe(0);
+    expect(days[1].points).toBe(4 * 12 * 60 + 600); // 12:00 to midnight
+    expect(days[2].points).toBe(4 * 12 * 60); // midnight to now
+  });
+
+  it("buckets points into five heat steps", () => {
+    expect([0, 1, 60, 61, 600, 601, 3000, 3001].map(heatLevel)).toEqual([0, 1, 1, 2, 2, 3, 3, 4]);
   });
 });
