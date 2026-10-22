@@ -16,28 +16,22 @@ export default function About() {
       <article className="prose">
         <h1 className="h1 sm">How it works</h1>
         <p className="lede">
-          downagain.dev never pings anyone. Every 5 minutes it reads each provider&apos;s own public status page, stores what changed, and grades the
-          track record with one rubric for everyone.
+          We never ping anyone. Every 5 minutes we read each provider&apos;s public status page, keep what changed, and grade everyone on one rubric.
         </p>
 
         <h2 className="h2">Where the data comes from</h2>
         <ul>
-          <li>Each provider&apos;s official status page API (Atlassian Statuspage JSON for most, Railway&apos;s and Heroku&apos;s own APIs for those two).</li>
+          <li>Official status page APIs: Atlassian Statuspage for most, Railway&apos;s and Heroku&apos;s own for those two.</li>
           <li>
-            We identify ourselves as <code className="mono">{USER_AGENT}</code>, use conditional requests, and back off when a page doesn&apos;t answer. A
-            status page we can&apos;t reach makes a provider &quot;status unknown&quot;, never &quot;down&quot;.
+            User-Agent <code className="mono">{USER_AGENT}</code>, conditional requests, backoff on errors. An unreachable status page means
+            &quot;status unknown&quot;, never &quot;down&quot;.
           </li>
-          <li>Every incident and every update posted on it is kept, even if the provider later edits or removes it from its own page.</li>
-          <li>
-            History starts with whatever each status API exposes (usually the last 50 incidents). Each provider page says how far back our records go.
-          </li>
+          <li>Every incident and update is kept, even if the provider later edits or deletes it.</li>
+          <li>History starts with whatever the status API exposes, usually the last 50 incidents. Provider pages show the start date.</li>
         </ul>
 
-        <h2 className="h2" id="severity">Our severity tiers</h2>
-        <p>
-          Providers&apos; own labels (minor, major, critical) aren&apos;t consistent with each other. We grade every incident by one question: how badly did
-          this hurt the people building on this provider?
-        </p>
+        <h2 className="h2" id="severity">Severity</h2>
+        <p>Providers&apos; own labels don&apos;t agree with each other, so we use one question: how badly did this hurt the people building on it?</p>
         <div className="tbl">
           <table>
             <tbody>
@@ -54,15 +48,15 @@ export default function About() {
           </table>
         </div>
         <p>
-          We map each status-page component to an area (production, shipping or dashboard) and combine it with how bad the provider said it was. A
-          security incident moves up one tier, with Sev 2 as the floor, and adds {SECURITY_PENALTY} penalty points. Confirmed data loss or exposure is
-          always Sev 1. Every incident page shows the reason it got its tier, and we can override a tier by hand after review.
+          Each status-page component maps to an area (production, shipping or dashboard), combined with the impact the provider posted. Security
+          incidents move up one tier (Sev 2 at least) and add {SECURITY_PENALTY} penalty points. Confirmed data loss or exposure is always Sev 1.
+          Every incident shows why it got its tier, and tiers can be corrected by hand.
         </p>
 
         <h2 className="h2">Grades</h2>
         <p>
-          Each incident earns <strong>weight × minutes</strong>, counted from its start until the provider first says it&apos;s monitoring a fix (or resolves
-          it). A provider&apos;s grade is the total over the same rolling 90 days for everyone, whatever history we hold.
+          Each incident scores <strong>weight × minutes</strong>, from start until the provider says it&apos;s monitoring a fix or resolved. Grades total
+          the last 90 days, the same window for everyone.
         </p>
         <div className="tbl">
           <table>
@@ -78,17 +72,17 @@ export default function About() {
           </table>
         </div>
         <p>
-          Area grades use the same scale for each area alone. <strong>Admitted uptime</strong> counts only Sev 1 time the provider posted itself. Status
-          pages can under-report, so treat it as a best case. Providers grade their own homework; we just add it up.
+          Area grades (PROD, SHIP, DASH) use the same scale per area. <strong>Admitted uptime</strong> counts only Sev 1 time the provider posted
+          itself, so it&apos;s a best case. Providers grade their own homework; we just add it up.
         </p>
 
         <h2 className="h2">The obvious question</h2>
-        <p>Yes, downagain.dev is hosted on Railway, which is on our own leaderboard. When Railway is down, so are we.</p>
+        <p>Yes, we&apos;re hosted on Railway. When Railway is down, so are we.</p>
 
         <h2 className="h2">Missing something?</h2>
         <p>
-          Suggest a provider or report a wrong grade on <a href="https://github.com/ejqs/downagain/issues">GitHub</a>. If you find this useful,{" "}
-          <a href="https://buymeacoffee.com/ejqs">buy me a coffee</a>.
+          Suggest a provider or report a wrong grade on <a href="https://github.com/ejqs/downagain/issues">GitHub</a>. Made by{" "}
+          <a href="https://ejqs.net">@ejqs</a>. Useful? <a href="https://buymeacoffee.com/ejqs">Buy me a coffee</a>.
         </p>
       </article>
     </main>

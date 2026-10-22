@@ -39,19 +39,17 @@ export function Board({ snap, category, sort, basePath }: { snap: Snapshot; cate
       <CategoryTabs snap={snap} active={category} />
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end", ["--gap" as string]: "12px 16px" }}>
         <div style={{ flex: "1 1 280px", minWidth: 0 }}>
-          <h2 className="h2">{cat?.name ?? category} leaderboard</h2>
-          <p className="body" style={{ marginTop: 6 }}>
-            {sort === "worst" ? "Least reliable first" : "Most reliable first"}, last 90 days. Tap a provider for its full history.
-          </p>
+          <h2 className="h2">{cat?.name ?? category}</h2>
+          <p className="body" style={{ marginTop: 6 }}>Last 90 days</p>
         </div>
         <div className="seg" role="group" aria-label="Sort order">
-          <Link href={basePath} aria-current={sort === "worst" ? "true" : undefined}>Least reliable</Link>
-          <Link href={`${basePath}?sort=best`} aria-current={sort === "best" ? "true" : undefined}>Most reliable</Link>
+          <Link href={basePath} aria-current={sort === "worst" ? "true" : undefined}>Worst first</Link>
+          <Link href={`${basePath}?sort=best`} aria-current={sort === "best" ? "true" : undefined}>Best first</Link>
         </div>
       </div>
 
       {rows.length === 0 ? (
-        <div className="empty">No providers in this category have reported in yet. The first poll after a deploy fills this in.</div>
+        <div className="empty">Nothing here yet.</div>
       ) : (
         <div className="box">
           {rows.map((r, i) => (
@@ -87,8 +85,7 @@ export function Board({ snap, category, sort, basePath }: { snap: Snapshot; cate
       )}
       <StripLegend />
       <p className="mono" style={{ fontSize: 12, color: "var(--body)" }}>
-        Everyone is ranked on the same last 90 days. Grades A+ to F are weighted by severity; PROD, SHIP and DASH are the Production, Shipping and Dashboard
-        area grades. &quot;Admitted&quot; uptime counts only Sev 1 downtime the provider posted on its own status page.
+        PROD · SHIP · DASH = production, shipping, dashboard grades. <Link href="/about">How grades work</Link>
       </p>
     </section>
   );
@@ -120,13 +117,13 @@ export function AlsoTracking({ snap, current }: { snap: Snapshot; current: strin
                   <span className="mono">{s.grade} · {fmtPct(s.admittedUptime)}</span>
                 </span>
               ))}
-              <span style={{ fontSize: 14, fontWeight: 700, textDecoration: "underline" }}>See all {provs.length}</span>
+              <span style={{ fontSize: 14, fontWeight: 700, textDecoration: "underline" }}>All {provs.length}</span>
             </Link>
           );
         })}
         <div className="empty stack" style={{ ["--gap" as string]: "8px", padding: 16 }}>
-          <strong style={{ fontSize: 20 }}>Coming next</strong>
-          <span className="body" style={{ fontSize: 15 }}>Databases, dev tools &amp; CI, CDN &amp; DNS.</span>
+          <strong style={{ fontSize: 20 }}>Next up</strong>
+          <span className="body" style={{ fontSize: 15 }}>Databases, CI, CDN &amp; DNS.</span>
           <a href="https://github.com/ejqs/downagain/issues/new?title=Track%20a%20provider" style={{ fontSize: 14, fontWeight: 700 }}>Suggest a provider</a>
         </div>
       </div>

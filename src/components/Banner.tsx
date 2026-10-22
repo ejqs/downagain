@@ -16,7 +16,7 @@ export function Banner({ snap }: { snap: Snapshot | null }) {
     return (
       <section className="allclear" aria-label="All services up">
         <div className="wrap">
-          <strong>All tracked services are up. Enjoy it.</strong>
+          <strong>All up. For now.</strong>
           <span className="mono" style={{ fontSize: 13 }}>
             {lastEnded ? `Last incident ended ${fmtAgo(lastEnded, snap.generatedAt)}` : `Checked ${fmtAgo(checked, snap.generatedAt)}`}
           </span>
@@ -35,7 +35,7 @@ export function Banner({ snap }: { snap: Snapshot | null }) {
             Down right now{checked ? ` · checked ${fmtAgo(checked, snap.generatedAt)}` : ""}
           </span>
           <span className="banner-title">
-            {down.length === 1 ? "1 service is reporting problems" : `${plural(down.length, "service")} are reporting problems`}
+            {plural(down.length, "provider")} reporting problems
           </span>
         </div>
         <div className="banner-cards">

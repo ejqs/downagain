@@ -12,6 +12,7 @@ import { DayStrip, GradeTile, SevPill, Stat, StripLegend } from "@/components/ui
 import { Unavailable } from "@/components/Unavailable";
 import { JsonLd } from "@/components/JsonLd";
 import { SITE, absUrl, pageMeta } from "@/lib/site";
+import { GLOSSARY } from "@/lib/glossary";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +63,7 @@ function IncidentItem({ i, updates }: { i: IncidentRow; updates?: { status: stri
         </span>
         {updates?.length ? (
           <details className="updates">
-            <summary>{plural(updates.length, "update")} from the provider</summary>
+            <summary>{plural(updates.length, "update")}</summary>
             <ol>
               {updates.map((u, k) => (
                 <li key={k}>
@@ -149,21 +150,20 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             )}
           </div>
           <p className="body" style={{ fontSize: 17 }}>
-            {p.historyFrom ? `Records since ${fmtMonth(p.historyFrom)}` : "Tracking just started"} · {plural(history?.total ?? list.length, "incident")} on record · source:{" "}
-            {new URL(p.statusPageUrl).host}
+            {p.historyFrom ? `Since ${fmtMonth(p.historyFrom)}` : "New"} · {plural(history?.total ?? list.length, "incident")} · {new URL(p.statusPageUrl).host}
             {p.lastCheckedAt ? ` · checked ${fmtAgo(p.lastCheckedAt, now)}` : ""}
           </p>
           <div className="row" style={{ ["--gap" as string]: "8px", marginTop: 4 }}>
             <Link className="btn dark" href={`/compare?p=${[p.slug, ...peers.filter((x) => x.x.slug !== p.slug).slice(0, 2).map((x) => x.x.slug)].join(",")}`} data-umami-event="compare">
-              Compare with peers
+              Compare
             </Link>
-            <a className="btn" href={p.statusPageUrl} data-umami-event="status-page-outbound">Official status page</a>
+            <a className="btn" href={p.statusPageUrl} data-umami-event="status-page-outbound">Status page</a>
           </div>
         </div>
         <div className={`big-grade g-${s90.grade === "A+" ? "Ap" : s90.grade}`}>
           <span className="eyebrow" style={{ letterSpacing: "0.1em" }}>Grade</span>
           <span className="letter">{s90.grade}</span>
-          <span className="mono" style={{ fontSize: 13, fontWeight: 700 }}>Overall · last 90 days</span>
+          <span className="mono" style={{ fontSize: 13, fontWeight: 700 }}>Last 90 days</span>
           <div className="row" style={{ ["--gap" as string]: "8px", marginTop: 10 }}>
             {AREAS.map((a) => (
               <span key={a} className="stack" style={{ alignItems: "center", ["--gap" as string]: "2px" }}>
@@ -206,25 +206,22 @@ export default async function ProviderPage({ params, searchParams }: Props) {
           </div>
         </div>
         <div className="stats">
-          <Stat label="Admitted uptime" value={fmtPct(s.admittedUptime, 3)} note={`Grade ${s.grade} for this window`} />
-          <Stat label="Incidents" value={String(s.incidentCount)} note={`${s.sevCounts[0]} were Sev 1`} />
-          <Stat label="Sev 1 downtime" value={fmtDuration(s.sev1Minutes)} note="Production down, as posted" />
-          <Stat label="Median time to resolve" value={s.medianResolveMinutes != null ? fmtDuration(s.medianResolveMinutes) : "–"} />
-          <Stat label="Longest incident" value={s.longestMinutes ? fmtDuration(s.longestMinutes) : "–"} />
+          <Stat label="Admitted uptime" value={fmtPct(s.admittedUptime, 3)} note={`Grade ${s.grade}`} hint={GLOSSARY.uptime} />
+          <Stat label="Incidents" value={String(s.incidentCount)} note={`${s.sevCounts[0]} Sev 1`} hint={GLOSSARY.incidents} />
+          <Stat label="Sev 1 downtime" value={fmtDuration(s.sev1Minutes)} hint={GLOSSARY.sev1Downtime} />
+          <Stat label="Median time to resolve" value={s.medianResolveMinutes != null ? fmtDuration(s.medianResolveMinutes) : "–"} hint={GLOSSARY.mttr} />
+          <Stat label="Longest incident" value={s.longestMinutes ? fmtDuration(s.longestMinutes) : "–"} hint={GLOSSARY.longest} />
           <Stat
             label="Since last incident"
+            hint={GLOSSARY.sinceLast}
             value={lastIncident ? (lastIncident.resolvedAt ? fmtDuration((now - lastIncident.resolvedAt) / 60_000) : "ongoing") : "–"}
             hot={!lastIncident?.resolvedAt && Boolean(lastIncident)}
           />
         </div>
-        <p className="muted" style={{ fontSize: 13 }}>
-          Admitted uptime counts time not covered by a Sev 1 incident {p.name} posted on its own status page. Status pages can under-report, so treat it as a best case.
-        </p>
       </section>
 
       <section className="stack">
         <h2 className="h2">By area</h2>
-        <p className="body" style={{ fontSize: 15 }}>Status-page components differ between providers, so we group them into three areas you can compare anywhere.</p>
         <div className="box">
           {AREAS.map((a) => {
             const areaList = list.filter((i) => i.areaTiers?.[a] != null || (i.tierOverride != null && a === "production"));
@@ -253,8 +250,8 @@ export default async function ProviderPage({ params, searchParams }: Props) {
         <div className="main stack">
           <h2 className="h2">Trend, last 12 months</h2>
           <p className="body">
-            {after > before ? <strong>Getting worse: </strong> : after < before ? <strong>Getting better: </strong> : null}
-            {after} incidents in the last 6 months, {before} in the 6 before.
+            {after > before ? <strong>Worse. </strong> : after < before ? <strong>Better. </strong> : null}
+            {after} in the last 6 months, {before} in the 6 before.
           </p>
           <div className="box pad stack" style={{ ["--gap" as string]: "8px" }}>
             <div className="bars" role="img" aria-label={`Incidents per month: ${trend.map((t) => `${fmtMonthShort(t.start)} ${t.count}`).join(", ")}`}>
@@ -274,7 +271,6 @@ export default async function ProviderPage({ params, searchParams }: Props) {
         </div>
         <div className="side stack">
           <h2 className="h2">Severity mix</h2>
-          <p className="body" style={{ fontSize: 14 }}>Incidents in the selected window. Security incidents count one tier higher.</p>
           <div className="box pad stack" style={{ ["--gap" as string]: "14px" }}>
             <div className="mix" role="img" aria-label={`Sev 1: ${s.sevCounts[0]}, Sev 2: ${s.sevCounts[1]}, Sev 3: ${s.sevCounts[2]}, Sev 4: ${s.sevCounts[3]}`}>
               {totalSev ? s.sevCounts.map((n, k) => <span key={k} style={{ width: `${(n / totalSev) * 100}%`, background: SEV_COLORS[k] }} />) : <span style={{ width: "100%", background: "var(--up)" }} />}
@@ -299,7 +295,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
       <section className="split">
         <div className="main stack">
           <h2 className="h2">When it breaks</h2>
-          <p className="body">Incident start times over the last 12 months, by weekday and hour (UTC).</p>
+          <p className="body">Start times, last 12 months, UTC.</p>
           <div className="box pad heat" role="img" aria-label="Heatmap of incident start times by weekday and hour, UTC">
             {heat.map((row, d) => (
               <div key={d}>
@@ -335,11 +331,11 @@ export default async function ProviderPage({ params, searchParams }: Props) {
       </section>
 
       <section className="stack">
-        <h2 className="h2">How they communicate</h2>
+        <h2 className="h2">Communication</h2>
         <div className="stats">
-          <Stat label="Updates per incident" value={comms.updatesPerIncident != null ? comms.updatesPerIncident.toFixed(1) : "–"} note="Last 12 months" />
-          <Stat label="Update cadence" value={comms.medianGapMinutes != null ? `every ${fmtDuration(comms.medianGapMinutes)}` : "–"} note="Median gap between updates" />
-          <Stat label="Postmortems" value={`${comms.postmortems} of ${comms.serious}`} note="Sev 1–2 incidents with a write-up" />
+          <Stat label="Updates per incident" value={comms.updatesPerIncident != null ? comms.updatesPerIncident.toFixed(1) : "–"} note="Last 12 months" hint={GLOSSARY.updatesPer} />
+          <Stat label="Median update gap" value={comms.medianGapMinutes != null ? fmtDuration(comms.medianGapMinutes) : "–"} note="Last 12 months" hint={GLOSSARY.updateGap} />
+          <Stat label="Postmortems" value={`${comms.postmortems} of ${comms.serious}`} note="Sev 1–2" hint={GLOSSARY.postmortems} />
         </div>
       </section>
 
@@ -355,7 +351,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             ))}
           </div>
         ) : (
-          <div className="empty">No incidents on record yet.</div>
+          <div className="empty">Clean record. So far.</div>
         )}
         {all && history?.older.length ? (
           <>
@@ -371,8 +367,8 @@ export default async function ProviderPage({ params, searchParams }: Props) {
 
       <section className="stack">
         <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
-          <h2 className="h2">Against other {cat?.slug === "ai" ? "AI APIs" : `${(cat?.name ?? "").toLowerCase()} providers`}, last 90 days</h2>
-          <Link href={`/compare?p=${peers.slice(0, 3).map((x) => x.x.slug).join(",")}`} style={{ fontWeight: 700, padding: "10px 0" }}>Open full comparison</Link>
+          <h2 className="h2">Peers, 90 days</h2>
+          <Link href={`/compare?p=${peers.slice(0, 3).map((x) => x.x.slug).join(",")}`} style={{ fontWeight: 700, padding: "10px 0" }}>Compare</Link>
         </div>
         <div className="peers">
           {peers.map(({ x, s: ps }) => (
@@ -390,7 +386,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
       <section className="dark-panel">
         <div className="stack" style={{ flex: "1 1 300px", minWidth: 0 }}>
           <h2 style={{ fontSize: 22, fontWeight: 800 }}>README badge</h2>
-          <p style={{ fontSize: 15, color: "#D4D4D8" }}>Show {p.name}&apos;s current grade in your README. It updates with every poll.</p>
+          <p style={{ fontSize: 15, color: "#D4D4D8" }}>{p.name}&apos;s live grade, for your README.</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={`/badge/${p.slug}.svg`} alt={`${p.name} grade badge`} height={20} style={{ alignSelf: "flex-start" }} />
           <div className="code">{badge}</div>

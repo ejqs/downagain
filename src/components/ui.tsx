@@ -36,18 +36,31 @@ export function DayStrip({ cells, label, short }: { cells: DayCell[]; label: str
 export function StripLegend() {
   return (
     <div className="legend">
-      <span><i className="c-up" />No incidents</span>
-      <span><i className="c-minor" />Sev 3–4 (can&apos;t ship, papercuts)</span>
-      <span><i className="c-major" />Sev 1–2 (prod down or degraded)</span>
-      <span><i className="c-none" />Before we started tracking</span>
+      <span><i className="c-up" />Clean</span>
+      <span><i className="c-minor" />Sev 3–4</span>
+      <span><i className="c-major" />Sev 1–2</span>
+      <span><i className="c-none" />No data</span>
     </div>
   );
 }
 
-export function Stat({ label, value, note, hot }: { label: string; value: string; note?: string; hot?: boolean }) {
+/** A tappable "?" that opens a one-line explanation over the surrounding box. */
+export function Hint({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <details className="hint">
+      <summary aria-label={`What is ${label}?`}>?</summary>
+      <span className="hint-body" role="note">{children}</span>
+    </details>
+  );
+}
+
+export function Stat({ label, value, note, hot, hint }: { label: string; value: string; note?: string; hot?: boolean; hint?: string }) {
   return (
     <div className={`stat ${hot ? "hot" : ""}`}>
-      <span className="label" style={hot ? { color: "var(--ink)" } : undefined}>{label}</span>
+      <span className="label" style={hot ? { color: "var(--ink)" } : undefined}>
+        {label}
+        {hint ? <Hint label={label}>{hint}</Hint> : null}
+      </span>
       <span className="value">{value}</span>
       {note ? <span className="note">{note}</span> : null}
     </div>

@@ -6,6 +6,9 @@ import { AREA_LABEL, type Area } from "@/lib/severity";
 import type { Score } from "@/lib/grading";
 import { Unavailable } from "@/components/Unavailable";
 import { pageMeta } from "@/lib/site";
+import { ComparePicker } from "@/components/ComparePicker";
+import { Hint } from "@/components/ui";
+import { GLOSSARY } from "@/lib/glossary";
 
 export const dynamic = "force-dynamic";
 
@@ -41,13 +44,16 @@ interface Col {
 
 type Cell = { text: string; value: number | null };
 
-function Row({ label, cells, better }: { label: string; cells: Cell[]; better?: "high" | "low" }) {
+function Row({ label, cells, better, hint }: { label: string; cells: Cell[]; better?: "high" | "low"; hint?: string }) {
   const vals = cells.map((c) => c.value).filter((v): v is number => v != null);
   const best = better && vals.length > 1 ? (better === "high" ? Math.max(...vals) : Math.min(...vals)) : null;
   const allSame = vals.length > 1 && vals.every((v) => v === vals[0]);
   return (
     <div className="cmp-row">
-      <span className="label">{label}</span>
+      <span className="label">
+        {label}
+        {hint ? <Hint label={label}>{hint}</Hint> : null}
+      </span>
       <div className="cmp-cells" style={{ ["--n" as string]: cells.length }}>
         {cells.map((c, k) => (
           <div key={k} className={`cmp-cell ${best != null && !allSame && c.value === best ? "best" : ""}`}>
@@ -110,31 +116,13 @@ export default async function ComparePage({ searchParams }: Props) {
     <main className="wrap stack" style={{ paddingTop: 24, ["--gap" as string]: "24px", maxWidth: 1080 }}>
       <div className="stack" style={{ ["--gap" as string]: "8px" }}>
         <span className="eyebrow">Compare</span>
-        <h1 className="h1 sm" style={{ fontSize: "clamp(36px, 7vw, 64px)" }}>Before you migrate, compare track records.</h1>
-        <p className="body" style={{ fontSize: 17 }}>Pick up to three providers. The best value in each row is highlighted. Comparing within one category makes the most sense.</p>
+        <h1 className="h1 sm" style={{ fontSize: "clamp(36px, 7vw, 64px)" }}>Before you migrate.</h1>
       </div>
 
-      <form className="pickers" action="/compare" method="get">
-        {[0, 1, 2].map((k) => (
-          <label key={k} className="label">
-            Provider {k + 1}
-            <select name={["a", "b", "c"][k]} defaultValue={slugs[k] ?? ""}>
-              {k === 2 ? <option value="">None</option> : null}
-              {options.map(({ cat, provs }) => (
-                <optgroup key={cat.slug} label={cat.name}>
-                  {provs.map((p) => (
-                    <option key={p.slug} value={p.slug}>{p.name}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </label>
-        ))}
-        <button type="submit" className="btn dark" data-umami-event="compare">Compare</button>
-      </form>
+      <ComparePicker key={slugs.join(",")} slugs={slugs} options={options} />
 
       {cols.length < 2 ? (
-        <div className="empty">Pick at least two providers.</div>
+        <div className="empty">Pick two.</div>
       ) : (
         <>
           <section className="stack" style={{ ["--gap" as string]: "8px" }}>
@@ -148,7 +136,7 @@ export default async function ComparePage({ searchParams }: Props) {
           <section className="stack" style={{ ["--gap" as string]: "8px" }}>
             <h2 className="h2">Admitted uptime</h2>
             <div className="box">
-              <Row label="Last 30 days" cells={cell((c) => c.s30.admittedUptime, pct)} better="high" />
+              <Row hint={GLOSSARY.uptime} label="Last 30 days" cells={cell((c) => c.s30.admittedUptime, pct)} better="high" />
               <Row label="Last 90 days" cells={cell((c) => c.s90.admittedUptime, pct)} better="high" />
               <Row label="Last 12 months" cells={cell((c) => c.s1y.admittedUptime, pct)} better="high" />
             </div>
@@ -157,9 +145,9 @@ export default async function ComparePage({ searchParams }: Props) {
           <section className="stack" style={{ ["--gap" as string]: "8px" }}>
             <h2 className="h2">Grades (90 days)</h2>
             <div className="box">
-              <Row label="Overall" cells={cols.map((c) => ({ text: `${c.s90.grade} · ${c.s90.points.toLocaleString("en-US")} pts`, value: c.s90.points }))} better="low" />
+              <Row hint={GLOSSARY.grade} label="Overall" cells={cols.map((c) => ({ text: `${c.s90.grade} · ${c.s90.points.toLocaleString("en-US")} pts`, value: c.s90.points }))} better="low" />
               {areas.map((a) => (
-                <Row key={a} label={AREA_LABEL[a]} cells={cols.map((c) => ({ text: c.s90.areas[a].grade, value: Math.round(c.s90.areas[a].points) }))} better="low" />
+                <Row key={a} hint={GLOSSARY[a]} label={AREA_LABEL[a]} cells={cols.map((c) => ({ text: c.s90.areas[a].grade, value: Math.round(c.s90.areas[a].points) }))} better="low" />
               ))}
             </div>
           </section>
@@ -167,14 +155,14 @@ export default async function ComparePage({ searchParams }: Props) {
           <section className="stack" style={{ ["--gap" as string]: "8px" }}>
             <h2 className="h2">Incidents (90 days)</h2>
             <div className="box">
-              <Row label="Total incidents" cells={cell((c) => c.s90.incidentCount, num)} better="low" />
-              <Row label="Sev 1 · Lights out" cells={cell((c) => c.s90.sevCounts[0], num)} better="low" />
-              <Row label="Sev 2 · Bleeding" cells={cell((c) => c.s90.sevCounts[1], num)} better="low" />
-              <Row label="Sev 3 · Can't ship" cells={cell((c) => c.s90.sevCounts[2], num)} better="low" />
-              <Row label="Sev 4 · Papercut" cells={cell((c) => c.s90.sevCounts[3], num)} better="low" />
-              <Row label="Median time to resolve" cells={cell((c) => c.s90.medianResolveMinutes, dur)} better="low" />
-              <Row label="Longest incident" cells={cell((c) => c.s90.longestMinutes || null, dur)} better="low" />
-              <Row label="Security incidents" cells={cell((c) => c.s90.securityCount, num)} better="low" />
+              <Row hint={GLOSSARY.incidents} label="Total incidents" cells={cell((c) => c.s90.incidentCount, num)} better="low" />
+              <Row hint={GLOSSARY.sev1} label="Sev 1 · Lights out" cells={cell((c) => c.s90.sevCounts[0], num)} better="low" />
+              <Row hint={GLOSSARY.sev2} label="Sev 2 · Bleeding" cells={cell((c) => c.s90.sevCounts[1], num)} better="low" />
+              <Row hint={GLOSSARY.sev3} label="Sev 3 · Can't ship" cells={cell((c) => c.s90.sevCounts[2], num)} better="low" />
+              <Row hint={GLOSSARY.sev4} label="Sev 4 · Papercut" cells={cell((c) => c.s90.sevCounts[3], num)} better="low" />
+              <Row hint={GLOSSARY.mttr} label="Median time to resolve" cells={cell((c) => c.s90.medianResolveMinutes, dur)} better="low" />
+              <Row hint={GLOSSARY.longest} label="Longest incident" cells={cell((c) => c.s90.longestMinutes || null, dur)} better="low" />
+              <Row hint={GLOSSARY.security} label="Security incidents" cells={cell((c) => c.s90.securityCount, num)} better="low" />
             </div>
           </section>
 
@@ -182,7 +170,8 @@ export default async function ComparePage({ searchParams }: Props) {
             <h2 className="h2">Trend and communication</h2>
             <div className="box">
               <Row
-                label="Incidents, last 6 months vs 6 before"
+                hint={GLOSSARY.trend}
+                label="Last 6 months vs 6 before"
                 cells={cols.map((c) => {
                   const a = c.trend.slice(0, 6).reduce((n, t) => n + t.count, 0);
                   const b = c.trend.slice(6).reduce((n, t) => n + t.count, 0);
@@ -190,23 +179,23 @@ export default async function ComparePage({ searchParams }: Props) {
                 })}
                 better="low"
               />
-              <Row label="Postmortems for Sev 1–2 (90d)" cells={cols.map((c) => ({ text: `${c.comms.postmortems} of ${c.comms.serious}`, value: c.comms.serious ? c.comms.postmortems / c.comms.serious : null }))} better="high" />
+              <Row hint={GLOSSARY.postmortems} label="Sev 1–2 postmortems" cells={cols.map((c) => ({ text: `${c.comms.postmortems} of ${c.comms.serious}`, value: c.comms.serious ? c.comms.postmortems / c.comms.serious : null }))} better="high" />
             </div>
           </section>
 
           <section className="verdict">
-            <span className="eyebrow">Summary</span>
+            <span className="eyebrow">Verdict</span>
             <span style={{ fontSize: "clamp(22px, 4vw, 30px)", fontWeight: 800, lineHeight: 1.15 }}>
               {byPoints[0].p.name} has the best 90-day record
               {byMttr.length ? `; ${byMttr[0].p.name} resolves incidents fastest.` : "."}
             </span>
-            <span style={{ fontSize: 16 }}>
-              If your app mostly needs to stay up once deployed, weigh the Production grade most. If you ship many times a day, weigh Shipping.
-            </span>
+            <span style={{ fontSize: 16 }}>Running app? Watch Production. Deploying all day? Watch Shipping.</span>
           </section>
         </>
       )}
-      <p className="muted" style={{ fontSize: 14 }}>Admitted uptime: downtime each provider posted on its own status page. It can under-report.</p>
+      <p className="muted" style={{ fontSize: 14 }}>
+        Uptime as admitted on each status page. <a href="/about">How grades work</a>
+      </p>
     </main>
   );
 }

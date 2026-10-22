@@ -72,7 +72,7 @@ export default async function IncidentsPage({ searchParams }: Props) {
     <main className="wrap stack" style={{ paddingTop: 24, ["--gap" as string]: "24px" }}>
       <div className="stack" style={{ ["--gap" as string]: "8px" }}>
         <h1 className="h1 sm">Incidents</h1>
-        <p className="body" style={{ fontSize: 17 }}>Everything currently open, then the history, newest first. Text is quoted from each provider&apos;s status page.</p>
+        <p className="body" style={{ fontSize: 17 }}>Quoted from each provider&apos;s status page.</p>
       </div>
 
       <div className="stack" style={{ ["--gap" as string]: "8px" }}>
@@ -86,7 +86,7 @@ export default async function IncidentsPage({ searchParams }: Props) {
         <div role="group" aria-label="Filter by severity" className="chips">
           {[0, 1, 2, 3, 4].map((n) => (
             <Link key={n} href={href({ sev: n })} className="chip small" aria-current={n === sev ? "true" : undefined}>
-              {n === 0 ? "Any severity" : `SEV ${n}`}
+              {n === 0 ? "Any sev" : `SEV ${n}`}
             </Link>
           ))}
         </div>
@@ -117,7 +117,7 @@ export default async function IncidentsPage({ searchParams }: Props) {
 
       <section className="split">
         <div className="main stack" style={{ ["--gap" as string]: "24px" }}>
-          {groups.size === 0 ? <div className="empty">No resolved incidents in the last {days} days for this filter.</div> : null}
+          {groups.size === 0 ? <div className="empty">Nothing in the last {days} days.</div> : null}
           {[...groups.entries()].map(([day, items]) => (
             <div key={day}>
               <h2 className="day-head">
@@ -155,14 +155,14 @@ export default async function IncidentsPage({ searchParams }: Props) {
           ))}
           {days < 400 ? (
             <Link href={href({ days: days + 30 })} className="btn" style={{ alignSelf: "flex-start" }} scroll={false}>
-              Load older incidents
+              Older
             </Link>
           ) : null}
         </div>
 
         <aside className="side stack" style={{ ["--gap" as string]: "16px" }}>
           <div className="box pad stack">
-            <span className="eyebrow">Most Sev 1–2 time this week</span>
+            <span className="eyebrow">Most Sev 1–2 time, 7d</span>
             {week.length ? (
               week.map((w) => (
                 <div key={w.p.slug} className="stack" style={{ ["--gap" as string]: "4px" }}>
@@ -184,7 +184,7 @@ export default async function IncidentsPage({ searchParams }: Props) {
                 <strong>Sev {t} · {TIER_NAMES[t]}:</strong> {TIER_BLURB[t].toLowerCase()}
               </span>
             ))}
-            <span className="muted" style={{ fontSize: 13 }}>Security incidents move up one tier. <Link href="/about#severity">How we grade</Link></span>
+            <span className="muted" style={{ fontSize: 13 }}>Security bumps one tier. <Link href="/about#severity">How grading works</Link></span>
           </div>
         </aside>
       </section>
