@@ -120,6 +120,20 @@ describe("reviewPending", () => {
     expect(left[0].tier).toBe(1);
   });
 
+  it("reads the incidents that weigh most on a grade first", async () => {
+    const recent = await addIncident("recent", new Date("2026-10-21T10:00:00Z"));
+    const long = await addIncident("long", new Date("2026-09-01T10:00:00Z"));
+    await database.update(incidents).set({ tier: 2, resolvedAt: new Date("2026-10-01T00:00:00Z") }).where(eq(incidents.id, long));
+    const old = await addIncident("old", new Date("2026-06-01T10:00:00Z"));
+    await database.update(incidents).set({ resolvedAt: new Date("2026-07-01T00:00:00Z") }).where(eq(incidents.id, old));
+
+    await reviewPending(database, { client, settings, limit: 1, now: NOW });
+    expect((await get(long)).gradedBy).toBe("claude");
+    await reviewPending(database, { client, settings, limit: 1, now: NOW });
+    expect((await get(recent)).gradedBy).toBe("claude");
+    expect((await get(old)).gradedBy).toBe("rules");
+  });
+
   it("falls back to the rules on a refusal and doesn't retry that version", async () => {
     const id = await addIncident("a");
     mode = "refuse";

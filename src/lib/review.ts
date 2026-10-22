@@ -7,7 +7,8 @@ import { and, asc, desc, eq, gte, inArray, isNull, lt, or, sql } from "drizzle-o
 import type { DB } from "@/db";
 import { categories, componentSurfaces, incidentReviews, incidentUpdates, incidents, providers } from "@/db/schema";
 import { DEFAULT_MODEL, PROMPT_VERSION, applyVerdict, isLongText, askClaude, costMicros, inputHash, parseVerdict, renderIncident } from "@/lib/ai-grade";
-import { classify, holdToRegion, singleRegion, type Classification, type Surface } from "@/lib/severity";
+import { MAX_PENALTY_MINUTES, WINDOW_DAYS } from "@/lib/grading";
+import { TIER_WEIGHT, classify, holdToRegion, singleRegion, type Classification, type Surface } from "@/lib/severity";
 
 export interface ReviewSettings {
   enabled: boolean;
@@ -106,6 +107,24 @@ export function finalGrade(rules: Classification, verdict: unknown, regions?: st
   return held === refined ? held : { ...held, reason: `${held.reason} Held to Sev ${held.tier} as only ${singleRegion(regions)} was hit.` };
 }
 
+/**
+ * Roughly how many penalty points the rules grade puts on the board: tier weight
+ * times penalty minutes (to monitoring, capped at 72 h), zero outside the ranking
+ * window. A long rules-graded incident can sink a grade on its own, so Claude
+ * reads those before a pile of short recent ones.
+ */
+function gradeWeight(now: Date) {
+  const from = new Date(now.getTime() - WINDOW_DAYS * 86_400_000);
+  const weight = sql.join(
+    Object.entries(TIER_WEIGHT).map(([t, w]) => sql`when ${Number(t)} then ${w}::float`),
+    sql` `,
+  );
+  return sql`case when ${incidents.startedAt} < ${from} then 0 else
+    (case coalesce(${incidents.tierOverride}, ${incidents.tier}, 4) ${weight} else 0 end)
+    * least(extract(epoch from coalesce(${incidents.monitoringAt}, ${incidents.resolvedAt}, ${now}) - ${incidents.startedAt}), ${MAX_PENALTY_MINUTES * 60})
+  end`;
+}
+
 let running = false;
 
 /**
@@ -139,7 +158,7 @@ export async function reviewPending(
       .innerJoin(providers, eq(providers.id, incidents.providerId))
       .innerJoin(categories, eq(categories.id, providers.categoryId))
       .where(opts.slugs?.length ? and(pending, inArray(providers.slug, opts.slugs)) : pending)
-      .orderBy(sql`${incidents.resolvedAt} is null desc`, desc(incidents.startedAt), asc(incidents.id))
+      .orderBy(sql`${incidents.resolvedAt} is null desc`, desc(gradeWeight(now)), desc(incidents.startedAt), asc(incidents.id))
       .limit(limit * 2);
     if (!rows.length) return report;
 

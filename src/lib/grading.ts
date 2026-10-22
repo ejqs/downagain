@@ -6,7 +6,7 @@ export const WINDOW_DAYS = 90;
 const MIN = 60_000;
 const DAY = 86_400_000;
 // An incident a provider forgot to close shouldn't sink them forever.
-const MAX_PENALTY_MINUTES = 72 * 60;
+export const MAX_PENALTY_MINUTES = 72 * 60;
 
 // A provider that leaves an incident open but posts nothing for a week has moved
 // on. We end it at its last update instead of counting it as ongoing for months.
