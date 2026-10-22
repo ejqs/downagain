@@ -29,7 +29,7 @@ const sha = (v: unknown) => createHash("sha256").update(JSON.stringify(v)).diges
 
 function stateHash(status: Status, components: NormalizedComponent[], incs: NormalizedIncident[] | undefined, prevIncidentKey: string | null) {
   const incidentKey = incs
-    ? sha(incs.map((i) => [i.externalId, i.status, i.resolvedAt?.toISOString() ?? null, i.updates.length]))
+    ? sha(incs.map((i) => [i.externalId, i.status, i.resolvedAt?.toISOString() ?? null, i.updates.length, ...(i.regions?.length ? [i.regions] : [])]))
     : prevIncidentKey;
   return { hash: `${sha([status, components])}:${incidentKey ?? ""}`, incidentKey };
 }
@@ -134,7 +134,7 @@ export async function writeIncidents(
   const existing = new Map(
     (
       await database
-        .select({ id: incidents.id, externalId: incidents.externalId, status: incidents.status, resolvedAt: incidents.resolvedAt, sourceUpdatedAt: incidents.sourceUpdatedAt })
+        .select({ id: incidents.id, externalId: incidents.externalId, status: incidents.status, resolvedAt: incidents.resolvedAt, sourceUpdatedAt: incidents.sourceUpdatedAt, regions: incidents.regions })
         .from(incidents)
         .where(eq(incidents.providerId, p.id))
     ).map((r) => [r.externalId, r]),
@@ -148,7 +148,9 @@ export async function writeIncidents(
       ex &&
       ex.status === inc.status &&
       (ex.resolvedAt?.getTime() ?? null) === (inc.resolvedAt?.getTime() ?? null) &&
-      (ex.sourceUpdatedAt?.getTime() ?? null) === (inc.sourceUpdatedAt?.getTime() ?? null);
+      (ex.sourceUpdatedAt?.getTime() ?? null) === (inc.sourceUpdatedAt?.getTime() ?? null) &&
+      // An adapter fix can change what regions we read without the provider touching the incident.
+      (ex.regions ?? []).join() === (inc.regions ?? []).join();
     if (same) continue;
 
     const c = classify(

@@ -72,7 +72,8 @@ describe("aws adapter", () => {
 
     const open = snap.incidents!.find((i) => i.resolvedAt === null)!;
     expect(open).toMatchObject({ regions: ["me-central-1"], worstComponentStatus: "major_outage", impact: "critical", status: "investigating" });
-    expect(open.components).toEqual(["Amazon Elastic Compute Cloud", "Amazon Simple Storage Service"]);
+    // Route 53 and the console are listed without a region; the event is still only in me-central-1.
+    expect(open.components).toEqual(["Amazon Elastic Compute Cloud", "Amazon Simple Storage Service", "route53", "management-console"]);
     expect(open.startedAt.toISOString()).toBe(new Date(1792652400_000).toISOString());
     expect(snap.status).toBe("degraded");
 

@@ -55,6 +55,15 @@ describe("polling the clouds", () => {
     expect(rs.every((r) => r.ok && !r.changed && r.newIncidents === 0 && r.updatedIncidents === 0)).toBe(true);
   });
 
+  it("regrades an incident when its regions change and nothing else does", async () => {
+    await fx.edit<{ id: string; previously_affected_locations: { id: string; title: string }[] }[]>("status.cloud.google.com__incidents.json", (list) => {
+      list.find((i) => i.id === "gcpOpenRegional")!.previously_affected_locations.push({ id: "us-east1", title: "South Carolina (us-east1)" });
+    });
+    const r = byslug(await pollAll(database, { slugs: ["gcp"], now: min(7) }));
+    expect(r.gcp).toMatchObject({ changed: true, updatedIncidents: 1 });
+    expect(await incident("gcpOpenRegional")).toMatchObject({ regions: ["us-central1", "us-east1"], tier: 1 });
+  });
+
   it("closes an Azure incident when its item leaves the feed", async () => {
     await writeFile(path.join(fx.dir, "azure.status.microsoft__en-us_status_feed.xml"), '<?xml version="1.0"?><rss version="2.0"><channel><title>Azure Status</title></channel></rss>');
     const r = byslug(await pollAll(database, { slugs: ["azure"], now: min(10) }));

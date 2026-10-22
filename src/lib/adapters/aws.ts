@@ -59,15 +59,24 @@ function epoch(v: number | string | undefined): Date | null {
   return new Date(n > 1e12 ? n : n * 1000);
 }
 
+/** arn:aws:health:me-central-1::event/... → "me-central-1"; "global" → null */
+function arnRegion(arn: string | undefined): string | null {
+  const r = arn?.split(":")[3];
+  return r && REGION_RE.test(r) ? r : null;
+}
+
 function eventKey(e: AwsEvent): string {
   return e.arn ?? `${e.service ?? "aws"}:${e.date ?? ""}:${e.summary ?? ""}`;
 }
 
 export function normalizeAwsEvent(e: AwsEvent, open: boolean, pageUrl: string): NormalizedIncident {
-  const keys = uniq([...(e.service ? [e.service] : []), ...Object.keys(e.impacted_services ?? {})]);
-  const split = keys.map(splitServiceKey);
-  // A key without a region is a global service (IAM, Route 53, CloudFront).
-  const regions = split.length && split.every(([, r]) => r) ? uniq(split.map(([, r]) => r!)).sort() : [];
+  // The event's own region decides its scope. A regional event often also lists a few
+  // services without a region in their key (Route 53, CloudFront, the console) that
+  // only felt knock-on effects; they don't make it global. An event with no region of
+  // its own (IAM, a global ARN) counts as global.
+  const own = splitServiceKey(e.service ?? "")[1] ?? arnRegion(e.arn);
+  const keyRegions = Object.keys(e.impacted_services ?? {}).flatMap((k) => splitServiceKey(k)[1] ?? []);
+  const regions = own ? uniq([own, ...keyRegions]).sort() : [];
 
   const impacted = Object.entries(e.impacted_services ?? {});
   const components = impacted.length
