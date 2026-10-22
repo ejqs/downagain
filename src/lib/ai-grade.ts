@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { areaFor, type Scope, securityBump, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
-export const PROMPT_VERSION = 3;
+export const PROMPT_VERSION = 4;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 
 const SURFACES = ["serving", "data", "ship", "manage", "peripheral"] as const;
@@ -66,17 +66,19 @@ Surfaces:
 
 Judge by impact, not by the component's name. A dashboard, auth or billing problem that stops people deploying, changing config, or freezes or suspends accounts is manage at Tier 3. If it took customers' running apps down too (for example suspended accounts stopped serving), add serving as well.
 
+Every product a customer builds on or routes their users' traffic through is serving or data for the customers who use it, however niche: each API endpoint of an AI provider (files, batch, assistants, a single model), and each network or security product of an edge provider (Zero Trust, Access login, Gateway, WAF, DLP, bot management). Do not call these peripheral because "customer apps were not described as affected".
+
 Tier for each affected surface:
 - 1 Lights out: serving or data down or failing for most requests across most customers, or confirmed data loss.
 - 2 Bleeding: serving or data degraded (elevated errors or latency, some requests failing), or down only in one region, for one model, or for a minority of customers. Also ship completely down for everyone.
 - 3 Can't ship: ship broken or badly degraded, or manage broken in a way that blocks deploys, config changes or accounts.
 - 4 Papercut: a slow or partly broken dashboard that blocks nothing, any peripheral problem, or minor ship trouble such as slower builds or delayed logs.
 
-Scope is the blast radius: global (most customers or regions), regional (one region or country, or a few locations), local (a single data centre, point of presence or cell), subset (one plan, model, feature, or a small share of customers everywhere), unclear (the text doesn't say). Pick the narrowest scope the text supports; "some customers" in one region is regional. Use it when choosing tiers: a full serving or data outage is Tier 1 only when it is global, or unclear but described as widespread.
+Scope is the blast radius: global (most customers or regions), regional (one region or country, or a few locations), local (a single data centre, point of presence or cell), subset (one plan, model, feature, or a small share of customers everywhere), unclear (the text doesn't say). Pick the narrowest scope the text supports; "some customers" in one region is regional. The site discounts narrower scopes itself, so the tier describes how bad it was for those who were hit: do not lower a tier because only one feature, region or a share of customers was affected; set the scope instead. The one exception: a full serving or data outage is Tier 1 only when it is global, or unclear but described as widespread; otherwise Tier 2.
 
 Set not_counted to true only for scheduled maintenance that stayed inside its window with no unplanned impact, a false alarm, or an incident the provider says had no customer impact. Then affected may be empty.
 
-Set security to true when the incident is about a vulnerability, unauthorized access, leaked or exposed credentials, a compromise, or malicious traffic aimed at the provider. A passing mention of security does not count. Set data_loss to true only when the provider says customer data was lost, irrecoverably corrupted, or exposed.
+Set security to true when the incident is about a vulnerability, unauthorized access, leaked or exposed credentials, a compromise, or malicious traffic aimed at the provider. A passing mention of security does not count. Set data_loss to true only when the provider says customer data was lost, irrecoverably corrupted, could not be restored or recovered, or was exposed.
 
 Give each surface the tier for its impact alone. Do not raise tiers for security or data loss yourself; the site does that from your flags.
 
