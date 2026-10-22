@@ -1,0 +1,54 @@
+{
+  "page": { "id": "lvglq8h0mdyh", "name": "Vercel", "url": "https://www.vercel-status.com" },
+  "incidents": [
+    {
+      "id": "inc-open",
+      "name": "Elevated 5xx on edge requests in iad1",
+      "status": "identified",
+      "impact": "major",
+      "created_at": "2026-10-22T13:20:00.000Z",
+      "started_at": "2026-10-22T13:18:00.000Z",
+      "updated_at": "2026-10-22T13:50:00.000Z",
+      "monitoring_at": null,
+      "resolved_at": null,
+      "shortlink": "https://stspg.io/abc",
+      "components": [{ "id": "c1", "name": "iad1 - Washington, D.C., USA", "status": "partial_outage" }],
+      "incident_updates": [
+        { "id": "u2", "status": "identified", "body": "We have identified the cause.", "created_at": "2026-10-22T13:50:00.000Z", "display_at": "2026-10-22T13:50:00.000Z", "affected_components": null },
+        { "id": "u1", "status": "investigating", "body": "We are investigating elevated errors.", "created_at": "2026-10-22T13:20:00.000Z", "display_at": "2026-10-22T13:20:00.000Z",
+          "affected_components": [{ "code": "c1", "name": "iad1 - Washington, D.C., USA", "old_status": "operational", "new_status": "partial_outage" }] }
+      ]
+    },
+    {
+      "id": "inc-builds",
+      "name": "Builds delayed",
+      "status": "resolved",
+      "impact": "minor",
+      "created_at": "2026-10-20T10:00:00.000Z",
+      "updated_at": "2026-10-20T11:00:00.000Z",
+      "monitoring_at": "2026-10-20T10:40:00.000Z",
+      "resolved_at": "2026-10-20T11:00:00.000Z",
+      "shortlink": null,
+      "components": [{ "id": "c2", "name": "Builds", "status": "operational" }],
+      "incident_updates": [
+        { "id": "u3", "status": "resolved", "body": "Resolved.", "created_at": "2026-10-20T11:00:00.000Z" },
+        { "id": "u4", "status": "monitoring", "body": "Fix deployed.", "created_at": "2026-10-20T10:40:00.000Z" },
+        { "id": "u5", "status": "investigating", "body": "Builds are queueing.", "created_at": "2026-10-20T10:00:00.000Z" }
+      ]
+    },
+    {
+      "id": "inc-sec",
+      "name": "Security incident affecting a subset of accounts",
+      "status": "postmortem",
+      "impact": "none",
+      "created_at": "2026-10-01T08:00:00.000Z",
+      "updated_at": "2026-10-03T08:00:00.000Z",
+      "resolved_at": "2026-10-01T09:00:00.000Z",
+      "components": [],
+      "incident_updates": [
+        { "id": "u6", "status": "resolved", "body": "We rotated the leaked credentials of the affected accounts.", "created_at": "2026-10-01T09:00:00.000Z" }
+      ],
+      "postmortem_body": "Full write-up"
+    }
+  ]
+}

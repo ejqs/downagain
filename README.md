@@ -1,1 +1,79 @@
-# downagain
+# downagain.dev
+
+**Is it down again?** Live status and 90-day track records for the hosting platforms and AI APIs your apps run on, pulled from each provider's own public status page.
+
+- A **down right now** banner on every page.
+- A leaderboard per category (Hosting first, then AI APIs), graded A+ to F on the same 90-day window for everyone.
+- Provider pages with admitted uptime for 30d / 90d / 1y, Production / Shipping / Dashboard area grades, severity mix, 12-month trend, when incidents start, what breaks, how the provider communicates, full incident history, peers and a README badge.
+- An incident feed, a head-to-head compare page and a public `/api/status.json`.
+
+We never ping provider sites. We only read their official status page APIs, every 5 minutes, politely.
+
+## How it works
+
+```
+Railway cron (*/5) ──POST──▶ web: /api/cron/poll ──GET (ETag)──▶ provider status APIs
+                                   │ write only on change
+                                   ▼
+                               Postgres ◀── cache miss only ── Next.js data cache ◀── visitors
+                                   └──── revalidateTag("status") on change ────┘
+```
+
+- **Adapters** (`src/lib/adapters/`) turn Atlassian Statuspage JSON (most providers, including incident.io pages with the compatible API), Railway's status API and Heroku's status API into one shape.
+- **Poller** (`src/lib/poller.ts`) diffs each provider against what's stored, upserts incidents and their updates, records status transitions and raw documents when they change, and reports which providers changed. Nothing is ever deleted.
+- **Severity** (`src/lib/severity.ts`) is our own rubric: Sev 1 Lights out, Sev 2 Bleeding, Sev 3 Can't ship, Sev 4 Papercut. Components map to production / shipping / dashboard; security bumps a tier (floor Sev 2); data loss is always Sev 1. `tier_override` wins.
+- **Grades** (`src/lib/grading.ts`): penalty points = tier weight × minutes until the provider says "monitoring", over a rolling 90 days. "Admitted uptime" counts only Sev 1 time the provider posted.
+- **Caching** (`src/lib/data.ts`): every read goes through `unstable_cache` tagged `status` / `provider:<slug>`. The poll route revalidates those tags only when something changed, so page traffic doesn't reach Postgres. A 10-minute safety net catches anything missed.
+- A provider stays hidden until its status source has answered once, so a wrong endpoint never shows up as an outage.
+
+## Stack
+
+Next.js 16 (App Router), Drizzle ORM, Postgres, all on Railway. Umami Cloud for analytics, proxied through `/stats` on our own domain.
+
+## Local development
+
+Needs Node 22+, pnpm and a Postgres.
+
+```bash
+cp .env.example .env          # set DATABASE_URL
+pnpm install
+pnpm db:migrate && pnpm db:seed
+pnpm dev:sample               # optional: made-up incidents (localhost only; --clear removes them)
+pnpm dev
+```
+
+Useful scripts:
+
+| Command | What it does |
+|---|---|
+| `pnpm poll [slug…]` | Poll providers once, straight into the database |
+| `STATUS_FIXTURES_DIR=tests/fixtures pnpm poll vercel railway heroku` | Same, reading saved fixtures instead of the network |
+| `pnpm backfill [--provider slug]` | Seed, then pull whatever history each status API exposes (marked `origin = backfill`) |
+| `pnpm regrade` | Re-run the classifier over every stored incident after changing the rubric |
+| `pnpm test` / `pnpm lint` | Unit tests (adapters, severity, grading) / typecheck |
+| `pnpm db:generate` | New migration after editing `src/db/schema.ts` |
+
+## Deploying on Railway
+
+`.railway/railway.ts` describes the project: `web` (Next.js, runs `pnpm db:migrate && pnpm db:seed` before each deploy, healthcheck `/api/health`), `Postgres`, and `poller` (cron `*/5 * * * *`, runs `scripts/cron-trigger.mjs`, which POSTs to web over the private network and exits).
+
+1. `railway link` to the existing project, then `railway config plan` and read the plan. Rename resources in the file if the project already uses other names.
+2. Set `CRON_SECRET` on `web` to a long random string. The poller reads it by reference.
+3. `railway config apply` once the plan looks right.
+4. After the first deploy, run the backfill once: `railway run --service web pnpm backfill`, then hit the poll route with `?revalidate` (or wait for the next cron run).
+5. Point `downagain.dev` at the web service and uncomment `domains` in `.railway/railway.ts`.
+
+Environment variables are listed in `.env.example`.
+
+## Adding a provider
+
+See `.claude/skills/downagain/SKILL.md`. In short: confirm the status API format, add an entry to `src/lib/providers.ts`, save a fixture and test, deploy, backfill.
+
+## Not yet built
+
+- The status-page history crawler for incidents older than what the APIs return.
+- Databases, dev tools and other categories.
+- Alerts by email.
+- Share-card images.
+
+If this is useful to you, [buy me a coffee](https://buymeacoffee.com/ejqs).

@@ -1,0 +1,380 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getProviderHistory, safeSnapshot, type IncidentRow } from "@/lib/data";
+import { communication, dailyCells, downNow, incidentsFor, monthlyTrend, openIncidents, scoreFor, startHeatmap, tierOf, topComponents } from "@/lib/views";
+import { durationMinutes } from "@/lib/grading";
+import { fmtAgo, fmtDate, fmtDuration, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
+import { AREA_BLURB, AREA_LABEL, AREA_SHORT, TIER_NAMES, TIER_BLURB, type Area } from "@/lib/severity";
+import { STATUS_LABEL, isProblem } from "@/lib/status";
+import { gradeInput } from "@/lib/views";
+import { DayStrip, GradeTile, SevPill, Stat, StripLegend } from "@/components/ui";
+import { Unavailable } from "@/components/Unavailable";
+
+export const dynamic = "force-dynamic";
+
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://downagain.dev";
+const WINDOWS = { "30d": 30, "90d": 90, "1y": 365 } as const;
+type WindowKey = keyof typeof WINDOWS;
+const AREAS: Area[] = ["production", "shipping", "dashboard"];
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const SEV_COLORS = ["var(--ink)", "var(--down)", "var(--minor)", "var(--rule)"];
+
+type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ w?: string; all?: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const snap = await safeSnapshot();
+  const p = snap?.providers.find((x) => x.slug === slug);
+  if (!snap || !p) return { title: "Provider" };
+  const s = scoreFor(snap, p.id);
+  return {
+    title: `${p.name} track record`,
+    description: `${p.name}: grade ${s.grade} over the last 90 days, ${plural(s.incidentCount, "incident")}, ${fmtPct(s.admittedUptime)} admitted uptime.`,
+  };
+}
+
+function IncidentItem({ i, updates }: { i: IncidentRow; updates?: { status: string; body: string; postedAt: number }[] }) {
+  const tier = tierOf(i);
+  const mins = durationMinutes(gradeInput(i));
+  return (
+    <div className="list-row" style={{ alignItems: "baseline", ["--gap" as string]: "6px 20px" }}>
+      <div className="row" style={{ flex: "0 1 260px", ["--gap" as string]: "6px 12px" }}>
+        <span className="mono" style={{ fontSize: 14 }}>{fmtDate(i.startedAt)}</span>
+        <span className="mono" style={{ fontSize: 14, fontWeight: 700 }}>{i.resolvedAt ? fmtDuration(mins) : "ongoing"}</span>
+        <SevPill tier={tier} security={i.security} />
+      </div>
+      <div className="stack" style={{ flex: "1 1 320px", minWidth: 0, ["--gap" as string]: "3px" }}>
+        <span style={{ fontSize: 16, fontWeight: 700 }}>{i.title}</span>
+        <span className="muted" style={{ fontSize: 14 }}>
+          {i.tierOverride != null ? `Sev ${i.tierOverride} (reviewed${i.overrideNote ? `: ${i.overrideNote}` : ""})` : i.reason}
+          {i.components.length ? ` · ${i.components.slice(0, 4).join(", ")}${i.components.length > 4 ? "…" : ""}` : ""}
+        </span>
+        {updates?.length ? (
+          <details className="updates">
+            <summary>{plural(updates.length, "update")} from the provider</summary>
+            <ol>
+              {updates.map((u, k) => (
+                <li key={k}>
+                  <span className="mono" style={{ fontSize: 12 }}>{fmtTime(u.postedAt)} · {u.status}</span>
+                  <br />
+                  {u.body}
+                </li>
+              ))}
+            </ol>
+          </details>
+        ) : null}
+      </div>
+      <div className="row" style={{ ["--gap" as string]: "12px" }}>
+        {i.postmortem && i.url ? <a href={i.url} style={{ fontSize: 14, fontWeight: 700 }}>Postmortem</a> : null}
+        {i.url ? <a href={i.url} style={{ fontSize: 14 }} data-umami-event="status-page-outbound">Source</a> : null}
+      </div>
+    </div>
+  );
+}
+
+export default async function ProviderPage({ params, searchParams }: Props) {
+  const { slug } = await params;
+  const { w, all } = await searchParams;
+  const snap = await safeSnapshot();
+  if (!snap) return <Unavailable />;
+  const p = snap.providers.find((x) => x.slug === slug);
+  if (!p) notFound();
+  const history = await getProviderHistory(slug);
+  const cat = snap.categories.find((c) => c.slug === p.category);
+
+  const win: WindowKey = w && w in WINDOWS ? (w as WindowKey) : "90d";
+  const s = scoreFor(snap, p.id, WINDOWS[win]);
+  const s90 = win === "90d" ? s : scoreFor(snap, p.id, 90);
+  const list = incidentsFor(snap, p.id);
+  const now = snap.generatedAt;
+  const yearList = list.filter((i) => i.startedAt >= now - 365 * 86_400_000);
+  const open = openIncidents(list);
+  const down = downNow(snap).find((d) => d.provider.id === p.id);
+  const lastIncident = list.find((i) => tierOf(i) > 0);
+  const trend = monthlyTrend(list, now);
+  const maxMonth = Math.max(1, ...trend.map((t) => t.count));
+  const half = (a: number, b: number) => trend.slice(a, b).reduce((n, t) => n + t.count, 0);
+  const [before, after] = [half(0, 6), half(6, 12)];
+  const heat = startHeatmap(yearList);
+  const maxHeat = Math.max(1, ...heat.flat());
+  const comps = topComponents(yearList);
+  const comms = communication(yearList, history?.updates ?? {});
+  const totalSev = s.sevCounts.reduce((a, b) => a + b, 0);
+  const peers = snap.providers
+    .filter((x) => x.category === p.category)
+    .map((x) => ({ x, s: scoreFor(snap, x.id) }))
+    .sort((a, b) => a.s.points - b.s.points);
+  const shown = all ? list : list.slice(0, 20);
+  const badge = `[![${p.slug} on downagain.dev](${SITE}/badge/${p.slug}.svg)](${SITE}/p/${p.slug})`;
+
+  return (
+    <main className="wrap stack" style={{ ["--gap" as string]: "40px" }}>
+      <section className="row" style={{ paddingTop: 24, alignItems: "stretch", ["--gap" as string]: "20px 32px" }}>
+        <div className="stack" style={{ flex: "999 1 520px", minWidth: 0 }}>
+          <Link href={cat && cat.slug !== snap.categories[0]?.slug ? `/c/${cat.slug}` : "/"} className="mono" style={{ fontSize: 13, fontWeight: 700 }}>
+            {cat?.name} / {p.kind} / {p.name}
+          </Link>
+          <div className="row" style={{ ["--gap" as string]: "10px 14px" }}>
+            <h1 className="h1" style={{ fontSize: "clamp(48px, 11vw, 88px)" }}>{p.name}</h1>
+            {down?.tier ? (
+              <span className={`pill sev-${down.tier}`} style={{ fontSize: 12, padding: "4px 8px", border: "2px solid var(--ink)" }}>
+                SEV {down.tier} · {TIER_NAMES[down.tier].toUpperCase()} · {fmtDuration((now - down.sinceMs) / 60_000)}
+              </span>
+            ) : (
+              <span className={`pill ${isProblem(p.status) ? "down" : p.status === "unknown" ? "unknown" : "ok"}`} style={{ fontSize: 12, padding: "4px 8px", border: "2px solid var(--ink)" }}>
+                {STATUS_LABEL[p.status].toUpperCase()}
+              </span>
+            )}
+          </div>
+          <p className="body" style={{ fontSize: 17 }}>
+            {p.historyFrom ? `Records since ${fmtMonth(p.historyFrom)}` : "Tracking just started"} · {plural(history?.total ?? list.length, "incident")} on record · source:{" "}
+            {new URL(p.statusPageUrl).host}
+            {p.lastCheckedAt ? ` · checked ${fmtAgo(p.lastCheckedAt, now)}` : ""}
+          </p>
+          <div className="row" style={{ ["--gap" as string]: "8px", marginTop: 4 }}>
+            <Link className="btn dark" href={`/compare?p=${[p.slug, ...peers.filter((x) => x.x.slug !== p.slug).slice(0, 2).map((x) => x.x.slug)].join(",")}`} data-umami-event="compare">
+              Compare with peers
+            </Link>
+            <a className="btn" href={p.statusPageUrl} data-umami-event="status-page-outbound">Official status page</a>
+          </div>
+        </div>
+        <div className={`big-grade g-${s90.grade === "A+" ? "Ap" : s90.grade}`}>
+          <span className="eyebrow" style={{ letterSpacing: "0.1em" }}>Grade</span>
+          <span className="letter">{s90.grade}</span>
+          <span className="mono" style={{ fontSize: 13, fontWeight: 700 }}>Overall · last 90 days</span>
+          <div className="row" style={{ ["--gap" as string]: "8px", marginTop: 10 }}>
+            {AREAS.map((a) => (
+              <span key={a} className="stack" style={{ alignItems: "center", ["--gap" as string]: "2px" }}>
+                <GradeTile grade={s90.areas[a].grade} size="md" label={`${AREA_LABEL[a]} grade ${s90.areas[a].grade}`} />
+                <span className="mono" style={{ fontSize: 11, fontWeight: 700 }}>{AREA_SHORT[a]}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {open.length || (isProblem(p.status) && p.components.some((c) => isProblem(c.status))) ? (
+        <section className="box" aria-label="Happening now" style={{ background: "var(--down-wash)" }}>
+          <div className="list-row" style={{ background: "var(--down)" }}>
+            <strong style={{ fontSize: 20 }}>Happening now</strong>
+          </div>
+          {open.map((i) => (
+            <IncidentItem key={i.id} i={i} updates={history?.updates[i.id]} />
+          ))}
+          {p.components.filter((c) => isProblem(c.status)).length ? (
+            <div className="list-row" style={{ fontSize: 15 }}>
+              {p.components
+                .filter((c) => isProblem(c.status))
+                .map((c) => `${c.group ? `${c.group} / ` : ""}${c.name}: ${STATUS_LABEL[c.status].toLowerCase()}`)
+                .join(" · ")}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      <section className="stack">
+        <div className="row" style={{ justifyContent: "space-between", ["--gap" as string]: "10px 16px" }}>
+          <h2 className="h2">Overview</h2>
+          <div className="seg" role="group" aria-label="Time window">
+            {(Object.keys(WINDOWS) as WindowKey[]).map((k) => (
+              <Link key={k} href={k === "90d" ? `/p/${p.slug}` : `/p/${p.slug}?w=${k}`} aria-current={k === win ? "true" : undefined} className="mono" scroll={false}>
+                {k}
+              </Link>
+            ))}
+          </div>
+        </div>
+        <div className="stats">
+          <Stat label="Admitted uptime" value={fmtPct(s.admittedUptime, 3)} note={`Grade ${s.grade} for this window`} />
+          <Stat label="Incidents" value={String(s.incidentCount)} note={`${s.sevCounts[0]} were Sev 1`} />
+          <Stat label="Sev 1 downtime" value={fmtDuration(s.sev1Minutes)} note="Production down, as posted" />
+          <Stat label="Median time to resolve" value={s.medianResolveMinutes != null ? fmtDuration(s.medianResolveMinutes) : "–"} />
+          <Stat label="Longest incident" value={s.longestMinutes ? fmtDuration(s.longestMinutes) : "–"} />
+          <Stat
+            label="Since last incident"
+            value={lastIncident ? (lastIncident.resolvedAt ? fmtDuration((now - lastIncident.resolvedAt) / 60_000) : "ongoing") : "–"}
+            hot={!lastIncident?.resolvedAt && Boolean(lastIncident)}
+          />
+        </div>
+        <p className="muted" style={{ fontSize: 13 }}>
+          Admitted uptime counts time not covered by a Sev 1 incident {p.name} posted on its own status page. Status pages can under-report, so treat it as a best case.
+        </p>
+      </section>
+
+      <section className="stack">
+        <h2 className="h2">By area</h2>
+        <p className="body" style={{ fontSize: 15 }}>Status-page components differ between providers, so we group them into three areas you can compare anywhere.</p>
+        <div className="box">
+          {AREAS.map((a) => {
+            const areaList = list.filter((i) => i.areaTiers?.[a] != null || (i.tierOverride != null && a === "production"));
+            return (
+              <div key={a} className="list-row" style={{ ["--gap" as string]: "10px 24px" }}>
+                <div className="row" style={{ flex: "1 1 220px", minWidth: 0 }}>
+                  <GradeTile grade={s.areas[a].grade} />
+                  <div className="stack" style={{ ["--gap" as string]: "2px", minWidth: 0 }}>
+                    <strong style={{ fontSize: 18 }}>{AREA_LABEL[a]}</strong>
+                    <span className="muted" style={{ fontSize: 14 }}>{AREA_BLURB[a]}</span>
+                  </div>
+                </div>
+                <div className="board-metrics">
+                  <div className="metric"><b>{s.areas[a].incidents}</b><span>INCIDENTS</span></div>
+                  <div className="metric"><b>{fmtDuration(s.areas[a].downtimeMinutes)}</b><span>AFFECTED</span></div>
+                </div>
+                <DayStrip cells={dailyCells(areaList, 60, now, p.historyFrom)} label={`${AREA_LABEL[a]}, last 60 days`} short />
+              </div>
+            );
+          })}
+        </div>
+        <StripLegend />
+      </section>
+
+      <section className="split">
+        <div className="main stack">
+          <h2 className="h2">Trend, last 12 months</h2>
+          <p className="body">
+            {after > before ? <strong>Getting worse: </strong> : after < before ? <strong>Getting better: </strong> : null}
+            {after} incidents in the last 6 months, {before} in the 6 before.
+          </p>
+          <div className="box pad stack" style={{ ["--gap" as string]: "8px" }}>
+            <div className="bars" role="img" aria-label={`Incidents per month: ${trend.map((t) => `${fmtMonthShort(t.start)} ${t.count}`).join(", ")}`}>
+              {trend.map((t) => (
+                <div key={t.start}>
+                  <b>{t.count}</b>
+                  <span style={{ height: `${(t.count / maxMonth) * 100}%`, background: t.worst <= 2 ? "var(--down)" : t.worst <= 4 ? "var(--minor)" : "var(--ink)" }} />
+                </div>
+              ))}
+            </div>
+            <div className="bars-x" aria-hidden="true">
+              {trend.map((t) => (
+                <span key={t.start}>{fmtMonthShort(t.start)}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="side stack">
+          <h2 className="h2">Severity mix</h2>
+          <p className="body" style={{ fontSize: 14 }}>Incidents in the selected window. Security incidents count one tier higher.</p>
+          <div className="box pad stack" style={{ ["--gap" as string]: "14px" }}>
+            <div className="mix" role="img" aria-label={`Sev 1: ${s.sevCounts[0]}, Sev 2: ${s.sevCounts[1]}, Sev 3: ${s.sevCounts[2]}, Sev 4: ${s.sevCounts[3]}`}>
+              {totalSev ? s.sevCounts.map((n, k) => <span key={k} style={{ width: `${(n / totalSev) * 100}%`, background: SEV_COLORS[k] }} />) : <span style={{ width: "100%", background: "var(--up)" }} />}
+            </div>
+            {s.sevCounts.map((n, k) => (
+              <div key={k} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 15 }}>
+                <span style={{ display: "flex", gap: 8, minWidth: 0 }}>
+                  <span style={{ flex: "none", width: 14, height: 14, marginTop: 4, border: "1px solid var(--ink)", background: SEV_COLORS[k] }} />
+                  <span className="stack" style={{ ["--gap" as string]: "0px", minWidth: 0 }}>
+                    <span>Sev {k + 1} · {TIER_NAMES[k + 1]}</span>
+                    <span className="muted" style={{ fontSize: 13 }}>{TIER_BLURB[k + 1]}</span>
+                  </span>
+                </span>
+                <span className="mono">{n}</span>
+              </div>
+            ))}
+            {s.securityCount ? <span className="mono" style={{ fontSize: 13 }}>{plural(s.securityCount, "security incident")}</span> : null}
+          </div>
+        </div>
+      </section>
+
+      <section className="split">
+        <div className="main stack">
+          <h2 className="h2">When it breaks</h2>
+          <p className="body">Incident start times over the last 12 months, by weekday and hour (UTC).</p>
+          <div className="box pad heat" role="img" aria-label="Heatmap of incident start times by weekday and hour, UTC">
+            {heat.map((row, d) => (
+              <div key={d}>
+                <span className="d">{DAYS[d]}</span>
+                {row.map((n, h) => (
+                  <span key={h} className="h" style={{ background: n ? `color-mix(in srgb, var(--down) ${25 + (n / maxHeat) * 75}%, white)` : "var(--rule)" }} />
+                ))}
+              </div>
+            ))}
+            <div className="mono muted" style={{ display: "flex", justifyContent: "space-between", paddingLeft: 32, fontSize: 10 }}>
+              <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
+            </div>
+          </div>
+        </div>
+        <div className="side stack">
+          <h2 className="h2">What breaks</h2>
+          <div className="box pad stack">
+            {comps.length ? (
+              comps.map((c) => (
+                <div key={c.name} className="stack" style={{ ["--gap" as string]: "4px" }}>
+                  <div className="row" style={{ justifyContent: "space-between", fontSize: 15 }}>
+                    <span style={{ fontWeight: 700, overflowWrap: "anywhere" }}>{c.name}</span>
+                    <span className="mono">{plural(c.count, "incident")}</span>
+                  </div>
+                  <div className="meter"><div style={{ width: `${(c.count / comps[0].count) * 100}%` }} /></div>
+                </div>
+              ))
+            ) : (
+              <span className="body">No components named in the last 12 months.</span>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="stack">
+        <h2 className="h2">How they communicate</h2>
+        <div className="stats">
+          <Stat label="Updates per incident" value={comms.updatesPerIncident != null ? comms.updatesPerIncident.toFixed(1) : "–"} note="Last 12 months" />
+          <Stat label="Update cadence" value={comms.medianGapMinutes != null ? `every ${fmtDuration(comms.medianGapMinutes)}` : "–"} note="Median gap between updates" />
+          <Stat label="Postmortems" value={`${comms.postmortems} of ${comms.serious}`} note="Sev 1–2 incidents with a write-up" />
+        </div>
+      </section>
+
+      <section className="stack">
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
+          <h2 className="h2">Incident history</h2>
+          {!all && list.length > shown.length ? <Link href={`/p/${p.slug}?all=1`} style={{ fontWeight: 700, padding: "10px 0" }}>Show all {list.length}</Link> : null}
+        </div>
+        {shown.length ? (
+          <div className="box">
+            {shown.map((i) => (
+              <IncidentItem key={i.id} i={i} updates={history?.updates[i.id]} />
+            ))}
+          </div>
+        ) : (
+          <div className="empty">No incidents on record yet.</div>
+        )}
+        {all && history?.older.length ? (
+          <>
+            <h3 style={{ fontSize: 20 }}>Older than a year</h3>
+            <div className="box">
+              {history.older.map((i) => (
+                <IncidentItem key={i.id} i={i} />
+              ))}
+            </div>
+          </>
+        ) : null}
+      </section>
+
+      <section className="stack">
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
+          <h2 className="h2">Against other {cat?.slug === "ai" ? "AI APIs" : `${(cat?.name ?? "").toLowerCase()} providers`}, last 90 days</h2>
+          <Link href={`/compare?p=${peers.slice(0, 3).map((x) => x.x.slug).join(",")}`} style={{ fontWeight: 700, padding: "10px 0" }}>Open full comparison</Link>
+        </div>
+        <div className="peers">
+          {peers.map(({ x, s: ps }) => (
+            <Link key={x.slug} href={`/p/${x.slug}`} className={`peer ${x.slug === p.slug ? "self" : ""}`}>
+              <strong>{x.name}</strong>
+              <span>Grade {ps.grade}</span>
+              <span>{fmtPct(ps.admittedUptime)} up</span>
+              <span>{plural(ps.incidentCount, "incident")}</span>
+              <span>MTTR {ps.medianResolveMinutes != null ? fmtDuration(ps.medianResolveMinutes) : "–"}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="dark-panel">
+        <div className="stack" style={{ flex: "1 1 300px", minWidth: 0 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 800 }}>README badge</h2>
+          <p style={{ fontSize: 15, color: "#D4D4D8" }}>Show {p.name}&apos;s current grade in your README. It updates with every poll.</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={`/badge/${p.slug}.svg`} alt={`${p.name} grade badge`} height={20} style={{ alignSelf: "flex-start" }} />
+          <div className="code">{badge}</div>
+        </div>
+      </section>
+    </main>
+  );
+}
