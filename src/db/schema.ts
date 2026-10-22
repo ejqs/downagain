@@ -167,7 +167,7 @@ export const componentSurfaces = pgTable(
       .notNull()
       .references(() => providers.id),
     componentName: text("component_name").notNull(),
-    surface: text("surface").notNull(), // serving | data | ship | peripheral
+    surface: text("surface").notNull(), // serving | data | ship | manage | peripheral
   },
   (t) => [primaryKey({ columns: [t.providerId, t.componentName] })],
 );

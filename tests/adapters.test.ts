@@ -155,7 +155,7 @@ describe("adapter edge cases", () => {
 
 describe("provider registry", () => {
   it("has unique slugs, known categories and https sources", () => {
-    const SURFACES: Surface[] = ["serving", "data", "ship", "peripheral"];
+    const SURFACES: Surface[] = ["serving", "data", "ship", "manage", "peripheral"];
     const slugs = PROVIDERS.map((p) => p.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
     const cats = new Set(CATEGORIES.map((c) => c.slug));

@@ -113,3 +113,45 @@ describe("scope from the rules", () => {
     expect(classify({ title: "x", impact: "major", components: ["Edge Network"], worstComponentStatus: null }).scope).toBeNull();
   });
 });
+
+describe("database surfaces", () => {
+  it.each([
+    ["Database Operations", "ship"],
+    ["Database Connectivity", "data"],
+    ["Branching", "ship"],
+    ["Management API", "ship"],
+    ["Dashboard and API Requests", "manage"],
+    ["CockroachDB Cloud Console", "manage"],
+    ["Auth0", "manage"],
+    ["Query Insights", "peripheral"],
+    ["CockroachDB Telemetry", "peripheral"],
+    ["us-east-1 (Northern Virginia)", "data"],
+    ["us-central1 (Iowa)", "data"],
+    ["AWS eu-central-1", "data"],
+    ["Connection Pooler", "data"],
+    ["Database Pay As You Go", "data"],
+    ["QStash", "data"],
+    ["CockroachDB Basic/Standard", "data"],
+    ["Edge Functions", "serving"],
+    ["Realtime", "serving"],
+  ])("%s is %s", (name, surface) => {
+    expect(surfaceForComponent(name, undefined, "databases")).toBe(surface);
+  });
+
+  const db = { ...base, categorySlug: "databases" };
+  it("counts a database outage that breaks queries against PROD", () => {
+    const c = classify({ ...db, title: "Connection errors", impact: "major", components: ["us-east-1 (Northern Virginia)"] });
+    expect(c.tier).toBe(1);
+    expect(c.areaTiers).toEqual({ production: 1 });
+  });
+  it("counts branching and new databases against SHIP", () => {
+    const c = classify({ ...db, title: "New Database Creation Failing Due to Upstream Provider Issue", impact: "major" });
+    expect(c.areaTiers).toEqual({ shipping: 3 });
+    const b = classify({ ...db, title: "Delays", impact: "minor", components: ["Branching"] });
+    expect(b.areaTiers).toEqual({ shipping: 3 });
+  });
+  it("reads Supabase Auth as production through its override", () => {
+    const c = classify({ ...db, title: "Auth errors", impact: "major", components: ["Auth"] }, new Map([["Auth", "serving" as const]]));
+    expect(c.areaTiers).toEqual({ production: 1 });
+  });
+});

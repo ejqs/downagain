@@ -18,7 +18,7 @@
 import type { Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
 
-export const CLASSIFIER_VERSION = 3;
+export const CLASSIFIER_VERSION = 4;
 
 // manage: dashboard, console, auth, billing. peripheral: docs, status page, consumer apps.
 export type Surface = "serving" | "data" | "ship" | "manage" | "peripheral";
@@ -110,11 +110,26 @@ const CLOUD_SURFACE_RULES: [Surface, RegExp][] = [
   ["serving", /compute|\bec2\b|lambda|functions?|cloud run|app engine|kubernetes|\b[gea]ks\b|\becs\b|fargate|load balanc|\belb\b|cloudfront|\bcdn\b|dns|route ?53|network|\bvpc\b|interconnect|api gateway|apigee|identity|\biam\b|\bsts\b|cognito|entra|active directory|vertex|bedrock|openai|gemini|virtual machines?|app service|front door|multiple (?:products|services)/i],
 ];
 
+// Database providers: queries, connections and the data APIs a customer's own users
+// hit are PROD; creating databases, branching, migrations and the management API
+// are SHIP. Checked before the generic rules, which would call "Database
+// Operations" or "New database creation" data. Auth here is the end-user auth
+// some providers serve (Supabase), so it is set per provider, not by these rules.
+const DATABASE_SURFACE_RULES: [Surface, RegExp][] = [
+  ["peripheral", /docs|documentation|support|status page|community|marketing|website|telemetry|insights|metrics|analytics|charts|e-?mail|notification/i],
+  ["ship", /branch|migration|schema|deploy|database operations|provision|creat(?:e|ion)|scal(?:e|ing)|restore|backups?|management api|admin api|\bcli\b|terraform|import|resiz|upgrade|webhook|cron|logs?\b/i],
+  ["manage", /dashboard|console|studio|billing|payment|subscription|sign[- ]?up|sign[- ]?in|login|log[- ]in|auth0|account|organi[sz]ation|api keys?|cloud manager|settings/i],
+  ["data", /database|postgres|mysql|mongo|redis|kafka|vector|qstash|queue|search|cluster|connect|pooler|supavisor|pgbouncer|quer(?:y|ies)|reads?\b|writes?\b|replica|storage|rest api|data api|graphql|api gateway|serverless|dedicated|advanced|basic|standard|free tier|pay as you go|\b(?:aws|gcp|azure)\b|region|\b[a-z]{2}-[a-z]+-?\d\b/i],
+];
+
 export function surfaceForComponent(name: string, overrides?: Map<string, Surface>, categorySlug?: string): Surface | null {
   const o = overrides?.get(name);
   if (o) return o;
   if (categorySlug === "cloud") {
     for (const [surface, re] of CLOUD_SURFACE_RULES) if (re.test(name)) return surface;
+  }
+  if (categorySlug === "databases") {
+    for (const [surface, re] of DATABASE_SURFACE_RULES) if (re.test(name)) return surface;
   }
   for (const [surface, re] of SURFACE_RULES) {
     if (!re.test(name)) continue;

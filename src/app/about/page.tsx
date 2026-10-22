@@ -18,9 +18,9 @@ export const metadata: Metadata = pageMeta({
 const DATASET_LD = {
   "@context": "https://schema.org",
   "@type": "Dataset",
-  name: "Hosting, cloud and AI API incident history",
+  name: "Hosting, cloud, database and AI API incident history",
   description:
-    "Incidents posted on the official status pages of hosting platforms, clouds and AI APIs, polled every 5 minutes, with a severity tier, duration and 90-day grade for each provider.",
+    "Incidents posted on the official status pages of hosting platforms, clouds, databases and AI APIs, polled every 5 minutes, with a severity tier, duration and 90-day grade for each provider.",
   url: absUrl("/about"),
   creator: { "@type": "Person", name: "ejqs", url: "https://ejqs.net" },
   includedInDataCatalog: { "@type": "DataCatalog", name: SITE_NAME, url: `${SITE}/` },

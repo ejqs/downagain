@@ -1,4 +1,4 @@
-// The launch list: Hosting first, then AI. Adding a provider is a new entry here,
+// The tracked list: Hosting, AI, Cloud, Databases. Adding a provider is a new entry here,
 // then `bun run db:seed` and `bun run backfill --provider <slug>`.
 //
 // A provider only appears on the site once its status source has answered at
@@ -33,6 +33,7 @@ export const CATEGORIES: CategorySeed[] = [
   { slug: "hosting", name: "Hosting", sortOrder: 1 },
   { slug: "ai", name: "AI APIs", sortOrder: 2 },
   { slug: "cloud", name: "Cloud", sortOrder: 3 },
+  { slug: "databases", name: "Databases", sortOrder: 4 },
 ];
 
 export const PROVIDERS: ProviderSeed[] = [
@@ -214,5 +215,71 @@ export const PROVIDERS: ProviderSeed[] = [
     sourceKind: "azure",
     sourceUrl: "https://azure.status.microsoft/en-us/status/feed/",
     verified: "2026-10-22",
+  },
+
+  // Databases. Rules for their components are in severity.ts (DATABASE_SURFACE_RULES).
+  {
+    slug: "supabase",
+    name: "Supabase",
+    category: "databases",
+    kind: "Postgres platform",
+    homepageUrl: "https://supabase.com",
+    statusPageUrl: "https://status.supabase.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.supabase.com",
+    // Supabase Auth signs in the customer's own users, so it's production, not a console login.
+    surfaces: { Auth: "serving" },
+  },
+  {
+    slug: "neon",
+    name: "Neon",
+    category: "databases",
+    kind: "Serverless Postgres",
+    homepageUrl: "https://neon.com",
+    statusPageUrl: "https://neonstatus.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://neonstatus.com",
+  },
+  {
+    slug: "planetscale",
+    name: "PlanetScale",
+    category: "databases",
+    kind: "Postgres and MySQL",
+    homepageUrl: "https://planetscale.com",
+    statusPageUrl: "https://www.planetscalestatus.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://www.planetscalestatus.com",
+  },
+  {
+    slug: "mongodb",
+    name: "MongoDB Atlas",
+    category: "databases",
+    kind: "Document database",
+    homepageUrl: "https://www.mongodb.com/atlas",
+    statusPageUrl: "https://status.mongodb.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.mongodb.com",
+    // "MongoDB Cloud" is the Atlas UI and Admin API, not the clusters.
+    surfaces: { "MongoDB Cloud": "manage" },
+  },
+  {
+    slug: "upstash",
+    name: "Upstash",
+    category: "databases",
+    kind: "Serverless Redis",
+    homepageUrl: "https://upstash.com",
+    statusPageUrl: "https://status.upstash.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.upstash.com",
+  },
+  {
+    slug: "cockroachdb",
+    name: "CockroachDB Cloud",
+    category: "databases",
+    kind: "Distributed SQL",
+    homepageUrl: "https://www.cockroachlabs.com",
+    statusPageUrl: "https://status.cockroachlabs.cloud",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.cockroachlabs.cloud",
   },
 ];
