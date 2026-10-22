@@ -10,6 +10,8 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "e2e:prepare": "bun run db:migrate && bun run db:seed && bun run dev:sample && STATUS_FIXTURES_DIR=tests/fixtures bun run poll vercel railway heroku",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "bun scripts/seed.ts",
@@ -28,6 +30,8 @@
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.11",
+    "@playwright/test": "1.56.1",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

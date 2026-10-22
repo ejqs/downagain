@@ -113,8 +113,9 @@ async function pollProvider(database: DB, p: typeof providers.$inferSelect, cate
     });
   if (statusChanged) await database.insert(statusChanges).values({ providerId: p.id, status, changedAt: now });
 
-  // A provider whose status page just came back after being "unknown" counts as changed too.
-  return { ...base, ok: true, changed: changed || firstPoll, status, newIncidents, updatedIncidents };
+  // A provider whose status page just came back after being "unknown" counts as changed too:
+  // its stored hash still matches, but the pages are showing "unknown".
+  return { ...base, ok: true, changed: changed || statusChanged || firstPoll, status, newIncidents, updatedIncidents };
 }
 
 export async function writeIncidents(
