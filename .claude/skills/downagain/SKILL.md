@@ -19,15 +19,15 @@ A read-only Next.js site that ranks hosting and AI providers by their own status
 
 1. Find the status page and confirm the source format by reading the live endpoint (e.g. `https://status.example.com/api/v2/summary.json`). Statuspage-compatible pages (including many incident.io pages) use `sourceKind: "statuspage"` with the page root as `sourceUrl`.
 2. Add an entry to `PROVIDERS` in `src/lib/providers.ts` (category, kind, URLs, `verified` date). Add `surfaces` overrides for component names the rules in `src/lib/severity.ts` get wrong.
-3. Save a real response as a fixture in `tests/fixtures/` (file name from `fixtureName()`), add an adapter test if the format is new, run `pnpm test`.
-4. Deploy, or locally: `pnpm db:seed && pnpm backfill --provider <slug>`.
+3. Save a real response as a fixture in `tests/fixtures/` (file name from `fixtureName()`), add an adapter test if the format is new, run `bun run test`.
+4. Deploy, or locally: `bun run db:seed && bun run backfill --provider <slug>`.
 5. A provider is hidden until its source answers once, so check the poll route's `failed` list after deploying.
 
 ## Change the severity rubric
 
 1. Edit `src/lib/severity.ts` and bump `CLASSIFIER_VERSION`.
 2. Update `tests/severity.test.ts` and the About page if tier meanings changed.
-3. After deploying, run `pnpm regrade` against production so stored incidents use the new rules. Manual overrides are kept.
+3. After deploying, run `bun run regrade` against production so stored incidents use the new rules. Manual overrides are kept.
 
 ## Grades
 
@@ -37,8 +37,8 @@ A read-only Next.js site that ranks hosting and AI providers by their own status
 
 ```bash
 cp .env.example .env            # point DATABASE_URL at a local Postgres
-pnpm db:migrate && pnpm db:seed
-pnpm dev:sample                 # made-up incidents, localhost only; --clear removes them
-STATUS_FIXTURES_DIR=tests/fixtures pnpm poll vercel railway heroku   # poll from fixtures
-pnpm dev
+bun run db:migrate && bun run db:seed
+bun run dev:sample                 # made-up incidents, localhost only; --clear removes them
+STATUS_FIXTURES_DIR=tests/fixtures bun run poll vercel railway heroku   # poll from fixtures
+bun run dev
 ```

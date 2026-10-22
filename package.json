@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.28.0",
+  "packageManager": "bun@1.4.2",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,12 +12,12 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx scripts/seed.ts",
-    "poll": "tsx scripts/poll-once.ts",
-    "backfill": "tsx scripts/backfill.ts",
-    "regrade": "tsx scripts/regrade.ts",
-    "cron": "node scripts/cron-trigger.mjs",
-    "dev:sample": "tsx scripts/dev-sample.ts"
+    "db:seed": "bun scripts/seed.ts",
+    "poll": "bun scripts/poll-once.ts",
+    "backfill": "bun scripts/backfill.ts",
+    "regrade": "bun scripts/regrade.ts",
+    "cron": "bun scripts/cron-trigger.mjs",
+    "dev:sample": "bun scripts/dev-sample.ts"
   },
   "dependencies": {
     "drizzle-kit": "0.31.11",
@@ -25,8 +25,7 @@
     "next": "16.4.2",
     "postgres": "3.4.9",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "tsx": "4.23.15"
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
@@ -36,14 +35,12 @@
     "typescript": "5.9.3",
     "vitest": "^5.0.5"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp",
-      "@parcel/watcher"
-    ]
-  },
   "engines": {
     "node": ">=22"
-  }
+  },
+  "trustedDependencies": [
+    "esbuild",
+    "sharp",
+    "@parcel/watcher"
+  ]
 }

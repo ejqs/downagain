@@ -7,7 +7,7 @@
 //   Sev 4 · Papercut    dashboard, billing, docs, support                weight 0.2
 //   0     · Not counted maintenance inside its window                    weight 0
 //
-// Bump CLASSIFIER_VERSION whenever these rules change, then run `pnpm regrade`.
+// Bump CLASSIFIER_VERSION whenever these rules change, then run `bun run regrade`.
 import type { Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
 

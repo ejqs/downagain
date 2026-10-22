@@ -1,7 +1,7 @@
 // Fill a LOCAL database with made-up incidents so the pages have something to show.
 // Refuses to run against anything but localhost. Rows are marked origin "sample".
-//   pnpm dev:sample           add sample data
-//   pnpm dev:sample --clear   remove sample data
+//   bun run dev:sample           add sample data
+//   bun run dev:sample --clear   remove sample data
 import { eq, inArray } from "drizzle-orm";
 import { closeDb, db } from "@/db";
 import { categories, incidentUpdates, incidents, providerStatus, providers } from "@/db/schema";
@@ -130,5 +130,5 @@ for (const [slug, comp, title, impact, mins] of [
   });
   total++;
 }
-console.log(`Inserted ${total} sample incidents. Remove them with: pnpm dev:sample --clear`);
+console.log(`Inserted ${total} sample incidents. Remove them with: bun run dev:sample --clear`);
 await closeDb();

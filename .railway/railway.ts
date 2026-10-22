@@ -13,12 +13,12 @@ import { defineRailway, github, postgres, preserve, project, service } from "rai
 export default defineRailway(() => {
   const db = postgres("Postgres");
 
-  const web = service("web", {
+  const web = service("downagain", {
     source: github("ejqs/downagain", { branch: "main" }),
-    build: "pnpm build",
+    build: "bun run build",
     // Migrations and the provider list are applied before each deploy goes live.
-    preDeploy: "pnpm db:migrate && pnpm db:seed",
-    start: "pnpm start",
+    preDeploy: "bun run db:migrate && bun run db:seed",
+    start: "bun run start",
     healthcheck: "/api/health",
     replicas: 1, // the page cache lives in this process; more replicas need a shared cache handler
     env: {
@@ -28,17 +28,17 @@ export default defineRailway(() => {
       NEXT_PUBLIC_SITE_URL: "https://downagain.dev",
       NEXT_PUBLIC_UMAMI_WEBSITE_ID: "5f60967a-e8ec-4965-85ef-cbcf07e4c968",
     },
-    // Add once DNS for downagain.dev points at Railway:
-    // domains: ["downagain.dev"],
+    // downagain.dev is attached; DNS is set up in Cloudflare via Railway's one-click flow.
+    domains: ["downagain.dev"],
   });
 
   const poller = service("poller", {
     source: github("ejqs/downagain", { branch: "main" }),
     build: "echo poller needs no build",
-    start: "node scripts/cron-trigger.mjs",
+    start: "bun scripts/cron-trigger.mjs",
     deploy: { cronSchedule: "*/5 * * * *", restartPolicyType: "NEVER" },
     env: {
-      POLL_URL: "http://${{web.RAILWAY_PRIVATE_DOMAIN}}:8080/api/cron/poll",
+      POLL_URL: "http://${{downagain.RAILWAY_PRIVATE_DOMAIN}}:8080/api/cron/poll",
       CRON_SECRET: web.env.CRON_SECRET,
     },
   });

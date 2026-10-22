@@ -32,36 +32,36 @@ Next.js 16 (App Router), Drizzle ORM, Postgres, all on Railway. Umami Cloud for 
 
 ## Local development
 
-Needs Node 22+, pnpm and a Postgres.
+Needs Node 22+, bun run and a Postgres.
 
 ```bash
 cp .env.example .env          # set DATABASE_URL
-pnpm install
-pnpm db:migrate && pnpm db:seed
-pnpm dev:sample               # optional: made-up incidents (localhost only; --clear removes them)
-pnpm dev
+bun install
+bun run db:migrate && bun run db:seed
+bun run dev:sample               # optional: made-up incidents (localhost only; --clear removes them)
+bun run dev
 ```
 
 Useful scripts:
 
 | Command | What it does |
 |---|---|
-| `pnpm poll [slug…]` | Poll providers once, straight into the database |
-| `STATUS_FIXTURES_DIR=tests/fixtures pnpm poll vercel railway heroku` | Same, reading saved fixtures instead of the network |
-| `pnpm backfill [--provider slug]` | Seed, then pull whatever history each status API exposes (marked `origin = backfill`) |
-| `pnpm regrade` | Re-run the classifier over every stored incident after changing the rubric |
-| `pnpm test` / `pnpm lint` | Unit tests (adapters, severity, grading) / typecheck |
-| `pnpm db:generate` | New migration after editing `src/db/schema.ts` |
+| `bun run poll [slug…]` | Poll providers once, straight into the database |
+| `STATUS_FIXTURES_DIR=tests/fixtures bun run poll vercel railway heroku` | Same, reading saved fixtures instead of the network |
+| `bun run backfill [--provider slug]` | Seed, then pull whatever history each status API exposes (marked `origin = backfill`) |
+| `bun run regrade` | Re-run the classifier over every stored incident after changing the rubric |
+| `bun run test` / `bun run lint` | Unit tests (adapters, severity, grading) / typecheck |
+| `bun run db:generate` | New migration after editing `src/db/schema.ts` |
 
 ## Deploying on Railway
 
-`.railway/railway.ts` describes the project: `web` (Next.js, runs `pnpm db:migrate && pnpm db:seed` before each deploy, healthcheck `/api/health`), `Postgres`, and `poller` (cron `*/5 * * * *`, runs `scripts/cron-trigger.mjs`, which POSTs to web over the private network and exits).
+`.railway/railway.ts` describes the project: `downagain` (the web service: Next.js, runs `bun run db:migrate && bun run db:seed` before each deploy, healthcheck `/api/health`), `Postgres`, and `poller` (cron `*/5 * * * *`, runs `bun scripts/cron-trigger.mjs`, which POSTs to web over the private network and exits).
 
 1. `railway link` to the existing project, then `railway config plan` and read the plan. Rename resources in the file if the project already uses other names.
-2. Set `CRON_SECRET` on `web` to a long random string. The poller reads it by reference.
+2. Set `CRON_SECRET` on `downagain` to a long random string. The poller reads it by reference.
 3. `railway config apply` once the plan looks right.
-4. After the first deploy, run the backfill once: `railway run --service web pnpm backfill`, then hit the poll route with `?revalidate` (or wait for the next cron run).
-5. Point `downagain.dev` at the web service and uncomment `domains` in `.railway/railway.ts`.
+4. After the first deploy, run the backfill once: `railway run --service downagain bun run backfill`, then hit the poll route with `?revalidate` (or wait for the next cron run).
+5. `downagain.dev` is attached to the web service; DNS lives in Cloudflare (set up with Railway's one-click Cloudflare flow).
 
 Environment variables are listed in `.env.example`.
 

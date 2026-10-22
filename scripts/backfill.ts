@@ -1,7 +1,7 @@
 // Backfill: pull whatever history each status API exposes (about the last 50
 // incidents on Statuspage) and mark it origin "backfill".
-//   pnpm backfill                     all providers
-//   pnpm backfill --provider vercel   one provider
+//   bun run backfill                     all providers
+//   bun run backfill --provider vercel   one provider
 // Then hit the web's poll route (or wait for the next cron run) so cached pages refresh.
 import { closeDb, db } from "@/db";
 import { pollAll } from "@/lib/poller";

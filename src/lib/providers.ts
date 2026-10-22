@@ -1,5 +1,5 @@
 // The launch list: Hosting first, then AI. Adding a provider is a new entry here,
-// then `pnpm db:seed` and `pnpm backfill --provider <slug>`.
+// then `bun run db:seed` and `bun run backfill --provider <slug>`.
 //
 // A provider only appears on the site once its status source has answered at
 // least once, so an entry with a wrong endpoint stays hidden instead of showing
