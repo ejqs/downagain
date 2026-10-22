@@ -1,0 +1,37 @@
+import { revalidateTag } from "next/cache";
+import { db } from "@/db";
+import { pollAll } from "@/lib/poller";
+
+export const dynamic = "force-dynamic";
+export const maxDuration = 120;
+
+function authorized(req: Request) {
+  const secret = process.env.CRON_SECRET;
+  return Boolean(secret) && req.headers.get("authorization") === `Bearer ${secret}`;
+}
+
+/** Called every 5 minutes by the Railway cron service. Revalidates cached pages only on change. */
+export async function POST(req: Request) {
+  if (!authorized(req)) return Response.json({ error: "unauthorized" }, { status: 401 });
+  const url = new URL(req.url);
+  const slugs = url.searchParams.get("provider")?.split(",").filter(Boolean);
+
+  let results;
+  try {
+    results = await pollAll(db(), { slugs });
+  } catch (err) {
+    return Response.json({ error: err instanceof Error ? err.message : String(err) }, { status: 409 });
+  }
+
+  const changed = results.filter((r) => r.changed).map((r) => r.slug);
+  if (changed.length || url.searchParams.has("revalidate")) {
+    // Next visitor gets fresh data immediately; outages are exactly when stale pages hurt.
+    revalidateTag("status", { expire: 0 });
+    for (const slug of changed) revalidateTag(`provider:${slug}`, { expire: 0 });
+  }
+  return Response.json({
+    changed,
+    failed: results.filter((r) => !r.ok).map((r) => ({ slug: r.slug, error: r.error })),
+    results: results.map(({ slug, status, newIncidents, updatedIncidents }) => ({ slug, status, newIncidents, updatedIncidents })),
+  });
+}

@@ -1,0 +1,31 @@
+{
+  "components": [
+    { "id": "g1", "name": "Railway", "type": "group", "description": null, "components": [
+      { "id": "c1", "name": "API — backboard.railway.com", "position": 1, "status": "PARTIAL_OUTAGE", "description": null },
+      { "id": "c2", "name": "Deployments", "position": 2, "status": "OPERATIONAL", "description": null }
+    ]},
+    { "id": "g2", "name": "US West (California, USA)", "type": "group", "description": null, "components": [
+      { "id": "c3", "name": "Edge Network", "position": 1, "status": "OPERATIONAL", "description": null }
+    ]},
+    { "id": "c4", "name": "Payments & Billing", "type": "component", "position": 9, "status": "OPERATIONAL", "description": null }
+  ],
+  "incidents": [
+    {
+      "autoResolveAt": null,
+      "components": [{ "component": { "groupName": "Railway", "id": "c1", "name": "API — backboard.railway.com" }, "impact": "PARTIAL_OUTAGE" }],
+      "createdAt": "2026-10-21T07:24:24.727677+00:00",
+      "id": "rw-1",
+      "resolvedAt": null,
+      "slug": "QH8L8B3E",
+      "status": "IDENTIFIED",
+      "title": "Dashboard and CLI requests failing",
+      "updatedAt": "2026-10-21T07:50:00+00:00",
+      "updates": [
+        { "createdAt": "2026-10-21T07:24:24+00:00", "id": "ru1", "message": "Investigating.", "status": "INVESTIGATING" },
+        { "createdAt": "2026-10-21T07:50:00+00:00", "id": "ru2", "message": "Identified.", "status": "IDENTIFIED" }
+      ],
+      "worstImpact": "PARTIAL_OUTAGE"
+    }
+  ],
+  "maintenances": []
+}

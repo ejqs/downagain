@@ -1,0 +1,12 @@
+{
+  "page": { "id": "lvglq8h0mdyh", "name": "Vercel", "url": "https://www.vercel-status.com", "updated_at": "2026-10-22T14:00:00.000Z" },
+  "status": { "indicator": "minor", "description": "Minor Service Outage" },
+  "components": [
+    { "id": "g1", "name": "Edge Network", "status": "operational", "group": true, "group_id": null },
+    { "id": "c1", "name": "iad1 - Washington, D.C., USA", "status": "partial_outage", "group": false, "group_id": "g1" },
+    { "id": "c2", "name": "Builds", "status": "degraded_performance", "group": false, "group_id": null },
+    { "id": "c3", "name": "Dashboard", "status": "operational", "group": false, "group_id": null }
+  ],
+  "incidents": [],
+  "scheduled_maintenances": []
+}
