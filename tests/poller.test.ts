@@ -51,6 +51,15 @@ describe("poller", () => {
     expect((await database.select().from(providers)).length).toBe(before);
   });
 
+  it("seeding disables a provider dropped from the list", async () => {
+    const [row] = await database.insert(providers).values({ ...(await database.select().from(providers))[0], id: undefined, slug: "dropped" }).returning();
+    await seed(database);
+    const [after] = await database.select().from(providers).where(eq(providers.id, row.id));
+    expect(after.enabled).toBe(false);
+    expect((await database.select().from(providers).where(eq(providers.enabled, false))).map((p) => p.slug)).toEqual(["dropped"]);
+    await database.delete(providers).where(eq(providers.id, row.id));
+  });
+
   it("first poll stores status, incidents as backfill, and a raw snapshot", async () => {
     const r = byslug(await pollAll(database, { slugs: SLUGS, now: T0 }));
     expect(Object.keys(r).sort()).toEqual(["heroku", "railway", "vercel"]);

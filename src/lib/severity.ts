@@ -18,7 +18,7 @@
 import type { Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
 
-export const CLASSIFIER_VERSION = 4;
+export const CLASSIFIER_VERSION = 5;
 
 // manage: dashboard, console, auth, billing. peripheral: docs, status page, consumer apps.
 export type Surface = "serving" | "data" | "ship" | "manage" | "peripheral";
@@ -117,7 +117,7 @@ const CLOUD_SURFACE_RULES: [Surface, RegExp][] = [
 // some providers serve (Supabase), so it is set per provider, not by these rules.
 const DATABASE_SURFACE_RULES: [Surface, RegExp][] = [
   ["peripheral", /docs|documentation|support|status page|community|marketing|website|telemetry|insights|metrics|analytics|charts|e-?mail|notification/i],
-  ["ship", /branch|migration|schema|deploy|database operations|provision|creat(?:e|ion)|scal(?:e|ing)|restore|backups?|management api|admin api|\bcli\b|terraform|import|resiz|upgrade|webhook|cron|logs?\b/i],
+  ["ship", /branch|migration|schema|deploy|database operations|provision|creat(?:e|ion)|scal(?:e|ing)|restore|pause|lifecycle|backups?|management api|mgmt|admin api|\bcli\b|terraform|import|resiz|upgrade|webhook|cron|logs?\b/i],
   ["manage", /dashboard|console|studio|billing|payment|subscription|sign[- ]?up|sign[- ]?in|login|log[- ]in|auth0|account|organi[sz]ation|api keys?|cloud manager|settings/i],
   ["data", /database|postgres|mysql|mongo|redis|kafka|vector|qstash|queue|search|cluster|connect|pooler|supavisor|pgbouncer|quer(?:y|ies)|reads?\b|writes?\b|replica|storage|rest api|data api|graphql|api gateway|serverless|dedicated|advanced|basic|standard|free tier|pay as you go|\b(?:aws|gcp|azure)\b|region|\b[a-z]{2}-[a-z]+-?\d\b/i],
 ];

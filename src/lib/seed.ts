@@ -1,9 +1,9 @@
-import { eq } from "drizzle-orm";
+import { eq, notInArray } from "drizzle-orm";
 import type { DB } from "@/db";
 import { categories, componentSurfaces, providers } from "@/db/schema";
 import { CATEGORIES, PROVIDERS } from "@/lib/providers";
 
-/** Idempotent: inserts or updates categories, providers and surface overrides. */
+/** Idempotent: inserts or updates categories, providers and surface overrides, and disables providers no longer listed. */
 export async function seed(database: DB) {
   for (const c of CATEGORIES) {
     await database
@@ -37,6 +37,11 @@ export async function seed(database: DB) {
         .onConflictDoUpdate({ target: [componentSurfaces.providerId, componentSurfaces.componentName], set: { surface } });
     }
   }
+  // A provider dropped from the list stops being polled and shown; its incidents stay.
+  await database
+    .update(providers)
+    .set({ enabled: false })
+    .where(notInArray(providers.slug, PROVIDERS.map((p) => p.slug)));
   return { categories: CATEGORIES.length, providers: PROVIDERS.length };
 }
 

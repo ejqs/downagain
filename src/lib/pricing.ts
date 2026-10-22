@@ -181,17 +181,6 @@ export const PRICES: Record<string, Price> = {
     source: "https://supabase.com/pricing",
     checked: "2026-10-22",
   },
-  neon: {
-    plan: "Launch, 0.25 CU always on",
-    lines: [
-      { label: "0.25 CU (about 1 GB RAM) for 730 h at $0.106/CU-hour", usd: 19.35 },
-      { label: "10 GB storage at $0.35/GB-month", usd: 3.5 },
-    ],
-    estimate: true,
-    note: "Assumes scale to zero is off and autoscaling stays at 0.25 CU.",
-    source: "https://neon.com/docs/introduction/plans",
-    checked: "2026-10-22",
-  },
   planetscale: {
     plan: "Postgres PS-10, single node",
     lines: [{ label: "PS-10 arm64 (1 GiB RAM, 10 GB storage included)", usd: 10 }],

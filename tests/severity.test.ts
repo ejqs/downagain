@@ -120,6 +120,8 @@ describe("database surfaces", () => {
     ["Database Connectivity", "data"],
     ["Branching", "ship"],
     ["Management API", "ship"],
+    ["Elevated Mgmt API Error Rates", "ship"],
+    ["Project lifecycle operation errors", "ship"],
     ["Dashboard and API Requests", "manage"],
     ["CockroachDB Cloud Console", "manage"],
     ["Auth0", "manage"],

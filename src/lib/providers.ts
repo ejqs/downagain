@@ -218,6 +218,7 @@ export const PROVIDERS: ProviderSeed[] = [
   },
 
   // Databases. Rules for their components are in severity.ts (DATABASE_SURFACE_RULES).
+  // Neon (neonstatus.com) 404s on the Statuspage API, so it needs its own adapter first.
   {
     slug: "supabase",
     name: "Supabase",
@@ -227,18 +228,9 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://status.supabase.com",
     sourceKind: "statuspage",
     sourceUrl: "https://status.supabase.com",
+    verified: "2026-10-22",
     // Supabase Auth signs in the customer's own users, so it's production, not a console login.
     surfaces: { Auth: "serving" },
-  },
-  {
-    slug: "neon",
-    name: "Neon",
-    category: "databases",
-    kind: "Serverless Postgres",
-    homepageUrl: "https://neon.com",
-    statusPageUrl: "https://neonstatus.com",
-    sourceKind: "statuspage",
-    sourceUrl: "https://neonstatus.com",
   },
   {
     slug: "planetscale",
@@ -249,6 +241,7 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://www.planetscalestatus.com",
     sourceKind: "statuspage",
     sourceUrl: "https://www.planetscalestatus.com",
+    verified: "2026-10-22",
   },
   {
     slug: "mongodb",
@@ -259,6 +252,7 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://status.mongodb.com",
     sourceKind: "statuspage",
     sourceUrl: "https://status.mongodb.com",
+    verified: "2026-10-22",
     // "MongoDB Cloud" is the Atlas UI and Admin API, not the clusters.
     surfaces: { "MongoDB Cloud": "manage" },
   },
@@ -271,6 +265,7 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://status.upstash.com",
     sourceKind: "statuspage",
     sourceUrl: "https://status.upstash.com",
+    verified: "2026-10-22",
   },
   {
     slug: "cockroachdb",
@@ -281,5 +276,6 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://status.cockroachlabs.cloud",
     sourceKind: "statuspage",
     sourceUrl: "https://status.cockroachlabs.cloud",
+    verified: "2026-10-22",
   },
 ];
