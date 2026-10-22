@@ -250,3 +250,6 @@ details.updates li { overflow-wrap: anywhere; }
 .hint[open] summary { color: var(--ink); text-decoration-style: solid; }
 .hint-body { position: absolute; left: 8px; right: 8px; top: calc(100% - 8px); z-index: 3; padding: 10px 12px; background: var(--ink); color: var(--paper); font: 400 14px/1.4 var(--font-display); letter-spacing: 0; text-transform: none; box-shadow: 4px 4px 0 var(--hazard); }
 .incident .what a { padding-block: 10px; }
+.comp-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: 320px; overflow-y: auto; font-size: 14px; }
+.comp-list li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-top: 1px solid var(--rule); }
+.comp-list li .mono { flex: none; font-size: 12px; color: var(--muted); }

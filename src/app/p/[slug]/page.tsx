@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProviderHistory, safeSnapshot, type IncidentRow } from "@/lib/data";
-import { communication, dailyCells, downNow, incidentsFor, monthlyTrend, openIncidents, scoreFor, startHeatmap, tierOf, topComponents, valueBoard } from "@/lib/views";
+import { getProviderHistory, safeSnapshot, type IncidentRow, type ProviderRow } from "@/lib/data";
+import { brokenComponents, communication, dailyCells, downNow, incidentsFor, monthlyTrend, openIncidents, scoreFor, startHeatmap, tierOf, topComponents, valueBoard } from "@/lib/views";
 import { WORKLOADS, checkedMs, fmtUsd, isStale } from "@/lib/pricing";
 import { durationMinutes } from "@/lib/grading";
 import { fmtAgo, fmtDate, fmtDuration, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
@@ -46,7 +46,52 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-const SCOPE_LABEL: Record<string, string> = { regional: "regional, ", subset: "some customers, " };
+const SCOPE_LABEL: Record<string, string> = { regional: "regional", subset: "some customers" };
+
+/** One short mono line: who graded it, how wide it was, which components. */
+function IncidentTags({ i }: { i: IncidentRow }) {
+  const tags = [
+    i.tierOverride == null && i.gradedBy === "claude" ? "AI-graded" : null,
+    SCOPE_LABEL[i.scope ?? ""] ?? null,
+    i.components.length ? `${i.components[0]}${i.components.length > 1 ? ` +${i.components.length - 1}` : ""}` : null,
+  ].filter(Boolean);
+  if (!tags.length) return null;
+  return (
+    <span className="mono muted" style={{ fontSize: 12 }} title={i.components.length > 1 ? i.components.join(", ") : undefined}>
+      {tags.join(" · ")}
+    </span>
+  );
+}
+
+function BrokenList({ p }: { p: ProviderRow }) {
+  const b = brokenComponents(p);
+  const n = b.items.length;
+  if (!n) return null;
+  const shownGroups = b.groups.slice(0, 3);
+  return (
+    <div className="list-row stack" style={{ alignItems: "stretch", ["--gap" as string]: "4px" }}>
+      <strong style={{ fontSize: 16 }}>{plural(n, "component")} affected</strong>
+      <span className="mono" style={{ fontSize: 13 }}>{b.byStatus.map(([st, k]) => `${k} ${STATUS_LABEL[st].toLowerCase()}`).join(" · ")}</span>
+      {b.groups.length > 1 ? (
+        <span className="muted" style={{ fontSize: 14 }}>
+          {shownGroups.map(([g, k]) => `${g} ${k}`).join(" · ")}
+          {b.groups.length > 3 ? ` · +${b.groups.length - 3} more` : ""}
+        </span>
+      ) : null}
+      <details className="updates">
+        <summary>{n > 1 ? `All ${n}` : "Show"}</summary>
+        <ul className="comp-list">
+          {b.items.map((c) => (
+            <li key={`${c.group}/${c.name}`}>
+              <span>{c.name}</span>
+              <span className="mono">{STATUS_LABEL[c.status].toLowerCase()}</span>
+            </li>
+          ))}
+        </ul>
+      </details>
+    </div>
+  );
+}
 
 function IncidentItem({ i, updates }: { i: IncidentRow; updates?: { status: string; body: string; postedAt: number }[] }) {
   const tier = tierOf(i);
@@ -62,9 +107,8 @@ function IncidentItem({ i, updates }: { i: IncidentRow; updates?: { status: stri
         <span style={{ fontSize: 16, fontWeight: 700 }}>{i.title}</span>
         <span className="muted" style={{ fontSize: 14 }}>
           {i.tierOverride != null ? `Sev ${i.tierOverride} (reviewed${i.overrideNote ? `: ${i.overrideNote}` : ""})` : i.reason}
-          {i.tierOverride == null && i.gradedBy === "claude" ? ` · ${SCOPE_LABEL[i.scope ?? ""] ?? ""}graded by Claude from the provider's updates` : ""}
-          {i.components.length ? ` · ${i.components.slice(0, 4).join(", ")}${i.components.length > 4 ? "…" : ""}` : ""}
         </span>
+        <IncidentTags i={i} />
         {updates?.length ? (
           <details className="updates">
             <summary>{plural(updates.length, "update")}</summary>
@@ -184,22 +228,17 @@ export default async function ProviderPage({ params, searchParams }: Props) {
         </div>
       </section>
 
-      {open.length || (isProblem(p.status) && p.components.some((c) => isProblem(c.status))) ? (
+      {down ? (
         <section className="box" aria-label="Happening now" style={{ background: "var(--down-wash)" }}>
           <div className="list-row" style={{ background: "var(--down)" }}>
             <strong style={{ fontSize: 20 }}>Happening now</strong>
           </div>
-          {open.map((i) => (
-            <IncidentItem key={i.id} i={i} updates={history?.updates[i.id]} />
-          ))}
-          {p.components.filter((c) => isProblem(c.status)).length ? (
-            <div className="list-row" style={{ fontSize: 15 }}>
-              {p.components
-                .filter((c) => isProblem(c.status))
-                .map((c) => `${c.group ? `${c.group} / ` : ""}${c.name}: ${STATUS_LABEL[c.status].toLowerCase()}`)
-                .join(" · ")}
-            </div>
-          ) : null}
+          {open
+            .filter((i) => tierOf(i) <= 3)
+            .map((i) => (
+              <IncidentItem key={i.id} i={i} updates={history?.updates[i.id]} />
+            ))}
+          <BrokenList p={p} />
         </section>
       ) : null}
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
-import { communication, dailyCells, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals } from "@/lib/views";
+import { brokenComponents, communication, dailyCells, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals } from "@/lib/views";
 
 const DAY = 86_400_000;
 const NOW = Date.parse("2026-10-22T12:00:00Z");
@@ -93,6 +93,29 @@ describe("downNow", () => {
 
   it("respects a manual override that zeroes an incident", () => {
     expect(openIncidents([inc(1, { startedAt: ago(0), resolvedAt: null, tierOverride: 0 })])).toEqual([]);
+  });
+
+  it("leaves out a provider whose only open incident is a Sev 4 papercut", () => {
+    const p = prov(1, { status: "degraded", components: [{ name: "Logs", status: "degraded" }] });
+    expect(downNow(snap([p], [inc(1, { startedAt: ago(0, 1), resolvedAt: null, tier: 4 })]))).toEqual([]);
+  });
+});
+
+describe("brokenComponents", () => {
+  it("counts by status and by group, worst first", () => {
+    const p = prov(1, {
+      components: [
+        { name: "Accra", group: "Africa", status: "degraded" },
+        { name: "Arica", group: "Latin America", status: "major_outage" },
+        { name: "Annaba", group: "Africa", status: "major_outage" },
+        { name: "Sydney", group: "Oceania", status: "degraded" },
+        { name: "API", status: "operational" },
+      ],
+    });
+    const b = brokenComponents(p);
+    expect(b.items.map((c) => c.name)).toEqual(["Annaba", "Arica", "Accra", "Sydney"]);
+    expect(b.byStatus).toEqual([["major_outage", 2], ["degraded", 2]]);
+    expect(b.groups).toEqual([["Africa", 2], ["Latin America", 1], ["Oceania", 1]]);
   });
 });
 

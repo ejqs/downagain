@@ -3,7 +3,7 @@ import { durationMinutes, effectiveTier, gradeRank, penaltyMinutes, score, windo
 import { SECURITY_PENALTY, TIER_WEIGHT } from "@/lib/severity";
 import { PRICES, monthlyUsd, valueFrontier, type Price } from "@/lib/pricing";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
-import { isProblem } from "@/lib/status";
+import { isProblem, statusRank } from "@/lib/status";
 import type { Status } from "@/lib/types";
 
 const DAY = 86_400_000;
@@ -106,13 +106,17 @@ export interface DownItem {
 
 const STATUS_TIER: Partial<Record<Status, number>> = { major_outage: 1, partial_outage: 2, degraded: 2 };
 
-/** Providers reporting a problem right now: an open incident or a non-green status. */
+/**
+ * Providers reporting a problem right now: an open Sev 1–3 incident, or a
+ * non-green status with no incident posted. An open Sev 4 alone doesn't count.
+ */
 export function downNow(snap: Snapshot): DownItem[] {
   const out: DownItem[] = [];
   for (const p of snap.providers) {
     const open = openIncidents(incidentsFor(snap, p.id)).sort((a, b) => tierOf(a) - tierOf(b));
     if (open.length) {
       const worst = open[0];
+      if (tierOf(worst) > 3) continue;
       out.push({
         provider: p,
         title: open.length > 1 ? `${worst.title} (+${open.length - 1} more)` : worst.title,
@@ -196,6 +200,31 @@ export function startHeatmap(list: IncidentRow[]): number[][] {
     grid[(d.getUTCDay() + 6) % 7][d.getUTCHours()]++;
   }
   return grid;
+}
+
+export interface BrokenComponents {
+  items: { name: string; group?: string; status: Status }[];
+  /** Counts per status, worst first, zero counts left out. */
+  byStatus: [Status, number][];
+  /** Counts per component group (e.g. region), largest first. */
+  groups: [string, number][];
+}
+
+/** A provider's non-green components, summarised so a 40-city outage fits on two lines. */
+export function brokenComponents(p: ProviderRow): BrokenComponents {
+  const items = p.components
+    .filter((c) => isProblem(c.status))
+    .sort((a, b) => statusRank(b.status) - statusRank(a.status) || (a.group ?? "").localeCompare(b.group ?? "") || a.name.localeCompare(b.name));
+  const tally = <K,>(keys: K[]) => {
+    const m = new Map<K, number>();
+    for (const k of keys) m.set(k, (m.get(k) ?? 0) + 1);
+    return [...m.entries()];
+  };
+  return {
+    items,
+    byStatus: tally(items.map((c) => c.status)),
+    groups: tally(items.flatMap((c) => (c.group ? [c.group] : []))).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])),
+  };
 }
 
 export function topComponents(list: IncidentRow[], n = 6) {
