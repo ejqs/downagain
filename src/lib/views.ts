@@ -98,6 +98,16 @@ export function openIncidents(list: IncidentRow[]): IncidentRow[] {
   return list.filter((i) => !i.resolvedAt && tierOf(i) > 0);
 }
 
+/**
+ * Open incidents that started within the last week. Anything older that is still
+ * open (a region written off for months, a page nobody closed) is history, not news,
+ * so it stays out of "Happening now".
+ */
+export const LIVE_DAYS = 7;
+export function liveIncidents(list: IncidentRow[], now: number): IncidentRow[] {
+  return openIncidents(list).filter((i) => i.startedAt >= now - LIVE_DAYS * 86_400_000);
+}
+
 export interface DownItem {
   provider: ProviderRow;
   title: string;
@@ -131,7 +141,8 @@ export function liveCount(items: DownItem[]): string | null {
 export function downNow(snap: Snapshot): DownItem[] {
   const out: DownItem[] = [];
   for (const p of snap.providers) {
-    const open = openIncidents(incidentsFor(snap, p.id)).sort((a, b) => tierOf(a) - tierOf(b));
+    const mine = incidentsFor(snap, p.id);
+    const open = liveIncidents(mine, snap.generatedAt).sort((a, b) => tierOf(a) - tierOf(b));
     if (open.length) {
       const worst = open[0];
       if (tierOf(worst) > 3) continue;
@@ -142,7 +153,8 @@ export function downNow(snap: Snapshot): DownItem[] {
         sinceMs: Math.min(...open.map((i) => i.startedAt)),
         status: p.status,
       });
-    } else if (isProblem(p.status)) {
+    } else if (isProblem(p.status) && !openIncidents(mine).length) {
+      // A status page still flagged by a long-running incident isn't news either.
       const broken = p.components.filter((c) => isProblem(c.status)).map((c) => c.name);
       out.push({
         provider: p,

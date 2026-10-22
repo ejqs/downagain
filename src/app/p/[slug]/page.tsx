@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProviderHistory, safeSnapshot, type IncidentRow, type ProviderRow, type ReviewTrace } from "@/lib/data";
-import { brokenComponents, communication, dailyCells, downNow, incidentsFor, monthlyTrend, openIncidents, scoreFor, startHeatmap, tierOf, topComponents, valueBoard } from "@/lib/views";
+import { brokenComponents, communication, dailyCells, downNow, incidentsFor, liveIncidents, monthlyTrend, scoreFor, startHeatmap, tierOf, topComponents, valueBoard } from "@/lib/views";
 import { WORKLOADS, checkedMs, fmtUsd, isStale } from "@/lib/pricing";
 import { durationMinutes } from "@/lib/grading";
 import { fmtAgo, fmtDate, fmtDuration, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
@@ -191,7 +191,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
   const list = incidentsFor(snap, p.id);
   const now = snap.generatedAt;
   const yearList = list.filter((i) => i.startedAt >= now - 365 * 86_400_000);
-  const open = openIncidents(list);
+  const open = liveIncidents(list, now);
   const down = downNow(snap).find((d) => d.provider.id === p.id);
   const lastIncident = list.find((i) => tierOf(i) > 0);
   const trend = monthlyTrend(list, now);

@@ -97,6 +97,14 @@ describe("downNow", () => {
     expect(openIncidents([inc(1, { startedAt: ago(0), resolvedAt: null, tierOverride: 0 })])).toEqual([]);
   });
 
+  it("leaves out incidents open for over a week, and the page status they hold red", () => {
+    const p = prov(1, { status: "degraded", components: [{ name: "ME-SOUTH-1", status: "major_outage" }] });
+    const stale = inc(1, { startedAt: ago(200), resolvedAt: null, tier: 1, title: "Region Availability" });
+    expect(downNow(snap([p], [stale]))).toEqual([]);
+    const fresh = inc(1, { startedAt: ago(0, 1), resolvedAt: null, tier: 2, title: "Elevated errors" });
+    expect(downNow(snap([p], [stale, fresh]))).toEqual([expect.objectContaining({ title: "Elevated errors", tier: 2 })]);
+  });
+
   it("leaves out a provider whose only open incident is a Sev 4 papercut", () => {
     const p = prov(1, { status: "degraded", components: [{ name: "Logs", status: "degraded" }] });
     expect(downNow(snap([p], [inc(1, { startedAt: ago(0, 1), resolvedAt: null, tier: 4 })]))).toEqual([]);
