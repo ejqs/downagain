@@ -6,6 +6,7 @@ import type { DB } from "@/db";
 import { categories, componentSurfaces, incidentUpdates, incidents, providerStatus, providers, rawSnapshots, statusChanges } from "@/db/schema";
 import { readProvider } from "@/lib/adapters";
 import { makeGetter } from "@/lib/fetcher";
+import { httpUrl } from "@/lib/format";
 import { classify, type Surface } from "@/lib/severity";
 import type { NormalizedComponent, NormalizedIncident, Status } from "@/lib/types";
 
@@ -170,7 +171,7 @@ export async function writeIncidents(
       startedAt: inc.startedAt,
       monitoringAt: inc.monitoringAt,
       resolvedAt: inc.resolvedAt,
-      url: inc.url,
+      url: httpUrl(inc.url),
       components: inc.components,
       worstComponentStatus: inc.worstComponentStatus,
       postmortem: inc.postmortem,

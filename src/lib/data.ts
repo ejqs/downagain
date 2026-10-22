@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { categories, incidentUpdates, incidents, providerStatus, providers } from "@/db/schema";
 import type { Status } from "@/lib/types";
 import type { Area } from "@/lib/severity";
+import { httpUrl } from "@/lib/format";
 
 const SAFETY_NET_SECONDS = 600;
 const DAY = 86_400_000;
@@ -98,6 +99,7 @@ const selectIncidents = () => db().select(incidentColumns).from(incidents);
 function toIncidentRow(r: IncidentSelect): IncidentRow {
   return {
     ...r,
+    url: httpUrl(r.url),
     startedAt: r.startedAt.getTime(),
     monitoringAt: ms(r.monitoringAt),
     resolvedAt: ms(r.resolvedAt),

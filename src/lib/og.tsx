@@ -68,3 +68,19 @@ export async function card(body: React.ReactNode, footer: string, tape: "hazard"
     },
   });
 }
+
+// Rendering a card costs real CPU, and anyone can request one as often as they
+// like. Keep the last render per card and reuse it until the data changes, so
+// repeated requests cost a map lookup. One entry per key, so memory stays bounded
+// by the number of cards (providers plus home).
+const rendered = new Map<string, { version: number; bytes: ArrayBuffer; headers: Headers }>();
+
+export async function cachedCard(key: string, version: number, render: () => Promise<Response>): Promise<Response> {
+  let hit = rendered.get(key);
+  if (!hit || hit.version !== version) {
+    const res = await render();
+    hit = { version, bytes: await res.arrayBuffer(), headers: new Headers(res.headers) };
+    if (res.ok) rendered.set(key, hit);
+  }
+  return new Response(hit.bytes, { headers: hit.headers });
+}

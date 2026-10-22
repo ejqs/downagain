@@ -119,6 +119,21 @@ describe("renderIncident and inputHash", () => {
     expect(text).toMatch(/\[\d+ middle updates left out for length\]/);
     expect(text.length).toBeLessThan(14_000);
   });
+
+  it("caps oversized fields so one hostile feed entry can't make a call expensive", () => {
+    const huge = "y".repeat(1_000_000);
+    const text = renderIncident({
+      ...incident,
+      title: huge,
+      components: Array.from({ length: 5_000 }, (_, k) => `component ${k}`),
+      updates: [
+        { status: "investigating", body: huge, postedAt: new Date(Date.UTC(2026, 9, 1)) },
+        { status: huge, body: huge, postedAt: new Date(Date.UTC(2026, 9, 1, 1)) },
+      ],
+    });
+    expect(text.length).toBeLessThan(14_000);
+    expect(text).toContain("[cut]");
+  });
 });
 
 describe("costMicros", () => {

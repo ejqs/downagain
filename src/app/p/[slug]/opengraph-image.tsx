@@ -1,9 +1,9 @@
-import { safeSnapshot } from "@/lib/data";
+import { safeSnapshot, type ProviderRow, type Snapshot } from "@/lib/data";
 import { dailyCells, downNow, incidentsFor, scoreFor } from "@/lib/views";
 import { fmtDuration, fmtPct, plural } from "@/lib/format";
 import { TIER_NAMES } from "@/lib/severity";
 import { BRAND, GRADE_COLORS } from "@/lib/site";
-import { MONO, OG_SIZE, card } from "@/lib/og";
+import { MONO, OG_SIZE, cachedCard, card } from "@/lib/og";
 
 export const dynamic = "force-dynamic";
 export const alt = "Provider track record on downagain.dev: 90-day grade, PROD and SHIP grades, downtime and incidents.";
@@ -16,12 +16,18 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const { slug } = await params;
   const snap = await safeSnapshot();
   const p = snap?.providers.find((x) => x.slug === slug);
+  // Unknown slugs get a 404, not a fresh render, so made-up URLs cost nothing.
+  if (snap && !p) return new Response("not found", { status: 404 });
   if (!snap || !p) {
     return card(
       <div style={{ display: "flex", flex: 1, alignItems: "center", fontSize: 96, letterSpacing: "-0.04em" }}>Is it down again?</div>,
       "90-day track records",
     );
   }
+  return cachedCard(`p:${p.slug}`, snap.generatedAt, () => render(snap, p));
+}
+
+function render(snap: Snapshot, p: ProviderRow) {
   const s = scoreFor(snap, p.id);
   const cells = dailyCells(incidentsFor(snap, p.id), 90, snap.generatedAt, p.historyFrom);
   const down = downNow(snap).find((d) => d.provider.id === p.id);

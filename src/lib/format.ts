@@ -34,3 +34,14 @@ export const fmtMonthShort = (ms: number) => monthShort.format(ms);
 export function plural(n: number, one: string, many = `${one}s`): string {
   return `${n} ${n === 1 ? one : many}`;
 }
+
+/** `url` if it is an absolute http(s) link, else null. Feeds are untrusted; this keeps javascript: and friends out of hrefs. */
+export function httpUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" || u.protocol === "http:" ? u.href : null;
+  } catch {
+    return null;
+  }
+}

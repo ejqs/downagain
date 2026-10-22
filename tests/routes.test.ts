@@ -67,6 +67,8 @@ describe("POST /api/cron/poll", () => {
   it("rejects a missing or wrong secret", async () => {
     expect((await poll(pollReq(undefined, ""))).status).toBe(401);
     expect((await poll(pollReq(undefined, "Bearer nope"))).status).toBe(401);
+    expect((await poll(pollReq(undefined, `Bearer ${SECRET}x`))).status).toBe(401);
+    expect((await poll(pollReq(undefined, SECRET))).status).toBe(401);
   });
 
   it("rejects everything when no secret is configured", async () => {

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fmtAgo, fmtDuration, fmtPct, plural } from "@/lib/format";
+import { fmtAgo, fmtDuration, fmtPct, httpUrl, plural } from "@/lib/format";
 import { impactFromStatus, isProblem, worstStatus } from "@/lib/status";
 import { makeGetter, USER_AGENT } from "@/lib/fetcher";
 
@@ -62,5 +62,34 @@ describe("fetcher", () => {
   it("turns an error status into a short message", async () => {
     vi.stubGlobal("fetch", async () => new Response("nope", { status: 503 }));
     await expect(makeGetter({})("https://s.test/a")).rejects.toThrow("s.test answered 503");
+  });
+
+  it("refuses a body past the size cap", async () => {
+    vi.stubGlobal("fetch", async () => new Response("x", { headers: { "content-length": String(50 * 1024 * 1024) } }));
+    await expect(makeGetter({})("https://s.test/a")).rejects.toThrow(/bytes/);
+    const endless = new ReadableStream({ pull: (c) => c.enqueue(new Uint8Array(1024 * 1024)) });
+    vi.stubGlobal("fetch", async () => new Response(endless));
+    await expect(makeGetter({})("https://s.test/a")).rejects.toThrow(/over \d+ bytes/);
+  });
+
+  it("refuses a redirect off https", async () => {
+    vi.stubGlobal("fetch", async () => {
+      const res = Response.json({ ok: 1 });
+      Object.defineProperty(res, "url", { value: "http://web.railway.internal:8080/" });
+      return res;
+    });
+    await expect(makeGetter({})("https://s.test/a")).rejects.toThrow("redirected off https");
+  });
+});
+
+describe("httpUrl", () => {
+  it("keeps http(s) links and drops everything else", () => {
+    expect(httpUrl("https://stspg.io/abc")).toBe("https://stspg.io/abc");
+    expect(httpUrl("http://example.com/x")).toBe("http://example.com/x");
+    expect(httpUrl("javascript:alert(1)")).toBeNull();
+    expect(httpUrl(" JavaScript:alert(1)")).toBeNull();
+    expect(httpUrl("data:text/html,<script>alert(1)</script>")).toBeNull();
+    expect(httpUrl("/relative")).toBeNull();
+    expect(httpUrl(null)).toBeNull();
   });
 });

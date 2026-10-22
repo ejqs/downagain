@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { db } from "@/db";
 import { pollAll } from "@/lib/poller";
@@ -7,9 +8,14 @@ import { reviewPending, type ReviewReport } from "@/lib/review";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
+const digest = (s: string) => createHash("sha256").update(s).digest();
+
+/** Constant-time check of the bearer token. Hashing first makes the lengths equal. */
 function authorized(req: Request) {
   const secret = process.env.CRON_SECRET;
-  return Boolean(secret) && req.headers.get("authorization") === `Bearer ${secret}`;
+  if (!secret) return false;
+  const got = req.headers.get("authorization") ?? "";
+  return timingSafeEqual(digest(got), digest(`Bearer ${secret}`));
 }
 
 /** Called every 5 minutes by the Railway cron service. Revalidates cached pages only on change. */

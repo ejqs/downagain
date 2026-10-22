@@ -99,10 +99,17 @@ export interface ReviewInput {
 // Long incidents can post dozens of updates. Keep the first and the latest ones
 // so the cost of one read stays bounded, and tell the model what was left out.
 const MAX_UPDATE_CHARS = 12_000;
+// Every other field is capped too, so one oversized feed entry can't make a single
+// call expensive. Normal incidents are far below these and render unchanged.
+const MAX_ONE_UPDATE_CHARS = 4_000;
+const MAX_FIELD_CHARS = 500;
+const MAX_COMPONENTS_CHARS = 2_000;
+
+const clip = (s: string, max: number) => (s.length > max ? `${s.slice(0, max)} [cut]` : s);
 
 export function renderIncident(i: ReviewInput): string {
   const updates = [...i.updates].sort((a, b) => a.postedAt.getTime() - b.postedAt.getTime());
-  const lines = updates.map((u) => `[${u.postedAt.toISOString()}] ${u.status}: ${u.body.trim()}`);
+  const lines = updates.map((u) => `[${u.postedAt.toISOString()}] ${clip(u.status, 40)}: ${clip(u.body.trim(), MAX_ONE_UPDATE_CHARS)}`);
   let kept = lines;
   if (lines.join("\n").length > MAX_UPDATE_CHARS) {
     const head = lines.slice(0, 2);
@@ -119,13 +126,13 @@ export function renderIncident(i: ReviewInput): string {
   return [
     `<incident>`,
     `Provider: ${i.provider} (${i.category})`,
-    `Title: ${i.title}`,
-    `Provider's impact label: ${i.impact}`,
-    `Status: ${i.status}`,
+    `Title: ${clip(i.title, MAX_FIELD_CHARS)}`,
+    `Provider's impact label: ${clip(i.impact, 40)}`,
+    `Status: ${clip(i.status, 40)}`,
     `Started: ${i.startedAt.toISOString()}`,
     `Resolved: ${i.resolvedAt ? i.resolvedAt.toISOString() : "not yet"}`,
-    `Affected components: ${i.components.length ? i.components.join(", ") : "none listed"}`,
-    `Worst component status: ${i.worstComponentStatus ?? "not given"}`,
+    `Affected components: ${i.components.length ? clip(i.components.join(", "), MAX_COMPONENTS_CHARS) : "none listed"}`,
+    `Worst component status: ${clip(i.worstComponentStatus ?? "not given", 40)}`,
     `Updates:`,
     kept.length ? kept.join("\n") : "(none posted)",
     `</incident>`,

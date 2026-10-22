@@ -1,7 +1,7 @@
-import { safeSnapshot } from "@/lib/data";
+import { safeSnapshot, type Snapshot } from "@/lib/data";
 import { daysSinceSev1, downNow } from "@/lib/views";
 import { BRAND } from "@/lib/site";
-import { DISPLAY, MONO, OG_SIZE, card } from "@/lib/og";
+import { DISPLAY, MONO, OG_SIZE, cachedCard, card } from "@/lib/og";
 
 export const dynamic = "force-dynamic";
 export const alt = "downagain.dev: Is it down again? Live status and track records for hosting platforms and AI APIs.";
@@ -10,6 +10,10 @@ export const contentType = "image/png";
 
 export default async function Image() {
   const snap = await safeSnapshot();
+  return snap ? cachedCard("home", snap.generatedAt, () => render(snap)) : render(null);
+}
+
+function render(snap: Snapshot | null) {
   const down = snap ? downNow(snap) : [];
   const days = snap ? daysSinceSev1(snap) : null;
   const names = down.map((d) => d.provider.name);
