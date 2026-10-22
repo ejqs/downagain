@@ -220,7 +220,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
                 SEV {down.tier} · {TIER_NAMES[down.tier].toUpperCase()} · {fmtDuration((now - down.sinceMs) / 60_000)}
               </span>
             ) : (
-              <span className={`pill ${isProblem(p.status) ? "down" : p.status === "unknown" ? "unknown" : "ok"}`} style={{ fontSize: 12, padding: "4px 8px", border: "2px solid var(--ink)" }}>
+              <span className={`pill ${p.status === "major_outage" ? "down" : isProblem(p.status) ? "issues" : p.status === "unknown" ? "unknown" : "ok"}`} style={{ fontSize: 12, padding: "4px 8px", border: "2px solid var(--ink)" }}>
                 {STATUS_LABEL[p.status].toUpperCase()}
               </span>
             )}

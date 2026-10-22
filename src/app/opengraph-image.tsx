@@ -1,5 +1,5 @@
 import { safeSnapshot, type Snapshot } from "@/lib/data";
-import { daysSinceSev1, downNow } from "@/lib/views";
+import { daysSinceSev1, downNow, liveLevel } from "@/lib/views";
 import { BRAND } from "@/lib/site";
 import { DISPLAY, MONO, OG_SIZE, cachedCard, card } from "@/lib/og";
 
@@ -17,6 +17,7 @@ function render(snap: Snapshot | null) {
   const down = snap ? downNow(snap) : [];
   const days = snap ? daysSinceSev1(snap) : null;
   const names = down.map((d) => d.provider.name);
+  const anyDown = down.some((d) => liveLevel(d) === "down");
   const downText = names.length > 3 ? `${names.slice(0, 3).join(", ")} +${names.length - 3}` : names.join(", ");
 
   return card(
@@ -30,8 +31,8 @@ function render(snap: Snapshot | null) {
           </div>
         </div>
         {down.length ? (
-          <div style={{ display: "flex", alignSelf: "flex-start", gap: 14, alignItems: "center", background: BRAND.down, border: `5px solid ${BRAND.ink}`, padding: "8px 16px", fontSize: 34 }}>
-            <span style={{ fontFamily: MONO, fontSize: 20 }}>DOWN NOW</span>
+          <div style={{ display: "flex", alignSelf: "flex-start", gap: 14, alignItems: "center", background: anyDown ? BRAND.down : BRAND.minor, border: `5px solid ${BRAND.ink}`, padding: "8px 16px", fontSize: 34 }}>
+            <span style={{ fontFamily: MONO, fontSize: 20 }}>{anyDown ? "DOWN NOW" : "ISSUES NOW"}</span>
             <span>{downText}</span>
           </div>
         ) : (
@@ -61,6 +62,6 @@ function render(snap: Snapshot | null) {
       ) : null}
     </div>,
     snap ? `${snap.providers.length} providers · 90-day track records` : "90-day track records",
-    down.length ? "down" : "hazard",
+    anyDown ? "down" : "hazard",
   );
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Snapshot } from "@/lib/data";
-import { downNow } from "@/lib/views";
+import { downNow, liveLevel } from "@/lib/views";
 import { fmtAgo, fmtDuration, plural } from "@/lib/format";
 import { TIER_NAMES } from "@/lib/severity";
 import { STATUS_LABEL } from "@/lib/status";
@@ -26,13 +26,13 @@ export function Banner({ snap }: { snap: Snapshot | null }) {
   }
 
   return (
-    <section className="banner" aria-label="Services down right now">
+    <section className={`banner ${down.some((d) => liveLevel(d) === "down") ? "" : "issues"}`} aria-label="Services with problems right now">
       <div className="tape" />
       <div className="wrap banner-inner">
         <div className="banner-head">
           <span className="eyebrow">
             <span className="dot" />
-            Down right now{checked ? ` · checked ${fmtAgo(checked, snap.generatedAt)}` : ""}
+            {down.some((d) => liveLevel(d) === "down") ? "Down right now" : "Issues right now"}{checked ? ` · checked ${fmtAgo(checked, snap.generatedAt)}` : ""}
           </span>
           <span className="banner-title">
             {plural(down.length, "provider")} reporting problems

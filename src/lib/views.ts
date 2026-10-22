@@ -106,6 +106,22 @@ export interface DownItem {
 
 const STATUS_TIER: Partial<Record<Status, number>> = { major_outage: 1, partial_outage: 2, degraded: 2 };
 
+/** "down" is Sev 1 or a major outage; anything milder in the banner is "issues". */
+export type LiveLevel = "down" | "issues";
+export const LIVE_LABEL: Record<LiveLevel, string> = { down: "DOWN", issues: "ISSUES" };
+
+export function liveLevel(d: Pick<DownItem, "tier" | "status">): LiveLevel {
+  return d.tier === 1 || d.status === "major_outage" ? "down" : "issues";
+}
+
+/** "2 down · 1 issues"-style count for a set of providers, or null when all are up. */
+export function liveCount(items: DownItem[]): string | null {
+  const down = items.filter((d) => liveLevel(d) === "down").length;
+  const issues = items.length - down;
+  const parts = [down ? `${down} down` : null, issues ? `${issues} ${issues === 1 ? "issue" : "issues"}` : null].filter(Boolean);
+  return parts.length ? parts.join(" · ") : null;
+}
+
 /**
  * Providers reporting a problem right now: an open Sev 1–3 incident, or a
  * non-green status with no incident posted. An open Sev 4 alone doesn't count.
@@ -153,18 +169,19 @@ export interface BoardRow {
   provider: ProviderRow;
   score: Score;
   cells: DayCell[];
-  down: boolean;
+  /** Live tag, if the provider is in the down-right-now banner. */
+  live: LiveLevel | null;
 }
 
 export function leaderboard(snap: Snapshot, category: string, sort: "worst" | "best" = "worst"): BoardRow[] {
-  const down = new Set(downNow(snap).map((d) => d.provider.id));
+  const live = new Map(downNow(snap).map((d) => [d.provider.id, liveLevel(d)]));
   const rows = snap.providers
     .filter((p) => p.category === category)
     .map((p) => ({
       provider: p,
       score: scoreFor(snap, p.id),
       cells: dailyCells(incidentsFor(snap, p.id), 60, snap.generatedAt, p.historyFrom),
-      down: down.has(p.id),
+      live: live.get(p.id) ?? null,
     }));
   rows.sort((a, b) => b.score.points - a.score.points || a.score.admittedUptime - b.score.admittedUptime || a.provider.name.localeCompare(b.provider.name));
   return sort === "best" ? rows.reverse() : rows;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
-import { brokenComponents, communication, dailyCells, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals } from "@/lib/views";
+import { brokenComponents, liveLevel, communication, dailyCells, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals } from "@/lib/views";
 
 const DAY = 86_400_000;
 const NOW = Date.parse("2026-10-22T12:00:00Z");
@@ -227,5 +227,14 @@ describe("dailyLoad", () => {
 
   it("buckets points into five heat steps", () => {
     expect([0, 1, 60, 61, 600, 601, 3000, 3001].map(heatLevel)).toEqual([0, 1, 1, 2, 2, 3, 3, 4]);
+  });
+});
+
+describe("liveLevel", () => {
+  it("calls only Sev 1 or a major outage down", () => {
+    expect(liveLevel({ tier: 1, status: "degraded" })).toBe("down");
+    expect(liveLevel({ tier: 2, status: "major_outage" })).toBe("down");
+    expect(liveLevel({ tier: 2, status: "degraded" })).toBe("issues");
+    expect(liveLevel({ tier: 3, status: "operational" })).toBe("issues");
   });
 });

@@ -1,5 +1,5 @@
 import { safeSnapshot, type ProviderRow, type Snapshot } from "@/lib/data";
-import { dailyCells, downNow, incidentsFor, scoreFor } from "@/lib/views";
+import { dailyCells, downNow, incidentsFor, liveLevel, LIVE_LABEL, scoreFor } from "@/lib/views";
 import { fmtDuration, fmtPct, plural } from "@/lib/format";
 import { TIER_NAMES } from "@/lib/severity";
 import { BRAND, GRADE_COLORS } from "@/lib/site";
@@ -31,6 +31,7 @@ function render(snap: Snapshot, p: ProviderRow) {
   const s = scoreFor(snap, p.id);
   const cells = dailyCells(incidentsFor(snap, p.id), 90, snap.generatedAt, p.historyFrom);
   const down = downNow(snap).find((d) => d.provider.id === p.id);
+  const live = down ? liveLevel(down) : null;
   const [gradeBg, gradeFg] = GRADE_COLORS[s.grade];
   const nameSize = p.name.length > 16 ? 76 : 104;
 
@@ -38,8 +39,8 @@ function render(snap: Snapshot, p: ProviderRow) {
     <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <div style={{ display: "flex", flex: 1, gap: 48, alignItems: "center" }}>
         <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 16 }}>
-          <span style={{ fontFamily: MONO, fontSize: 22, letterSpacing: "0.08em", color: down ? BRAND.downInk : BRAND.ink }}>
-            {down ? `DOWN NOW${down.tier ? ` · SEV ${down.tier} ${TIER_NAMES[down.tier].toUpperCase()}` : ""}` : "LAST 90 DAYS"}
+          <span style={{ fontFamily: MONO, fontSize: 22, letterSpacing: "0.08em", color: live === "down" ? BRAND.downInk : BRAND.ink }}>
+            {down && live ? `${LIVE_LABEL[live]} NOW${down.tier ? ` · SEV ${down.tier} ${TIER_NAMES[down.tier].toUpperCase()}` : ""}` : "LAST 90 DAYS"}
           </span>
           <span style={{ fontSize: nameSize, lineHeight: 0.9, letterSpacing: "-0.04em" }}>{p.name}</span>
           {s.sev1Minutes > 0 ? (
@@ -80,6 +81,6 @@ function render(snap: Snapshot, p: ProviderRow) {
       </div>
     </div>,
     `PROD ${s.areas.production.grade} · SHIP ${s.areas.shipping.grade} · ${fmtPct(s.admittedUptime)} admitted uptime`,
-    down ? "down" : "hazard",
+    live === "down" ? "down" : "hazard",
   );
 }

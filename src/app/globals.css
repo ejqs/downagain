@@ -56,6 +56,7 @@ p { margin: 0; }
 
 /* Down-right-now banner */
 .banner { background: var(--down); border-bottom: 3px solid var(--ink); }
+.banner.issues { background: var(--minor); }
 .banner .tape { height: 10px; background: repeating-linear-gradient(-45deg, var(--ink) 0 14px, var(--hazard) 14px 28px); }
 .banner-inner { padding-top: 16px; padding-bottom: 16px; display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: center; }
 .banner-head { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
@@ -111,6 +112,7 @@ main.wrap { padding-bottom: 48px; }
 .chip[aria-current="true"], .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .chip.small[aria-current="true"] { background: var(--hazard); color: var(--ink); }
 .chip .count { font-family: var(--font-mono); font-size: 11px; background: var(--down); color: var(--ink); padding: 1px 5px; }
+.chip .count.issues { background: var(--minor); }
 .btn { min-height: 44px; display: inline-flex; align-items: center; padding: 0 16px; border: 3px solid var(--ink); font-weight: 700; text-decoration: none; background: var(--paper); color: var(--ink); font-family: var(--font-display); font-size: 15px; cursor: pointer; }
 .btn.dark { background: var(--ink); color: var(--paper); }
 .btn.dark:hover { color: var(--hazard); }
@@ -162,6 +164,7 @@ main.wrap { padding-bottom: 48px; }
 .sev-4 { background: var(--rule); color: var(--ink); }
 .sev-0 { background: var(--paper); color: var(--ink); border: 1px solid var(--ink); }
 .pill.down { background: var(--down); }
+.pill.issues { background: var(--minor); }
 .pill.ok { background: var(--up-wash); }
 .pill.unknown { background: var(--rule); }
 .pill.value { background: var(--hazard); color: var(--ink); border: 1px solid var(--ink); }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Snapshot } from "@/lib/data";
-import { leaderboard, downNow, scoreFor, valueBoard } from "@/lib/views";
+import { leaderboard, downNow, liveCount, liveLevel, LIVE_LABEL, scoreFor, valueBoard } from "@/lib/views";
 import { fmtDuration, fmtPct } from "@/lib/format";
 import { AREA_SHORT, AREAS } from "@/lib/severity";
 import { priceText } from "./Value";
@@ -14,7 +14,8 @@ export function CategoryTabs({ snap, active }: { snap: Snapshot; active: string 
   return (
     <nav aria-label="Categories" className="chips" style={{ paddingBottom: 14, borderBottom: "3px solid var(--ink)" }}>
       {snap.categories.map((c) => {
-        const n = down.filter((d) => d.provider.category === c.slug).length;
+        const catDown = down.filter((d) => d.provider.category === c.slug);
+        const n = liveCount(catDown);
         return (
           <Link
             key={c.slug}
@@ -25,7 +26,7 @@ export function CategoryTabs({ snap, active }: { snap: Snapshot; active: string 
             data-umami-event-category={c.slug}
           >
             {c.name}
-            {n > 0 ? <span className="count">{n} down</span> : null}
+            {n ? <span className={`count ${catDown.some((d) => liveLevel(d) === "down") ? "" : "issues"}`}>{n}</span> : null}
           </Link>
         );
       })}
@@ -78,14 +79,14 @@ export function Board({
       ) : (
         <div className="box">
           {rows.map((r, i) => (
-            <div key={r.provider.slug} className={`list-row ${r.down ? "down" : ""}`}>
+            <div key={r.provider.slug} className={`list-row ${r.live ?? ""}`}>
               <div className="board-name">
                 <span className="rank">{i + 1}</span>
                 <GradeTile grade={r.score.grade} label={`Overall grade ${r.score.grade}`} />
                 <div className="stack" style={{ ["--gap" as string]: "2px", minWidth: 0 }}>
                   <div className="row" style={{ ["--gap" as string]: "8px" }}>
                     <Link href={`/p/${r.provider.slug}`}>{r.provider.name}</Link>
-                    {r.down ? <span className="pill down">DOWN NOW</span> : null}
+                    {r.live ? <span className={`pill ${r.live}`}>{LIVE_LABEL[r.live]}</span> : null}
                     {value.get(r.provider.slug)?.bestValue ? <a href="#value" className="pill value" style={{ textDecoration: "none" }}>BEST VALUE</a> : null}
                   </div>
                   <span className="muted" style={{ fontSize: 14 }}>{r.provider.kind}</span>
@@ -140,12 +141,14 @@ export function AlsoTracking({ snap, current }: { snap: Snapshot; current: strin
             .map((p) => ({ p, s: scoreFor(snap, p.id) }))
             .sort((a, b) => a.s.points - b.s.points)
             .slice(0, 3);
-          const n = down.filter((d) => d.provider.category === c.slug).length;
+          const catDown = down.filter((d) => d.provider.category === c.slug);
+          const n = liveCount(catDown);
+          const worst = catDown.some((d) => liveLevel(d) === "down") ? "down" : "issues";
           return (
             <Link key={c.slug} href={`/c/${c.slug}`} className="box pad stack" style={{ textDecoration: "none", ["--gap" as string]: "10px" }}>
               <span className="row" style={{ justifyContent: "space-between" }}>
                 <strong style={{ fontSize: 20 }}>{c.name}</strong>
-                <span className={`pill ${n ? "down" : "ok"}`}>{n ? `${n} DOWN` : "ALL UP"}</span>
+                <span className={`pill ${n ? worst : "ok"}`}>{n ? n.toUpperCase() : "ALL UP"}</span>
               </span>
               {top.map(({ p, s }) => (
                 <span key={p.slug} className="row" style={{ justifyContent: "space-between", fontSize: 15 }}>
