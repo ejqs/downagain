@@ -57,11 +57,12 @@ Useful scripts:
 
 `.railway/railway.ts` describes the project: `downagain` (the web service: Next.js, runs `bun run db:migrate && bun run db:seed` before each deploy, healthcheck `/api/health`), `Postgres`, and `poller` (cron `*/5 * * * *`, runs `bun scripts/cron-trigger.mjs`, which POSTs to web over the private network and exits).
 
-1. `railway link` to the existing project, then `railway config plan` and read the plan. Rename resources in the file if the project already uses other names.
+The live project ("Down Again", region asia-southeast1) is set up this way already. To recreate it:
+
+1. `railway link` to the project, then `railway config plan` and read the plan before `railway config apply`.
 2. Set `CRON_SECRET` on `downagain` to a long random string. The poller reads it by reference.
-3. `railway config apply` once the plan looks right.
-4. After the first deploy, run the backfill once: `railway run --service downagain bun run backfill`, then hit the poll route with `?revalidate` (or wait for the next cron run).
-5. `downagain.dev` is attached to the web service; DNS lives in Cloudflare (set up with Railway's one-click Cloudflare flow).
+3. On a fresh database, run the history backfill once, either with `railway run --service downagain bun run backfill` or by setting the pre-deploy command to `bun run db:migrate && bun run backfill` for one deploy.
+4. `downagain.dev` is attached to the web service; DNS lives in Cloudflare (set up with Railway's one-click Cloudflare flow).
 
 Environment variables are listed in `.env.example`.
 
