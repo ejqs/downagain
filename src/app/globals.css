@@ -260,3 +260,10 @@ details.updates li { overflow-wrap: anywhere; }
 .comp-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: 320px; overflow-y: auto; font-size: 14px; }
 .comp-list li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-top: 1px solid var(--rule); }
 .comp-list li .mono { flex: none; font-size: 12px; color: var(--muted); }
+/* By-area cards open in place */
+details.area > summary { list-style: none; cursor: pointer; position: relative; padding-right: 44px; }
+details.area > summary::-webkit-details-marker { display: none; }
+details.area > summary::after { content: "+"; position: absolute; top: 14px; right: 16px; font: 700 22px/1 var(--font-mono); }
+details.area[open] > summary::after { content: "−"; }
+details.area > summary:hover { background: var(--panel); }
+.area-more { padding: 4px 16px 18px; --gap: 16px; }

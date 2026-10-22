@@ -21,6 +21,7 @@ export const dynamic = "force-dynamic";
 
 const WINDOWS = { "30d": 30, "90d": 90, "1y": 365 } as const;
 type WindowKey = keyof typeof WINDOWS;
+const DAY = 86_400_000;
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const SEV_COLORS = ["var(--ink)", "var(--down)", "var(--minor)", "var(--rule)"];
 
@@ -333,21 +334,60 @@ export default async function ProviderPage({ params, searchParams }: Props) {
         <div className="box">
           {AREAS.map((a) => {
             const areaList = list.filter((i) => i.areaTiers?.[a] != null || (i.tierOverride != null && a === "production"));
+            const inWindow = areaList.filter((i) => i.startedAt >= now - WINDOWS[win] * DAY);
+            const areaTier = (i: IncidentRow) => i.areaTiers?.[a] ?? tierOf(i);
+            const worst = [...inWindow].sort((x, y) => areaTier(x) - areaTier(y) || durationMinutes(gradeInput(y)) - durationMinutes(gradeInput(x))).slice(0, 3);
+            const hit = topComponents(inWindow, 4);
+            const at = monthlyTrend(areaList, now);
+            const [was, is] = [at.slice(0, 6), at.slice(6)].map((h) => h.reduce((n, t) => n + t.count, 0));
             return (
-              <div key={a} className="list-row" style={{ ["--gap" as string]: "10px 24px" }}>
-                <div className="row" style={{ flex: "1 1 220px", minWidth: 0 }}>
-                  <GradeTile grade={s.areas[a].grade} />
-                  <div className="stack" style={{ ["--gap" as string]: "2px", minWidth: 0 }}>
+              <details key={a} className="area">
+                <summary className="list-row" style={{ ["--gap" as string]: "10px 24px" }}>
+                  <div className="row" style={{ flex: "1 1 220px", minWidth: 0 }}>
+                    <GradeTile grade={s.areas[a].grade} />
                     <strong style={{ fontSize: 18 }}>{AREA_LABEL[a]}</strong>
-                    <span className="muted" style={{ fontSize: 14 }}>{AREA_BLURB[a]}</span>
                   </div>
+                  <div className="board-metrics">
+                    <div className="metric"><b>{s.areas[a].incidents}</b><span>INCIDENTS</span></div>
+                    <div className="metric"><b>{fmtDuration(s.areas[a].downtimeMinutes)}</b><span>AFFECTED</span></div>
+                  </div>
+                  <DayStrip cells={dailyCells(areaList, 60, now, p.historyFrom)} label={`${AREA_LABEL[a]}, last 60 days`} short />
+                </summary>
+                <div className="area-more stack">
+                  <span className="muted" style={{ fontSize: 14 }}>{AREA_BLURB[a]}</span>
+                  <div className="stack" style={{ ["--gap" as string]: "6px" }}>
+                    <span className="label">Worst, {win}</span>
+                    {worst.length ? (
+                      worst.map((i) => (
+                        <div key={i.id} className="row" style={{ ["--gap" as string]: "4px 10px", alignItems: "baseline" }}>
+                          <SevPill tier={areaTier(i)} security={i.security} />
+                          <span className="mono" style={{ fontSize: 13 }}>{fmtDate(i.startedAt)} · {i.resolvedAt ? fmtDuration(durationMinutes(gradeInput(i))) : "ongoing"}</span>
+                          <span style={{ fontSize: 15, flex: "1 1 100%", minWidth: 0 }}>
+                            {i.url ? <a href={i.url} data-umami-event="status-page-outbound">{i.title}</a> : i.title}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="body" style={{ fontSize: 15 }}>Nothing. Nice.</span>
+                    )}
+                  </div>
+                  {hit.length ? (
+                    <div className="stack" style={{ ["--gap" as string]: "4px" }}>
+                      <span className="label">Most hit</span>
+                      {hit.map((c) => (
+                        <div key={c.name} className="row" style={{ justifyContent: "space-between", fontSize: 15 }}>
+                          <span style={{ overflowWrap: "anywhere", minWidth: 0 }}>{c.name}</span>
+                          <span className="mono" style={{ fontSize: 13 }}>{c.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                  <span className="body" style={{ fontSize: 15 }}>
+                    {is > was ? <strong>Worse. </strong> : is < was ? <strong>Better. </strong> : null}
+                    {is} in the last 6 months, {was} in the 6 before.
+                  </span>
                 </div>
-                <div className="board-metrics">
-                  <div className="metric"><b>{s.areas[a].incidents}</b><span>INCIDENTS</span></div>
-                  <div className="metric"><b>{fmtDuration(s.areas[a].downtimeMinutes)}</b><span>AFFECTED</span></div>
-                </div>
-                <DayStrip cells={dailyCells(areaList, 60, now, p.historyFrom)} label={`${AREA_LABEL[a]}, last 60 days`} short />
-              </div>
+              </details>
             );
           })}
         </div>
