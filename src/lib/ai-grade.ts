@@ -211,7 +211,9 @@ export interface Refined extends Classification {
 
 /** Turn Claude's verdict into our grade, with the same security and data-loss rules as severity.ts. */
 export function applyVerdict(rules: Classification, v: Verdict): Refined {
-  const base = { classifierVersion: rules.classifierVersion, gradedBy: "claude" as const, scope: v.scope, summary: v.summary, recoveredAt: v.recovered_at };
+  // Claude reads the text; the rules can read which cities were listed. Unclear text doesn't erase that.
+  const scope = v.scope === "unclear" && rules.scope ? rules.scope : v.scope;
+  const base = { classifierVersion: rules.classifierVersion, gradedBy: "claude" as const, scope, summary: v.summary, recoveredAt: v.recovered_at };
   if (v.not_counted && !v.security && !v.data_loss) {
     return { ...base, tier: 0, areaTiers: {}, surfaces: [], security: false, lowConfidence: v.confidence === "low", reason: v.rationale };
   }

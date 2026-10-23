@@ -117,6 +117,20 @@ describe("scope from the rules", () => {
     expect(one.scope).toBe("regional");
     expect(classify({ title: "x", impact: "major", components: ["Edge Network"], worstComponentStatus: null }).scope).toBeNull();
   });
+
+  it("reads the blast radius from the cities a network lists", () => {
+    const at = (components: string[], title = "Elevated errors") => classify({ title, impact: "major", components, worstComponentStatus: null }).scope;
+    expect(at(["Ashburn, VA, United States - (IAD)", "CDN/Cache"])).toBe("local");
+    expect(at(["Ashburn, VA, United States - (IAD)", "North America - Ashburn, VA, United States - (IAD)"])).toBe("local");
+    expect(at(["Portland, OR, United States - (PDX)", "Seattle, WA, United States - (SEA)"])).toBe("regional");
+    const many = Array.from({ length: 11 }, (_, k) => `City ${k} - (C${String.fromCharCode(65 + k)}X)`);
+    expect(at(many)).toBeNull();
+  });
+
+  it("marks some users as a subset", () => {
+    expect(classify({ title: "Incorrect geo location for some Cloudflare WARP users", impact: "minor", components: ["WARP"], worstComponentStatus: null }).scope).toBe("subset");
+    expect(classify({ title: "Increased HTTP 502 Errors", impact: "major", components: ["CDN/Cache"], worstComponentStatus: null }).scope).toBeNull();
+  });
 });
 
 describe("database surfaces", () => {

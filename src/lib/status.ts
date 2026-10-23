@@ -19,6 +19,14 @@ export function worstStatus(list: Status[], fallback: Status = "operational"): S
   return worst;
 }
 
+// One city's point of presence on a big network's page: Cloudflare's "Accra, Ghana - (ACC)".
+const LOCATION_RE = /\s-\s\([A-Z]{3,4}\)\s*$/;
+
+/** A component that is a single location, not a product. */
+export function isLocation(name: string): boolean {
+  return LOCATION_RE.test(name);
+}
+
 /** Statuses that put a provider in the "down right now" banner. */
 export function isProblem(s: Status): boolean {
   return s === "degraded" || s === "partial_outage" || s === "major_outage";

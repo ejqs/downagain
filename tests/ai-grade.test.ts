@@ -42,6 +42,12 @@ describe("applyVerdict", () => {
     expect(g.reason).toBe("Requests failed in iad1 for 30 minutes.");
   });
 
+  it("keeps the rules' scope when Claude finds it unclear", () => {
+    const local = classify({ title: "Elevated errors", impact: "major", components: ["Lisbon, Portugal - (LIS)"], worstComponentStatus: null });
+    expect(applyVerdict(local, verdict({ scope: "unclear" })).scope).toBe("local");
+    expect(applyVerdict(local, verdict({ scope: "global" })).scope).toBe("global");
+  });
+
   it("takes the worst surface for the overall tier and the worst per area", () => {
     const g = applyVerdict(rules, verdict({ affected: [{ surface: "ship", tier: 3 }, { surface: "data", tier: 1 }, { surface: "serving", tier: 2 }] }));
     expect(g.tier).toBe(1);

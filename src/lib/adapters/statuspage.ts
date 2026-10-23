@@ -4,7 +4,7 @@
 //   GET {base}/api/v2/incidents.json  last ~50 incidents with every update
 import type { Getter, NormalizedComponent, NormalizedIncident, ProviderSnapshot, Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
-import { dropBareTwins, worstStatus } from "@/lib/status";
+import { dropBareTwins, isLocation, worstStatus } from "@/lib/status";
 
 interface SpComponent {
   id: string;
@@ -48,6 +48,7 @@ interface SpSummary {
   status?: { indicator?: string };
   components?: SpComponent[];
   incidents?: SpIncident[];
+  scheduled_maintenances?: { status?: string }[];
 }
 
 export function mapSpStatus(s: string | undefined | null): Status {
@@ -142,6 +143,19 @@ export function normalizeSpIncident(i: SpIncident, pageUrl: string): NormalizedI
   };
 }
 
+/**
+ * Status for a page with a component per city (Cloudflare). Some city is nearly always re-routed
+ * or in maintenance, and Statuspage folds that into the indicator, so the indicator reads as a
+ * standing outage while the page itself says "no known issues". Go by open incidents, running
+ * maintenance and the product components instead, which is what the page headlines.
+ */
+export function networkStatus(s: SpSummary, components: NormalizedComponent[]): Status {
+  const statuses = components.filter((c) => !isLocation(c.name)).map((c) => c.status);
+  for (const i of s.incidents ?? []) statuses.push(indicatorStatus(i.impact));
+  if ((s.scheduled_maintenances ?? []).some((m) => m.status === "in_progress")) statuses.push("maintenance");
+  return worstStatus(statuses.filter((st) => st !== "unknown"));
+}
+
 export async function fetchStatuspage(base: string, pageUrl: string, get: Getter): Promise<ProviderSnapshot> {
   const root = base.replace(/\/$/, "");
   const [summaryRes, incidentsRes] = await Promise.all([
@@ -155,11 +169,14 @@ export async function fetchStatuspage(base: string, pageUrl: string, get: Getter
     if (!s || !Array.isArray(s.components)) throw new Error("summary.json: unexpected shape");
     const components = normalizeSpComponents(s.components);
     snap.components = components;
-    // The page's own indicator is the provider's overall call. Big pages (Cloudflare has a component
-    // per city) nearly always have one component down, so the worst component would read as a
-    // permanent outage. Components still count when the page publishes no indicator.
+    // The page's own indicator is the provider's overall call. Components still count when the page
+    // publishes no indicator.
     const indicator = indicatorStatus(s.status?.indicator);
-    snap.status = indicator !== "unknown" ? indicator : worstStatus(components.map((c) => c.status));
+    snap.status = components.some((c) => isLocation(c.name))
+      ? networkStatus(s, components)
+      : indicator !== "unknown"
+        ? indicator
+        : worstStatus(components.map((c) => c.status));
     snap.raw!.summary = s;
   }
 

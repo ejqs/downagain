@@ -3,7 +3,7 @@ import { durationMinutes, effectiveTier, gradeFor, gradeRank, incidentPoints, MA
 import { AREAS, SECURITY_PENALTY, TIER_WEIGHT, scopeWeight, type Area } from "@/lib/severity";
 import { PRICES, monthlyUsd, valueFrontier, type Price } from "@/lib/pricing";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
-import { isProblem, statusRank } from "@/lib/status";
+import { isLocation, isProblem, statusRank } from "@/lib/status";
 import type { Status } from "@/lib/types";
 
 const DAY = 86_400_000;
@@ -214,7 +214,7 @@ export function downNow(snap: Snapshot): DownItem[] {
     } else if (!snap.focus && isProblem(p.status) && !openIncidents(mine).length) {
       // Skipped in a narrowed view: a red status page doesn't say whether it's the part you use.
       // A status page still flagged by a long-running incident isn't news either.
-      const broken = p.components.filter((c) => isProblem(c.status)).map((c) => c.name);
+      const broken = brokenComponents(p).items.map((c) => c.name);
       out.push({
         provider: p,
         title: broken.length ? `Problems reported on ${broken.slice(0, 3).join(", ")}${broken.length > 3 ? "…" : ""}` : "Status page reports a problem",
@@ -313,8 +313,9 @@ export interface BrokenComponents {
 
 /** A provider's non-green components, summarised so a 40-city outage fits on two lines. */
 export function brokenComponents(p: ProviderRow): BrokenComponents {
+  // A re-routed city is routine on a big network; the provider doesn't headline it, so neither do we.
   const items = p.components
-    .filter((c) => isProblem(c.status))
+    .filter((c) => isProblem(c.status) && !isLocation(c.name))
     .sort((a, b) => statusRank(b.status) - statusRank(a.status) || (a.group ?? "").localeCompare(b.group ?? "") || a.name.localeCompare(b.name));
   const tally = <K,>(keys: K[]) => {
     const m = new Map<K, number>();

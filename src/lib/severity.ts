@@ -17,8 +17,9 @@
 // every stored incident (see regradeStale), or run `bun run regrade`.
 import type { Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
+import { isLocation } from "@/lib/status";
 
-export const CLASSIFIER_VERSION = 6;
+export const CLASSIFIER_VERSION = 7;
 
 // manage: dashboard, console, auth, billing. peripheral: docs, status page, consumer apps.
 export type Surface = "serving" | "data" | "ship" | "manage" | "peripheral";
@@ -91,6 +92,7 @@ const SURFACE_RULES: [Surface, RegExp][] = [
 
 const SECURITY_RE = /\bsecurity\b|vulnerab|unauthori[sz]ed|credential|token leak|leaked|compromise|\bcve-\d|exposed|breach|malicious|supply.?chain/i;
 const DATA_LOSS_RE = /data loss|lost data|data (?:was|were|has been) lost|customer data (?:was |were )?(?:exposed|accessed)|data breach|irrecoverabl/i;
+const SUBSET_RE = /\bsome (?:[\w-]+ ){0,3}(?:users|customers|accounts|requests|zones|sites)\b|\bsubset of\b/i;
 const MAINTENANCE_RE = /scheduled maintenance|planned maintenance/i;
 // Text that says customers were blocked from shipping or managing, whatever the component.
 const BLOCKED_RE = /(?:unable|can(?:no|')t|could not|couldn't|fail(?:ed|ing|s)?) to (?:deploy|build|push|log ?in|sign ?in|update|create|scale|configure|change)|deploy(?:s|ments)? (?:are |were )?(?:failing|blocked|stuck|delayed)|accounts? (?:were |was |are |is )?(?:suspended|frozen|locked)/i;
@@ -299,5 +301,17 @@ export function classify(input: ClassifyInput, overrides?: Map<string, Surface>)
     tier = bumped;
   }
 
-  return { tier, areaTiers, surfaces, security, lowConfidence, reason, classifierVersion: CLASSIFIER_VERSION, scope: region ? "regional" : null };
+  return { tier, areaTiers, surfaces, security, lowConfidence, reason, classifierVersion: CLASSIFIER_VERSION, scope: region ? "regional" : scopeFrom(input) };
+}
+
+/** Max cities an incident can name and still count as regional; past that it's the network. */
+const MAX_REGIONAL_LOCATIONS = 10;
+
+/** Blast radius the rules can read: the cities named, or "some users" in the title. Null is unclear. */
+function scopeFrom(input: Pick<ClassifyInput, "title" | "components">): Scope | null {
+  const places = new Set(input.components.filter(isLocation).map((c) => c.slice(c.lastIndexOf("(")))).size;
+  if (places === 1) return "local";
+  if (places > 1 && places <= MAX_REGIONAL_LOCATIONS) return "regional";
+  if (!places && SUBSET_RE.test(input.title)) return "subset";
+  return null;
 }

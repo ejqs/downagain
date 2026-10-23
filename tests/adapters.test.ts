@@ -144,6 +144,21 @@ describe("adapter edge cases", () => {
   const sp = { slug: "x", sourceKind: "statuspage" as const, sourceUrl: "https://x.test/", statusPageUrl: "https://x.test/" };
   const serve = (bodies: Record<string, unknown>) => async (url: string) => ({ notModified: false as const, body: bodies[new URL(url).pathname] });
 
+  it("statuspage: a page with a component per city goes by incidents, not re-routed cities", async () => {
+    const city = (id: string, name: string, status: string) => ({ id, name, status, group_id: "g" });
+    const components = [
+      { id: "g", name: "Africa", status: "partial_outage", group: true },
+      city("a", "Accra, Ghana - (ACC)", "partial_outage"),
+      city("b", "Annaba, Algeria - (AAE)", "major_outage"),
+      { id: "w", name: "Workers", status: "operational" },
+    ];
+    const read = (summary: object) => readProvider(sp, serve({ "/api/v2/summary.json": { status: { indicator: "critical" }, components, ...summary }, "/api/v2/incidents.json": { incidents: [] } }));
+    expect((await read({ incidents: [] })).status).toBe("operational");
+    expect((await read({ incidents: [{ id: "i", name: "Access issues", status: "investigating", impact: "minor" }] })).status).toBe("degraded");
+    expect((await read({ scheduled_maintenances: [{ status: "in_progress" }] })).status).toBe("maintenance");
+    expect((await read({ scheduled_maintenances: [{ status: "scheduled" }] })).status).toBe("operational");
+  });
+
   it("statuspage: no indicator falls back to the worst component, and dates fall back sensibly", async () => {
     const snap = await readProvider(
       sp,

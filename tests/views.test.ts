@@ -145,6 +145,17 @@ describe("brokenComponents", () => {
     expect(b.byStatus).toEqual([["major_outage", 2], ["degraded", 2]]);
     expect(b.groups).toEqual([["Africa", 2], ["Latin America", 1], ["Oceania", 1]]);
   });
+
+  it("leaves out re-routed cities, which the provider doesn't headline", () => {
+    const p = prov(1, {
+      status: "operational",
+      components: [
+        { name: "Accra, Ghana - (ACC)", group: "Africa", status: "partial_outage" },
+        { name: "Workers", status: "degraded" },
+      ],
+    });
+    expect(brokenComponents(p).items.map((c) => c.name)).toEqual(["Workers"]);
+  });
 });
 
 describe("dailyCells", () => {
