@@ -5,7 +5,7 @@ description: Working on downagain.dev - adding or fixing a tracked provider, cha
 
 # downagain.dev
 
-A read-only Next.js site that ranks hosting, cloud, database and AI providers by their own status-page history. Read `README.md` first; this is the checklist for the common changes.
+A read-only Next.js site that ranks hosting, cloud, database, AI and dev tool providers by their own status-page history. Read `README.md` first; this is the checklist for the common changes.
 
 ## Ground rules
 

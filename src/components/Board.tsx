@@ -165,7 +165,7 @@ export function AlsoTracking({ snap, current }: { snap: Snapshot; current: strin
         })}
         <div className="empty stack" style={{ ["--gap" as string]: "8px", padding: 16 }}>
           <strong style={{ fontSize: 20 }}>Next up</strong>
-          <span className="body" style={{ fontSize: 15 }}>Databases, CI, CDN &amp; DNS.</span>
+          <span className="body" style={{ fontSize: 15 }}>CDN &amp; DNS.</span>
           <a href="https://github.com/ejqs/downagain/issues/new?title=Track%20a%20provider" style={{ fontSize: 14, fontWeight: 700 }}>Suggest a provider</a>
         </div>
       </div>

@@ -162,3 +162,30 @@ describe("database surfaces", () => {
     expect(c.areaTiers).toEqual({ production: 1 });
   });
 });
+
+describe("dev tools", () => {
+  it.each([
+    ["Git Operations", "ship"],
+    ["Actions", "ship"],
+    ["Pull Requests", "ship"],
+    ["API Requests", "ship"],
+    ["Webhooks", "ship"],
+    ["Packages", "ship"],
+    ["Package installation", "ship"],
+    ["Registry", "ship"],
+    ["Docker Hub Registry", "ship"],
+    ["Pages", "serving"],
+    ["Issues", "manage"],
+    ["Codespaces", "manage"],
+    ["Copilot", "peripheral"],
+    ["www.npmjs.com website", "peripheral"],
+  ])("%s is %s", (name, surface) => {
+    expect(surfaceForComponent(name, undefined, "devtools")).toBe(surface);
+  });
+
+  it("grades a full Actions outage as SHIP, not PROD", () => {
+    const c = classify({ ...base, categorySlug: "devtools", title: "Actions runs failing", impact: "critical", components: ["Actions"] });
+    expect(c.tier).toBe(2);
+    expect(c.areaTiers).toEqual({ shipping: 2 });
+  });
+});

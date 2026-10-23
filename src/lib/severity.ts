@@ -123,12 +123,25 @@ const DATABASE_SURFACE_RULES: [Surface, RegExp][] = [
   ["data", /database|postgres|mysql|mongo|redis|kafka|vector|qstash|queue|search|cluster|connect|pooler|supavisor|pgbouncer|quer(?:y|ies)|reads?\b|writes?\b|replica|storage|rest api|data api|graphql|api gateway|serverless|dedicated|advanced|basic|standard|free tier|pay as you go|\b(?:aws|gcp|azure)\b|region|\b[a-z]{2}-[a-z]+-?\d\b/i],
 ];
 
+// Dev tools: git, CI, APIs, webhooks, package and image pulls are how code ships, so
+// SHIP. Serving is only what they host for the customer's own users (GitHub Pages).
+// Issues and the like are manage; Copilot and docs don't block a deploy.
+const DEVTOOLS_SURFACE_RULES: [Surface, RegExp][] = [
+  ["peripheral", /docs|documentation|support|status page|community|marketing|website|blog|e-?mail|notification|copilot|scout|desktop/i],
+  ["serving", /\bpages\b|\bcdn\b/i],
+  ["manage", /issues|projects|discussions|wiki|dashboard|account|billing|payment|sign[- ]?up|sign[- ]?in|login|log[- ]in|auth|settings|organi[sz]ation|codespaces/i],
+  ["ship", /git|actions|pull requests|\bapi\b|webhook|packages?|registry|install|publish|download|pull|push|build|hub|search|token/i],
+];
+
 export function surfaceForComponent(name: string, overrides?: Map<string, Surface>, categorySlug?: string): Surface | null {
   // Overrides name the bare component; incidents may carry it as "Group - Name".
   const o = overrides?.get(name) ?? (name.includes(" - ") ? overrides?.get(name.slice(name.lastIndexOf(" - ") + 3)) : undefined);
   if (o) return o;
   if (categorySlug === "cloud") {
     for (const [surface, re] of CLOUD_SURFACE_RULES) if (re.test(name)) return surface;
+  }
+  if (categorySlug === "devtools") {
+    for (const [surface, re] of DEVTOOLS_SURFACE_RULES) if (re.test(name)) return surface;
   }
   if (categorySlug === "databases") {
     for (const [surface, re] of DATABASE_SURFACE_RULES) if (re.test(name)) return surface;
