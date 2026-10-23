@@ -30,6 +30,15 @@ describe("penaltyMinutes", () => {
     expect(penaltyMinutes(inc({ startedAt: at("2026-10-21T23:00:00Z") }), from, to)).toBe(60);
     expect(penaltyMinutes(inc({ startedAt: at("2026-09-01T00:00:00Z"), tier: 1 }), from, to)).toBe(72 * 60);
   });
+  it("stops at the recovery Claude read, but only once the incident is resolved", () => {
+    const base = { startedAt: at("2026-10-01T10:00:00Z"), recoveredAt: at("2026-10-01T12:00:00Z"), tier: 2 };
+    expect(penaltyMinutes(inc({ ...base, resolvedAt: at("2026-10-01T20:00:00Z") }), from, to)).toBe(120);
+    // Still open: the provider hasn't called it over, so neither do we.
+    expect(penaltyMinutes(inc({ ...base, startedAt: at("2026-10-21T10:00:00Z"), recoveredAt: at("2026-10-21T12:00:00Z") }), from, to)).toBe(14 * 60);
+    // Monitoring came first, or the timestamp is out of range: monitoring and resolve win.
+    expect(penaltyMinutes(inc({ ...base, monitoringAt: at("2026-10-01T11:00:00Z"), resolvedAt: at("2026-10-01T20:00:00Z") }), from, to)).toBe(60);
+    expect(penaltyMinutes(inc({ ...base, recoveredAt: at("2026-09-30T00:00:00Z"), resolvedAt: at("2026-10-01T11:00:00Z") }), from, to)).toBe(60);
+  });
   it("caps anything short of Sev 1 at a day", () => {
     expect(penaltyMinutes(inc({ startedAt: at("2026-09-01T00:00:00Z"), tier: 2 }), from, to)).toBe(24 * 60);
     expect(penaltyMinutes(inc({ startedAt: at("2026-09-01T00:00:00Z"), tier: 1, tierOverride: 3 }), from, to)).toBe(24 * 60);
@@ -89,6 +98,8 @@ describe("score", () => {
     );
     expect(s.longestMinutes).toBe(120);
     expect(score([inc({ startedAt: at("2026-10-01T00:00:00Z"), resolvedAt: at("2026-10-01T02:00:00Z"), tier: 4, areaTiers: { shipping: 4 } })], from, to).longestMinutes).toBe(0);
+    // Still open, but began before the window: not a record for this window.
+    expect(score([inc({ startedAt: at("2026-03-01T00:00:00Z"), resolvedAt: null, tier: 1 })], from, to).longestMinutes).toBe(0);
   });
 
   it("ignores not-counted and out-of-window incidents", () => {

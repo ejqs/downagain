@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { safeSnapshot } from "@/lib/data";
-import { dailyLoad, gradeInput, openIncidents, tierOf } from "@/lib/views";
+import { LIVE_DAYS, dailyLoad, gradeInput, openIncidents, tierOf, whereHit } from "@/lib/views";
 import { WINDOW_DAYS, durationMinutes, shownEnd } from "@/lib/grading";
-import { fmtDay, fmtDuration, fmtTime, plural } from "@/lib/format";
+import { fmtDate, fmtDay, fmtDuration, fmtTime, plural } from "@/lib/format";
 import { TIER_BLURB, TIER_NAMES } from "@/lib/severity";
 import { SevPill } from "@/components/ui";
 import { pageMeta } from "@/lib/site";
@@ -123,12 +123,14 @@ export default async function IncidentsPage({ searchParams }: Props) {
             <Link key={i.id} href={`/p/${p.slug}`} className="list-row" style={{ textDecoration: "none", ["--gap" as string]: "8px 20px" }}>
               <span className="stack" style={{ flex: "1 1 160px", ["--gap" as string]: "2px" }}>
                 <strong style={{ fontSize: 20 }}>{p.name}</strong>
-                <span className="muted" style={{ fontSize: 14 }}>{catName.get(p.category)}{i.components.length ? ` · ${i.components.slice(0, 2).join(", ")}` : ""}</span>
+                <span className="muted" style={{ fontSize: 14 }}>{[catName.get(p.category), whereHit(i, 2)].filter(Boolean).join(" · ")}</span>
               </span>
               <span style={{ flex: "999 1 320px", minWidth: 0, fontSize: 16 }}>{i.title}</span>
               <span className="row" style={{ ["--gap" as string]: "10px" }}>
                 <SevPill tier={tierOf(i)} security={i.security} />
-                <span className="mono" style={{ fontSize: 20, fontWeight: 700 }}>{fmtDuration((now - i.startedAt) / 60_000)}</span>
+                <span className="mono" style={{ fontSize: 20, fontWeight: 700 }}>
+                  {i.startedAt >= now - LIVE_DAYS * DAY ? fmtDuration((now - i.startedAt) / 60_000) : `since ${fmtDate(i.startedAt)}`}
+                </span>
               </span>
             </Link>
           );
@@ -158,7 +160,7 @@ export default async function IncidentsPage({ searchParams }: Props) {
                         <Link href={`/p/${p.slug}`} style={{ fontWeight: 800, textDecoration: "none" }}>{p.name}</Link> · {i.title}
                       </span>
                       <span className="muted" style={{ fontSize: 14 }}>
-                        {i.components.slice(0, 3).join(", ")}
+                        {whereHit(i)}
                         {i.postmortem ? " · postmortem" : ""}
                         {i.url ? (
                           <>

@@ -49,6 +49,8 @@ export interface IncidentRow {
   startedAt: number;
   monitoringAt: number | null;
   resolvedAt: number | null;
+  /** Claude's read of when service was back, see penaltyEnd. */
+  recoveredAt?: number | null;
   url: string | null;
   components: string[];
   /** Cloud regions the provider named; null or empty when global or not stated. */
@@ -89,6 +91,7 @@ const incidentColumns = {
   startedAt: incidents.startedAt,
   monitoringAt: incidents.monitoringAt,
   resolvedAt: incidents.resolvedAt,
+  recoveredAt: incidents.recoveredAt,
   url: incidents.url,
   components: incidents.components,
   regions: incidents.regions,
@@ -124,6 +127,7 @@ export function toIncidentRow(r: IncidentSelect, now = Date.now()): IncidentRow 
     startedAt,
     monitoringAt: ms(r.monitoringAt),
     resolvedAt: ms(r.resolvedAt) ?? end,
+    recoveredAt: ms(r.recoveredAt),
     stale: end != null,
   };
 }

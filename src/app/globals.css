@@ -57,6 +57,7 @@ p { margin: 0; }
 /* Down-right-now banner */
 .banner { background: var(--down); border-bottom: 2px solid var(--ink); }
 .banner.issues { background: var(--minor); }
+.banner.monitoring { background: var(--up-wash); }
 .banner-inner { padding-top: 12px; padding-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; }
 .banner-head { flex: 0 0 auto; margin: 0; display: flex; align-items: center; gap: 8px; }
 .banner-cards { flex: 999 1 560px; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px; }
@@ -117,6 +118,7 @@ main.wrap { padding-bottom: 48px; }
 .tabs a[aria-current="true"] { border-bottom-color: var(--ink); }
 .tabs .count { font-family: var(--font-mono); font-size: 11px; background: var(--down); color: var(--ink); padding: 1px 5px; }
 .tabs .count.issues { background: var(--minor); }
+.tabs .count.monitoring { background: var(--up-wash); }
 
 /* Buttons, chips, tabs */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -127,6 +129,7 @@ main.wrap { padding-bottom: 48px; }
 .chip.small[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .chip .count { font-family: var(--font-mono); font-size: 11px; background: var(--down); color: var(--ink); padding: 1px 5px; }
 .chip .count.issues { background: var(--minor); }
+.chip .count.monitoring { background: var(--up-wash); }
 .btn { min-height: 44px; display: inline-flex; align-items: center; padding: 0 16px; border: 3px solid var(--ink); font-weight: 700; text-decoration: none; background: var(--paper); color: var(--ink); font-family: var(--font-display); font-size: 15px; cursor: pointer; }
 .btn.dark { background: var(--ink); color: var(--paper); }
 .btn.dark:hover { color: var(--hazard); }
@@ -192,6 +195,7 @@ main.wrap { padding-bottom: 48px; }
 .pill.down { background: var(--down); }
 .pill.issues { background: var(--minor); }
 .pill.ok { background: var(--up-wash); }
+.pill.monitoring { background: var(--up-wash); }
 .pill.unknown { background: var(--rule); }
 .pill.value { background: var(--hazard); color: var(--ink); border: 1px solid var(--ink); }
 
@@ -285,11 +289,13 @@ details.updates li { overflow-wrap: anywhere; }
 .empty { border: 3px dashed var(--ink); padding: 20px; font-size: 17px; }
 
 /* Tappable labels: the body covers the nearest positioned box (.stat, .cmp-row) */
-.hint { display: inline; }
+.hint { display: inline; position: relative; }
+.stat .hint, .cmp-row .hint { position: static; }
 .hint summary { display: inline; cursor: pointer; list-style: none; text-decoration: underline dotted; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .hint summary::-webkit-details-marker { display: none; }
 .hint[open] summary { color: var(--ink); text-decoration-style: solid; }
-.hint-body { position: absolute; left: 8px; right: 8px; top: calc(100% - 8px); z-index: 3; padding: 10px 12px; background: var(--ink); color: var(--paper); font: 400 14px/1.4 var(--font-display); letter-spacing: 0; text-transform: none; box-shadow: 4px 4px 0 var(--hazard); }
+.hint-body { position: absolute; left: 0; top: calc(100% + 6px); z-index: 3; width: max-content; max-width: min(360px, calc(100vw - 56px)); padding: 10px 12px; background: var(--ink); color: var(--paper); font: 400 14px/1.4 var(--font-display); letter-spacing: 0; text-transform: none; box-shadow: 4px 4px 0 var(--hazard); }
+.stat .hint-body, .cmp-row .hint-body { left: 8px; right: 8px; top: calc(100% - 8px); width: auto; max-width: none; }
 .incident .what a { padding-block: 10px; }
 .comp-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: 320px; overflow-y: auto; font-size: 14px; }
 .comp-list li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-top: 1px solid var(--rule); }

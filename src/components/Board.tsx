@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Snapshot } from "@/lib/data";
-import { dailyLoad, gradeCauses, incidentsFor, leaderboard, downNow, isGraded, liveCount, liveLevel, LIVE_LABEL, scoreFor, valueBoard } from "@/lib/views";
+import { dailyLoad, gradeCauses, incidentsFor, leaderboard, downNow, isGraded, liveCount, LIVE_LABEL, worstLevel, scoreFor, valueBoard } from "@/lib/views";
 import { fmtDate, fmtDuration, fmtPct, plural } from "@/lib/format";
 import { durationMinutes, WINDOW_DAYS } from "@/lib/grading";
 import { gradeInput, tierOf, type DayCell } from "@/lib/views";
@@ -31,7 +31,7 @@ export function CategoryTabs({ snap, active, query = "" }: { snap: Snapshot; act
             data-umami-event-category={c.slug}
           >
             {c.name}
-            {n ? <span className={`count ${catDown.some((d) => liveLevel(d) === "down") ? "" : "issues"}`} aria-label={liveCount(catDown) ?? undefined}>{n}</span> : null}
+            {n ? <span className={`count ${worstLevel(catDown) === "down" ? "" : worstLevel(catDown)}`} aria-label={liveCount(catDown) ?? undefined}>{n}</span> : null}
           </Link>
         );
       })}
@@ -202,7 +202,7 @@ export function AlsoTracking({ snap, current }: { snap: Snapshot; current: strin
             .slice(0, 3);
           const catDown = down.filter((d) => d.provider.category === c.slug);
           const n = liveCount(catDown);
-          const worst = catDown.some((d) => liveLevel(d) === "down") ? "down" : "issues";
+          const worst = worstLevel(catDown) ?? "ok";
           return (
             <Link key={c.slug} href={`/c/${c.slug}`} className="box pad stack" style={{ textDecoration: "none", ["--gap" as string]: "10px" }}>
               <span className="row" style={{ justifyContent: "space-between" }}>

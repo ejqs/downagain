@@ -36,6 +36,13 @@
       "when": 1792687917314,
       "tag": "0004_nappy_jack_power",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792747012119,
+      "tag": "0005_robust_mandarin",
+      "breakpoints": true
     }
   ]
 }

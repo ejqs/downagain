@@ -95,6 +95,8 @@ export const incidents = pgTable(
     startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
     monitoringAt: timestamp("monitoring_at", { withTimezone: true }), // first "monitoring" update
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    // Claude's read of when service was back to normal, if earlier than the provider closing it
+    recoveredAt: timestamp("recovered_at", { withTimezone: true }),
     url: text("url"),
     components: text("components").array().notNull().default([]),
     regions: text("regions").array(), // cloud regions named by the provider; null = global or not stated

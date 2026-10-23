@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
-import { brokenComponents, coveredDays, liveLevel, communication, dailyCells, valueBoard, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals } from "@/lib/views";
+import { brokenComponents, coveredDays, liveLevel, worstLevel, communication, dailyCells, valueBoard, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals, whereHit } from "@/lib/views";
 
 const DAY = 86_400_000;
 const NOW = Date.parse("2026-10-22T12:00:00Z");
@@ -70,6 +70,24 @@ describe("downNow", () => {
     expect(d.map((x) => x.provider.id)).toEqual([2, 1]);
     expect(d[1].title).toBe("Edge errors (+1 more)");
     expect(d[1].sinceMs).toBe(ago(0, 2)); // earliest open incident
+  });
+
+  it("marks providers watching a fix as monitoring and lists them last", () => {
+    const s = snap(
+      [prov(1), prov(2)],
+      [
+        inc(1, { startedAt: ago(0, 30), resolvedAt: null, tier: 1, status: "monitoring", title: "Platform outage" }),
+        inc(2, { startedAt: ago(0, 1), resolvedAt: null, tier: 3, status: "identified", title: "Builds slow" }),
+      ],
+    );
+    const d = downNow(s);
+    expect(d.map((x) => [x.provider.id, liveLevel(x)])).toEqual([
+      [2, "issues"],
+      [1, "monitoring"],
+    ]);
+    // One open incident still being worked on keeps the provider live.
+    s.incidents.push(inc(1, { startedAt: ago(0, 2), resolvedAt: null, tier: 2, status: "investigating" }));
+    expect(downNow(s).find((x) => x.provider.id === 1)?.monitoring).toBe(false);
   });
 
   it("falls back to the page status and names the broken components", () => {
@@ -272,6 +290,11 @@ describe("liveLevel", () => {
     expect(liveLevel({ tier: 2, status: "degraded" })).toBe("issues");
     expect(liveLevel({ tier: 3, status: "operational" })).toBe("issues");
   });
+  it("calls it monitoring once the fix is in, whatever the tier", () => {
+    expect(liveLevel({ tier: 1, status: "major_outage", monitoring: true })).toBe("monitoring");
+    expect(worstLevel([{ tier: 1, status: "major_outage", monitoring: true }, { tier: 3, status: "degraded" }])).toBe("issues");
+    expect(worstLevel([])).toBeNull();
+  });
 });
 
 describe("coverage", () => {
@@ -312,5 +335,12 @@ describe("narrowed views", () => {
     expect(scoreFor(focused, 1).grade).toBe("A+");
     expect(downNow(base)).toHaveLength(1);
     expect(downNow(focused)).toHaveLength(0);
+  });
+});
+
+describe("whereHit", () => {
+  it("names the regions when the provider gave them, else the components", () => {
+    expect(whereHit({ regions: ["me-south-1"], components: ["AWS Resource Groups", "Amazon S3"] })).toBe("me-south-1");
+    expect(whereHit({ regions: null, components: ["API", "Builds", "Docs", "Logs"] })).toBe("API, Builds, Docs +1");
   });
 });

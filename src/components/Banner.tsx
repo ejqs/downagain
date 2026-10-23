@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { Snapshot } from "@/lib/data";
-import { downNow, liveLevel } from "@/lib/views";
+import { downNow, worstLevel } from "@/lib/views";
 import { fmtAgo, fmtDuration } from "@/lib/format";
 import { TIER_NAMES } from "@/lib/severity";
 import { STATUS_LABEL } from "@/lib/status";
+
+const HEAD = { down: "Down right now", issues: "Issues right now", monitoring: "Monitoring right now" };
 
 /** The "down right now" banner at the top of every page. */
 export function Banner({ snap }: { snap: Snapshot | null }) {
@@ -25,12 +27,13 @@ export function Banner({ snap }: { snap: Snapshot | null }) {
     );
   }
 
+  const level = worstLevel(down);
   return (
-    <section className={`banner ${down.some((d) => liveLevel(d) === "down") ? "" : "issues"}`} aria-label="Services with problems right now">
+    <section className={`banner ${level === "down" ? "" : level}`} aria-label="Services with problems right now">
       <div className="wrap banner-inner">
         <h2 className="banner-head eyebrow">
           <span className="dot" />
-          {down.some((d) => liveLevel(d) === "down") ? "Down right now" : "Issues right now"} · {down.length}{checked ? ` · checked ${fmtAgo(checked, snap.generatedAt)}` : ""}
+          {HEAD[level ?? "issues"]} · {down.length}{checked ? ` · checked ${fmtAgo(checked, snap.generatedAt)}` : ""}
         </h2>
         <div className="banner-cards">
           {down.map((d) => (
@@ -41,6 +44,7 @@ export function Banner({ snap }: { snap: Snapshot | null }) {
                   <span className={`pill ${d.tier ? `sev-${d.tier}` : "down"}`} title={d.tier ? TIER_NAMES[d.tier] : undefined}>
                     {d.tier ? `SEV ${d.tier}` : STATUS_LABEL[d.status].toUpperCase()}
                   </span>
+                  {d.monitoring ? <>{" "}<span className="pill monitoring">MONITORING</span></> : null}
                 </span>
                 <span className="dur">{fmtDuration((snap.generatedAt - d.sinceMs) / 60_000)}</span>
               </span>

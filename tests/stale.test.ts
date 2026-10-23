@@ -15,6 +15,7 @@ function row(p: { startedAt: string; resolvedAt?: string; sourceUpdatedAt?: stri
     startedAt: new Date(p.startedAt),
     monitoringAt: null,
     resolvedAt: p.resolvedAt ? new Date(p.resolvedAt) : null,
+    recoveredAt: null,
     url: null,
     components: [],
     regions: null,

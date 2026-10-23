@@ -190,6 +190,27 @@ describe("adapter edge cases", () => {
     await expect(readProvider(rw, async () => ({ notModified: false, body: {} }))).rejects.toThrow(/unexpected shape/);
   });
 
+  it("railway: an incident in monitoring no longer holds the page status down", async () => {
+    const rw = { slug: "railway", sourceKind: "railway" as const, sourceUrl: "https://rw.test/status", statusPageUrl: "https://status.railway.com" };
+    const incident = (status: string) => ({
+      id: "i1",
+      title: "Builds paused",
+      status,
+      createdAt: "2026-10-21T07:24:00Z",
+      updatedAt: "2026-10-23T09:30:00Z",
+      worstImpact: "MAJOR_OUTAGE",
+      components: [{ impact: "MAJOR_OUTAGE", component: { name: "Builds" } }],
+      updates: [{ id: "u1", status: "IDENTIFIED", message: "Builds paused.", createdAt: "2026-10-21T08:00:00Z" }],
+    });
+    const read = (status: string) =>
+      readProvider(rw, async () => ({ notModified: false, body: { components: [{ id: "a", name: "Builds", status: "OPERATIONAL" }], incidents: [incident(status)] } }));
+    expect((await read("IDENTIFIED")).status).toBe("major_outage");
+    const monitoring = await read("MONITORING");
+    expect(monitoring.status).toBe("operational");
+    // Flipped to monitoring with no update saying so: the flip time stands in.
+    expect(monitoring.incidents![0].monitoringAt?.toISOString()).toBe("2026-10-23T09:30:00.000Z");
+  });
+
   it("heroku: resolved incidents and unknown systems", async () => {
     const hk = { slug: "heroku", sourceKind: "heroku" as const, sourceUrl: "https://hk.test", statusPageUrl: "https://hk.test" };
     const snap = await readProvider(hk, async () => ({

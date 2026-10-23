@@ -4,11 +4,11 @@ import { notFound } from "next/navigation";
 import { getProviderHistory, safeSnapshot, type IncidentRow, type ProviderRow, type ReviewTrace } from "@/lib/data";
 import { brokenComponents, communication, coveredDays, dataFrom, isGraded, dailyCells, downNow, incidentsFor, liveIncidents, monthlyTrend, scoreFor, startHeatmap, tierOf, topComponents, valueBoard } from "@/lib/views";
 import { WORKLOADS, checkedMs, fmtUsd, isStale } from "@/lib/pricing";
-import { durationMinutes, penaltyMinutes } from "@/lib/grading";
+import { durationMinutes, penaltyEnd, penaltyMinutes } from "@/lib/grading";
 import { fmtAgo, fmtDate, fmtDuration, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
 import { AREA_BLURB, AREA_LABEL, AREA_SHORT, AREAS, TIER_NAMES, TIER_BLURB, TIER_WEIGHT, scopeWeight } from "@/lib/severity";
 import { STATUS_LABEL, isProblem } from "@/lib/status";
-import { gradeInput } from "@/lib/views";
+import { gradeInput, whereHit } from "@/lib/views";
 import { DayStrip, GradeTile, SevPill, Hint, Stat, StripLegend } from "@/components/ui";
 import { Unavailable } from "@/components/Unavailable";
 import { JsonLd } from "@/components/JsonLd";
@@ -61,7 +61,7 @@ function IncidentTags({ i }: { i: IncidentRow }) {
   const tags = [
     i.tierOverride == null && i.gradedBy === "claude" ? "AI-graded" : null,
     SCOPE_LABEL[i.scope ?? ""] ?? null,
-    i.components.length ? `${i.components[0]}${i.components.length > 1 ? ` +${i.components.length - 1}` : ""}` : null,
+    whereHit(i, 1) || null,
   ].filter(Boolean);
   if (!tags.length) return null;
   return (
@@ -76,7 +76,9 @@ const MODEL_NAME: Record<string, string> = { "claude-haiku-5-5": "Claude Haiku 5
 /** The audit trail behind an AI grade: model, date, the rules' call next to Claude's, and a link to the raw record. */
 function WhyGrade({ i, review }: { i: IncidentRow; review: ReviewTrace }) {
   const v = (review.verdict ?? {}) as { scope?: string; confidence?: string; security?: boolean; data_loss?: boolean; rationale?: string };
-  const flags = [v.scope, v.confidence ? `${v.confidence} confidence` : null, v.security ? "security" : null, v.data_loss ? "data loss" : null].filter(Boolean);
+  const end = penaltyEnd(gradeInput(i));
+  const back = i.recoveredAt && end?.getTime() === i.recoveredAt ? `back after ${fmtDuration((i.recoveredAt - i.startedAt) / 60_000)}` : null;
+  const flags = [v.scope, v.confidence ? `${v.confidence} confidence` : null, v.security ? "security" : null, v.data_loss ? "data loss" : null, back].filter(Boolean);
   return (
     <details className="updates">
       <summary>Why this grade</summary>
