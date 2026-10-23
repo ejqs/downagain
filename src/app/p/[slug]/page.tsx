@@ -376,7 +376,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
                         </div>
                       ))
                     ) : (
-                      <span className="body" style={{ fontSize: 15 }}>Nothing. Nice.</span>
+                      <span className="body" style={{ fontSize: 15 }}>Nothing.</span>
                     )}
                   </div>
                   {hit.length ? (
@@ -549,7 +549,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             ))}
           </div>
         ) : (
-          <div className="empty">Clean record. So far.</div>
+          <div className="empty">No incidents.</div>
         )}
         {all && history?.older.length ? (
           <>

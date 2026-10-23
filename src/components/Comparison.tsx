@@ -167,7 +167,6 @@ export function Comparison({ snap, slugs, heading }: { snap: Snapshot; slugs: st
               {byPoints[0].p.name} has the best 90-day record
               {byMttr.length ? `; ${byMttr[0].p.name} resolves incidents fastest.` : "."}
             </span>
-            <span style={{ fontSize: 16 }}>Running app? Watch Production. Deploying all day? Watch Shipping.</span>
           </section>
         </>
       )}

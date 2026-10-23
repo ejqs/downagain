@@ -38,8 +38,7 @@ export default async function ComparePage({ searchParams }: Props) {
       slugs={slugs}
       heading={
         <div className="stack" style={{ ["--gap" as string]: "8px" }}>
-          <span className="eyebrow">Compare</span>
-          <h1 className="h1 sm" style={{ fontSize: "clamp(36px, 7vw, 64px)" }}>Before you migrate.</h1>
+          <h1 className="h1 sm" style={{ fontSize: "clamp(36px, 7vw, 64px)" }}>Compare</h1>
         </div>
       }
     />

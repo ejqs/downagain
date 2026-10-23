@@ -16,7 +16,7 @@ export function Banner({ snap }: { snap: Snapshot | null }) {
     return (
       <section className="allclear" aria-label="All services up">
         <div className="wrap">
-          <strong>All up. For now.</strong>
+          <strong>All up.</strong>
           <span className="mono" style={{ fontSize: 13 }}>
             {lastEnded ? `Last incident ended ${fmtAgo(lastEnded, snap.generatedAt)}` : `Checked ${fmtAgo(checked, snap.generatedAt)}`}
           </span>
