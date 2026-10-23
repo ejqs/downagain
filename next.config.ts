@@ -26,11 +26,24 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
 ];
 
+// Pages render per request (the build has no database), which Next marks no-store.
+// Let the edge share each page for 30s and serve it stale for 60s more while one
+// request refreshes it, so a traffic spike renders a page about twice a minute.
+// RSC requests (client navigation, and the 307 that adds ?_rsc) keep Next's no-store
+// so a cache keyed on the URL never hands out a flight payload or redirect as HTML.
+const PAGES = ["/", "/about", "/incidents", "/stack", "/compare", "/compare/:pair", "/p/:slug", "/c/:slug"];
+const edgeCache = PAGES.map((source) => ({
+  source,
+  missing: [{ type: "header" as const, key: "rsc" }],
+  headers: [{ key: "Cache-Control", value: "public, max-age=0, s-maxage=30, stale-while-revalidate=60" }],
+}));
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
+      ...edgeCache,
       // Opened directly, an SVG badge is a document; it never needs scripts.
       { source: "/badge/:file", headers: [{ key: "Content-Security-Policy", value: "default-src 'none'; style-src 'unsafe-inline'" }] },
       // Only on the real domain, so a local `next start` never pins localhost to https.
