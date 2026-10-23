@@ -7,7 +7,7 @@
 // evidence: an incident is left out only when it names something, and that
 // something is not what you picked.
 import type { IncidentRow, Snapshot } from "@/lib/data";
-import type { Surface } from "@/lib/severity";
+import { AREAS, type Area, type Surface } from "@/lib/severity";
 
 export interface Need {
   key: string;
@@ -158,8 +158,14 @@ export function incidentFits(i: IncidentRow, f: NeedFilter): boolean {
   return f.needs.some((n) => n.surfaces.some((s) => i.surfaces!.includes(s)));
 }
 
+/** The area grades the picked needs touch: SHIP only with Deploys, PROD with anything else. Both when none are picked. */
+export function areasFor(f: NeedFilter): Area[] {
+  if (!f.needs.length) return AREAS;
+  return AREAS.filter((a) => f.needs.some((n) => (n.key === "deploys" ? "shipping" : "production") === a));
+}
+
 /** The snapshot as if only incidents that could have hit what was picked had happened. */
 export function applyFilter(snap: Snapshot, f: NeedFilter): Snapshot {
   if (!isFiltering(f)) return snap;
-  return { ...snap, incidents: snap.incidents.filter((i) => incidentFits(i, f)) };
+  return { ...snap, incidents: snap.incidents.filter((i) => incidentFits(i, f)), focus: { areas: areasFor(f) } };
 }

@@ -301,3 +301,16 @@ describe("gradeCauses", () => {
     expect(c.rest).toBe(1);
   });
 });
+
+describe("narrowed views", () => {
+  it("grade only the focused areas and skip status-only live tags", async () => {
+    const { downNow, scoreFor } = await import("@/lib/views");
+    const ship = inc(1, { startedAt: ago(2), resolvedAt: ago(2) + 10 * 3_600_000, tier: 3, areaTiers: { shipping: 3 }, surfaces: ["ship"] });
+    const base = snap([prov(1, { status: "major_outage" })], [ship]);
+    const focused = { ...base, focus: { areas: ["production" as const] } };
+    expect(scoreFor(base, 1).grade).not.toBe("A+");
+    expect(scoreFor(focused, 1).grade).toBe("A+");
+    expect(downNow(base)).toHaveLength(1);
+    expect(downNow(focused)).toHaveLength(0);
+  });
+});

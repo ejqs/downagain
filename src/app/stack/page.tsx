@@ -149,7 +149,7 @@ export default async function StackPage({ searchParams }: Props) {
               {filterQuery(filter) ? <p className="body" style={{ marginTop: 6 }}>{[filter.needs.map((n) => n.label).join(", "), filter.region?.label].filter(Boolean).join(" · ")}</p> : null}
             </div>
             <div className="box">
-              {whole ? <StackRow name="Whole stack" sub={plural(rows.length, "provider")} score={whole.score} graded={whole.graded} cells={dailyCells(all, 60, now)} list={all} now={now} /> : null}
+              {whole ? <StackRow name="Whole stack" sub={plural(rows.length, "provider")} score={whole.score} graded={whole.graded} cells={dailyCells(all, 60, now)} list={all} now={now} areas={sum.areas} /> : null}
               {rows.map((r) => (
                 <StackRow
                   key={r.provider.slug}
@@ -161,6 +161,7 @@ export default async function StackPage({ searchParams }: Props) {
                   cells={dailyCells(r.incidents, 60, now, dataFrom(r.provider))}
                   list={r.incidents}
                   now={now}
+                  areas={sum.areas}
                 />
               ))}
             </div>
@@ -229,7 +230,7 @@ export default async function StackPage({ searchParams }: Props) {
   );
 }
 
-function StackRow({ name, href, sub, score: s, graded, cells, list, now }: { name: string; href?: string; sub: string; score: Score; graded: boolean; cells: ReturnType<typeof dailyCells>; list: IncidentRow[]; now: number }) {
+function StackRow({ name, href, sub, score: s, graded, cells, list, now, areas }: { areas: typeof AREAS; name: string; href?: string; sub: string; score: Score; graded: boolean; cells: ReturnType<typeof dailyCells>; list: IncidentRow[]; now: number }) {
   return (
     <div className="list-row">
       <div className="board-name">
@@ -241,7 +242,7 @@ function StackRow({ name, href, sub, score: s, graded, cells, list, now }: { nam
       </div>
       <div className="board-metrics">
         <div className="areas" aria-label="Area grades">
-          {AREAS.map((a) => (
+          {areas.map((a) => (
             <span key={a}>
               <GradeTile grade={graded ? s.areas[a].grade : null} size="xs" label={`${a} grade ${s.areas[a].grade}`} />
               {AREA_SHORT[a]}
