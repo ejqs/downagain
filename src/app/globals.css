@@ -144,7 +144,7 @@ main.wrap { padding-bottom: 48px; }
 /* Leaderboard rows */
 .board-name { flex: 1 1 260px; min-width: 0; display: flex; gap: 12px; align-items: center; }
 .rank { width: 32px; font-family: var(--font-mono); font-size: 20px; font-weight: 700; flex: none; }
-.board-name a { font-size: 19px; font-weight: 800; text-decoration: none; }
+.board-name a:not(.pill) { font-size: 19px; font-weight: 800; text-decoration: none; }
 .board-metrics { flex: 0 1 auto; display: flex; flex-wrap: wrap; gap: 12px 20px; }
 .metric { display: flex; flex-direction: column; gap: 2px; }
 .metric b { font-family: var(--font-mono); font-size: 17px; }

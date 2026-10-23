@@ -78,6 +78,19 @@ describe("score", () => {
     expect(s.sev1Minutes).toBe(0);
   });
 
+  it("longest counts Sev 1-2 only", () => {
+    const s = score(
+      [
+        inc({ startedAt: at("2026-10-01T00:00:00Z"), resolvedAt: at("2026-10-01T02:00:00Z"), tier: 2, areaTiers: { production: 2 } }),
+        inc({ startedAt: at("2026-09-01T00:00:00Z"), resolvedAt: at("2026-09-20T00:00:00Z"), tier: 3, areaTiers: { shipping: 3 } }),
+      ],
+      from,
+      to,
+    );
+    expect(s.longestMinutes).toBe(120);
+    expect(score([inc({ startedAt: at("2026-10-01T00:00:00Z"), resolvedAt: at("2026-10-01T02:00:00Z"), tier: 4, areaTiers: { shipping: 4 } })], from, to).longestMinutes).toBe(0);
+  });
+
   it("ignores not-counted and out-of-window incidents", () => {
     const s = score(
       [inc({ startedAt: at("2026-10-01T10:00:00Z"), resolvedAt: at("2026-10-01T11:00:00Z"), tier: 0 }), inc({ startedAt: at("2025-01-01T00:00:00Z"), resolvedAt: at("2025-01-01T01:00:00Z") })],

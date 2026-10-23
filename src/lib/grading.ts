@@ -139,6 +139,7 @@ export interface Score {
   sev1Minutes: number;
   incidentCount: number;
   sevCounts: [number, number, number, number]; // Sev 1..4
+  /** Longest Sev 1-2 incident in the window, start to resolved. 0 if none. */
   longestMinutes: number;
   medianResolveMinutes: number | null;
   securityCount: number;
@@ -172,7 +173,8 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
     const end = (i.resolvedAt ?? to).getTime();
     // Uptime is provider-wide: a Sev 1 in one region or for one add-on doesn't take it down.
     if (tier === 1 && scopeWeight(i.scope) === 1) sev1.push([i.startedAt.getTime(), end]);
-    longest = Math.max(longest, durationMinutes(i, to));
+    // Longest is downtime: a Sev 3-4 left open for weeks is a papercut, not a record.
+    if (tier <= 2) longest = Math.max(longest, durationMinutes(i, to));
     if (i.resolvedAt) resolveTimes.push(durationMinutes(i));
 
     const minutes = penaltyMinutes(i, from, to) * scopeWeight(i.scope);
