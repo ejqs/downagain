@@ -26,4 +26,5 @@ export const GLOSSARY = {
   dns: "Incidents with DNS in the title or components, 90 days.",
   sev1Count: "Sev 1 incidents across every provider, 90 days.",
   daysSince: "Days since the last Sev 1 anywhere was resolved.",
+  userReports: "Visitors who said it's down for them, per hour over 24 hours. Not from the status page. Never counted in grades.",
 } as const;

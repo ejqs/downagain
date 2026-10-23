@@ -68,7 +68,7 @@ Useful scripts:
 The live project ("Down Again", region asia-southeast1) is set up this way already. To recreate it:
 
 1. `railway link` to the project, then `railway config plan` and read the plan before `railway config apply`.
-2. Set `CRON_SECRET` on `downagain` to a long random string. The poller reads it by reference. Set `ANTHROPIC_API_KEY` on `downagain` to turn on Claude grading.
+2. Set `CRON_SECRET` on `downagain` to a long random string. The poller reads it by reference. Set `ANTHROPIC_API_KEY` on `downagain` to turn on Claude grading, and `TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` (a Cloudflare Turnstile widget for downagain.dev) to turn on "Down for me" user reports.
 3. On a fresh database, run the history backfill once, either with `railway run --service downagain bun run backfill` or by setting the pre-deploy command to `bun run db:migrate && bun run backfill` for one deploy.
 4. `downagain.dev` is attached to the web service; DNS lives in Cloudflare (set up with Railway's one-click Cloudflare flow).
 

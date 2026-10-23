@@ -3,14 +3,16 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 
 // No nonces: every page is dynamic anyway, but nonces would mean a proxy on every
-// request for little gain on a read-only site with no logins. Umami Cloud is the
-// one third party: its script from cloud.umami.is posts events to gateway.umami.is.
+// request for little gain on a read-only site with no logins. Third parties: Umami
+// Cloud (script from cloud.umami.is, events to gateway.umami.is) and Cloudflare
+// Turnstile (script and iframe from challenges.cloudflare.com) behind "Down for me".
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://cloud.umami.is${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' https://cloud.umami.is https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self'",
   "img-src 'self' data: blob:",
+  "frame-src https://challenges.cloudflare.com",
   "connect-src 'self' https://cloud.umami.is https://gateway.umami.is",
   "object-src 'none'",
   "base-uri 'self'",

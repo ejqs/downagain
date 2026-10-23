@@ -17,6 +17,8 @@ import { GLOSSARY } from "@/lib/glossary";
 import { beatText, priceText } from "@/components/Value";
 import { compareHref, comparePath } from "@/lib/compare";
 import { stackHref } from "@/lib/stack";
+import { turnstileKeys } from "@/lib/reports";
+import { UserReports } from "@/components/UserReports";
 
 export const dynamic = "force-dynamic";
 
@@ -222,6 +224,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
   const beaten = value.find((v) => v.provider.id === cost?.beatenBy?.id);
   const cheaper = cost?.usd != null ? value.filter((v) => v.usd != null && v.usd < cost.usd!).length : 0;
   const badge = `[![${p.slug} on downagain.dev](${SITE}/badge/${p.slug}.svg)](${SITE}/p/${p.slug})`;
+  const reportKey = turnstileKeys()?.siteKey;
   const catPath = cat && cat.slug !== snap.categories[0]?.slug ? `/c/${cat.slug}` : "/";
 
   return (
@@ -282,6 +285,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             <Link className="btn" href={stackHref([{ slug: p.slug, parts: [] }])} data-umami-event="stack-add">Add to stack</Link>
             <a className="btn" href={p.statusPageUrl} data-umami-event="status-page-outbound">Status page</a>
           </div>
+          {reportKey ? <UserReports slug={p.slug} siteKey={reportKey} /> : null}
         </div>
         <div className={`big-grade g-${!graded ? "none" : s90.grade === "A+" ? "Ap" : s90.grade}`}>
           <span className="eyebrow" style={{ letterSpacing: "0.1em" }}>Grade</span>

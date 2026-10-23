@@ -34,6 +34,9 @@ jobs:
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/downagain
+      # Cloudflare's public Turnstile test keys: every token passes.
+      TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+      TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

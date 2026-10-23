@@ -134,3 +134,15 @@ test("grades and strip days explain themselves", async ({ page }) => {
   const day = page.locator('.strip [data-tip][tabindex="0"]').first();
   await expect(day).toHaveAttribute("data-tip", /^[A-Z][a-z]{2} \d{1,2} · Sev \d · /);
 });
+
+// CI runs with Cloudflare's always-pass Turnstile test keys, so this hits the real siteverify.
+test("a user report needs a Turnstile token and shows up in the count", async ({ page, request }) => {
+  expect((await request.post("/api/reports/railway", { data: { token: "" } })).status()).toBe(400);
+  const res = await request.post("/api/reports/railway", { data: { token: "XXXX.DUMMY.TOKEN.XXXX" } });
+  expect(res.status()).toBe(200);
+  expect((await res.json()).outcome).toMatch(/^(added|duplicate)$/);
+  await page.goto("/p/railway");
+  const row = page.locator(".reports");
+  await expect(row).toContainText(/\d+ in the last hour/);
+  await expect(row.getByRole("button", { name: "Down for me" })).toBeEnabled();
+});

@@ -200,3 +200,26 @@ export const incidentReviews = pgTable(
   },
   (t) => [uniqueIndex("reviews_incident_hash").on(t.incidentId, t.inputHash), index("reviews_created").on(t.createdAt)],
 );
+
+// "Down for me" reports from visitors who passed a Turnstile check. Kept apart
+// from everything the status pages say: nothing here feeds tiers or grades.
+export const userReports = pgTable(
+  "user_reports",
+  {
+    id: serial("id").primaryKey(),
+    providerId: integer("provider_id")
+      .notNull()
+      .references(() => providers.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    // HMAC of the visitor's IP with a secret and the UTC day; never the IP itself
+    reporter: text("reporter").notNull(),
+    // one report per reporter, provider and 30-minute slot (epoch / 30 min)
+    slot: integer("slot").notNull(),
+    country: text("country"), // Cloudflare's two-letter guess, if it sent one
+  },
+  (t) => [
+    uniqueIndex("user_reports_once").on(t.providerId, t.reporter, t.slot),
+    index("user_reports_provider").on(t.providerId, t.createdAt),
+    index("user_reports_reporter").on(t.reporter, t.createdAt),
+  ],
+);

@@ -50,6 +50,10 @@ export default function About() {
           <li>Every incident and update is kept, even if the provider later edits or deletes it.</li>
           <li>History starts with whatever the status API exposes, usually the last 50 incidents. Provider pages show the start date.</li>
           <li>
+            User reports come from visitors who tap &quot;Down for me&quot; and pass a Cloudflare Turnstile check. One per visitor per provider every 30
+            minutes. They show on provider pages and never count toward a grade. We keep a hash of your IP that changes daily, never the IP.
+          </li>
+          <li>
             The whole board as JSON: <a href="/api/status.json" className="mono">/api/status.json</a>. Free to use. A link back is plenty.
           </li>
         </ul>

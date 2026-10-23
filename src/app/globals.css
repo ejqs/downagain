@@ -211,6 +211,10 @@ main.wrap { padding-bottom: 48px; }
 .bars span { width: 100%; background: var(--ink); }
 .bars-x { display: flex; gap: 4px; }
 .bars-x span { flex: 1; text-align: center; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.reports { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 24px; padding-top: 12px; border-top: 1px solid var(--rule); }
+.spark { display: inline-flex; gap: 2px; align-items: flex-end; height: 20px; width: 120px; flex: none; }
+.spark span { flex: 1; min-height: 2px; }
+.btn:disabled { cursor: default; opacity: 0.6; }
 .mix { display: flex; height: 28px; border: 2px solid var(--ink); }
 .heat { display: flex; flex-direction: column; gap: 3px; }
 .heat > div { display: flex; gap: 2px; align-items: center; }
