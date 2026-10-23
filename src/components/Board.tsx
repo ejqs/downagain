@@ -8,9 +8,11 @@ import { isPriced } from "@/lib/pricing";
 import { DayStrip, GradeTile, StripLegend } from "./ui";
 import { JsonLd } from "./JsonLd";
 import { absUrl } from "@/lib/site";
+import { EMPTY_FILTER, filterQuery, isFiltering, withQuery, type NeedFilter } from "@/lib/needs";
+import { NeedBar } from "./NeedBar";
 
 
-export function CategoryTabs({ snap, active }: { snap: Snapshot; active: string }) {
+export function CategoryTabs({ snap, active, query = "" }: { snap: Snapshot; active: string; query?: string }) {
   const down = downNow(snap);
   return (
     <nav aria-label="Categories" className="tabs">
@@ -20,7 +22,7 @@ export function CategoryTabs({ snap, active }: { snap: Snapshot; active: string 
         return (
           <Link
             key={c.slug}
-            href={c.slug === snap.categories[0]?.slug ? "/" : `/c/${c.slug}`}
+            href={withQuery(c.slug === snap.categories[0]?.slug ? "/" : `/c/${c.slug}`, query)}
             aria-current={c.slug === active ? "true" : undefined}
             data-umami-event="category-filter"
             data-umami-event-category={c.slug}
@@ -40,13 +42,17 @@ export function Board({
   sort,
   basePath,
   heading: Heading = "h2",
+  filter = EMPTY_FILTER,
 }: {
   snap: Snapshot;
   category: string;
   sort: "worst" | "best";
   basePath: string;
   heading?: "h1" | "h2";
+  filter?: NeedFilter;
 }) {
+  const q = filterQuery(filter);
+  const picked = [filter.needs.map((n) => n.label).join(", "), filter.region?.label].filter(Boolean).join(" · ");
   const cat = snap.categories.find((c) => c.slug === category);
   const rows = leaderboard(snap, category, sort);
   const value = new Map(valueBoard(snap, category).map((v) => [v.provider.slug, v]));
@@ -62,15 +68,16 @@ export function Board({
           itemListElement: rows.map((r, i) => ({ "@type": "ListItem", position: i + 1, name: r.provider.name, url: absUrl(`/p/${r.provider.slug}`) })),
         }}
       />
-      <CategoryTabs snap={snap} active={category} />
+      <CategoryTabs snap={snap} active={category} query={q} />
+      <NeedBar category={category} filter={filter} path={basePath} keep={sort === "best" ? "sort=best" : ""} />
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end", ["--gap" as string]: "12px 16px" }}>
         <div style={{ flex: "1 1 280px", minWidth: 0 }}>
           <Heading className="h2">{cat?.name ?? category}</Heading>
-          <p className="body" style={{ marginTop: 6 }}>Last 90 days</p>
+          <p className="body" style={{ marginTop: 6 }}>Last 90 days{isFiltering(filter) ? ` · ${picked}` : ""}</p>
         </div>
         <div className="seg" role="group" aria-label="Sort order">
-          <Link href={basePath} aria-current={sort === "worst" ? "true" : undefined}>Worst first</Link>
-          <Link href={`${basePath}?sort=best`} aria-current={sort === "best" ? "true" : undefined}>Best first</Link>
+          <Link href={withQuery(basePath, q)} aria-current={sort === "worst" ? "true" : undefined}>Worst first</Link>
+          <Link href={withQuery(basePath, "sort=best", q)} aria-current={sort === "best" ? "true" : undefined}>Best first</Link>
         </div>
       </div>
 

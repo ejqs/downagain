@@ -7,15 +7,18 @@ import { Stat } from "@/components/ui";
 import { Unavailable } from "@/components/Unavailable";
 import { GLOSSARY } from "@/lib/glossary";
 import { ValueBoard } from "@/components/Value";
+import { applyFilter, parseFilter } from "@/lib/needs";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({ path: "/" });
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ sort?: string }> }) {
+export default async function Home({ searchParams }: { searchParams: Promise<{ sort?: string; need?: string; region?: string }> }) {
   const snap = await safeSnapshot();
   if (!snap) return <Unavailable />;
-  const { sort } = await searchParams;
+  const q = await searchParams;
   const first = snap.categories[0]?.slug ?? "hosting";
+  const filter = parseFilter(q, first);
+  const view = applyFilter(snap, filter);
   const days = daysSinceSev1(snap);
   const t = totals(snap);
 
@@ -37,8 +40,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
         <Stat label="It was DNS" value={String(t.dns)} hint={GLOSSARY.dns} />
       </section>
 
-      <Board snap={snap} category={first} sort={sort === "best" ? "best" : "worst"} basePath="/" />
-      <ValueBoard snap={snap} category={first} />
+      <Board snap={view} category={first} sort={q.sort === "best" ? "best" : "worst"} basePath="/" filter={filter} />
+      <ValueBoard snap={view} category={first} />
       <AlsoTracking snap={snap} current={first} />
     </main>
   );

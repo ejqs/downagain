@@ -16,6 +16,7 @@ import { SITE, absUrl, pageMeta } from "@/lib/site";
 import { GLOSSARY } from "@/lib/glossary";
 import { beatText, priceText } from "@/components/Value";
 import { compareHref, comparePath } from "@/lib/compare";
+import { stackHref } from "@/lib/stack";
 
 export const dynamic = "force-dynamic";
 
@@ -276,6 +277,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             <Link className="btn dark" href={compareHref([p.slug, ...rivals.slice(0, 2).map((x) => x.slug)])} data-umami-event="compare">
               Compare
             </Link>
+            <Link className="btn" href={stackHref([{ slug: p.slug, parts: [] }])} data-umami-event="stack-add">Add to stack</Link>
             <a className="btn" href={p.statusPageUrl} data-umami-event="status-page-outbound">Status page</a>
           </div>
         </div>

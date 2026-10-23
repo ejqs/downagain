@@ -51,6 +51,8 @@ export interface IncidentRow {
   resolvedAt: number | null;
   url: string | null;
   components: string[];
+  /** Cloud regions the provider named; null or empty when global or not stated. */
+  regions?: string[] | null;
   postmortem: boolean;
   origin: string;
   tier: number | null;
@@ -87,6 +89,7 @@ const incidentColumns = {
   resolvedAt: incidents.resolvedAt,
   url: incidents.url,
   components: incidents.components,
+  regions: incidents.regions,
   postmortem: incidents.postmortem,
   origin: incidents.origin,
   tier: incidents.tier,
@@ -182,7 +185,7 @@ async function readSnapshot(): Promise<Snapshot> {
   };
 }
 
-export const getSnapshot = unstable_cache(readSnapshot, ["snapshot-v1"], {
+export const getSnapshot = unstable_cache(readSnapshot, ["snapshot-v2"], {
   tags: ["status"],
   revalidate: SAFETY_NET_SECONDS,
 });

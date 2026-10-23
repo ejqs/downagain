@@ -17,6 +17,7 @@ function row(p: { startedAt: string; resolvedAt?: string; sourceUpdatedAt?: stri
     resolvedAt: p.resolvedAt ? new Date(p.resolvedAt) : null,
     url: null,
     components: [],
+    regions: null,
     postmortem: false,
     origin: "backfill",
     tier: 2,
