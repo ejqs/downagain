@@ -1,5 +1,5 @@
 // Pure functions that turn the cached snapshot into what each page shows.
-import { durationMinutes, effectiveTier, gradeRank, MAX_SHOWN_DAYS, penaltyMinutes, score, shownEnd, windowBounds, type GradeInput, type Score } from "@/lib/grading";
+import { durationMinutes, effectiveTier, gradeRank, incidentPoints, MAX_SHOWN_DAYS, penaltyMinutes, score, shownEnd, windowBounds, type GradeInput, type Score } from "@/lib/grading";
 import { SECURITY_PENALTY, TIER_WEIGHT } from "@/lib/severity";
 import { PRICES, monthlyUsd, valueFrontier, type Price } from "@/lib/pricing";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
@@ -345,4 +345,26 @@ export function valueBoard(snap: Snapshot, category: string): ValueRow[] {
       return { ...r, bestValue: v?.bestValue ?? false, beatenBy: provs.find((p) => p.slug === v?.beatenBy) ?? null };
     })
     .sort((a, b) => (a.usd ?? Infinity) - (b.usd ?? Infinity) || gradeRank(a.score.grade) - gradeRank(b.score.grade) || a.provider.name.localeCompare(b.provider.name));
+}
+
+export interface GradeCause {
+  incident: IncidentRow;
+  points: number;
+  /** Share of the provider's points, 0 to 1. */
+  share: number;
+}
+
+/** What a 90-day grade is made of: the incidents that cost the most points, biggest first. */
+export function gradeCauses(snap: Snapshot, providerId: number, n = 3, days = 90): { top: GradeCause[]; rest: number; total: number } {
+  const { from, to } = windowBounds(new Date(snap.generatedAt), days);
+  const costs = incidentsFor(snap, providerId)
+    .filter((i) => tierOf(i) > 0 && i.startedAt < to.getTime() && (i.resolvedAt ?? snap.generatedAt) > from.getTime())
+    .map((incident) => ({ incident, points: incidentPoints(gradeInput(incident), from, to) }))
+    .sort((a, b) => b.points - a.points || tierOf(a.incident) - tierOf(b.incident));
+  const total = costs.reduce((t, c) => t + c.points, 0);
+  return {
+    top: costs.slice(0, n).map((c) => ({ ...c, share: total ? c.points / total : 0 })),
+    rest: Math.max(0, costs.length - n),
+    total,
+  };
 }

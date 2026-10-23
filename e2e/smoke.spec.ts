@@ -126,3 +126,11 @@ test("a stack has a README badge", async ({ page, request }) => {
   await page.goto("/stack?u=vercel&need=compute&region=sg");
   await expect(page.locator('input[aria-label="Badge Markdown"]')).toHaveValue(/\/badge\/stack\.svg\?u=vercel&need=compute&region=sg/);
 });
+
+test("grades and strip days explain themselves", async ({ page }) => {
+  await page.goto("/c/hosting");
+  await page.locator(".why").first().focus();
+  await expect(page.locator(".why-body").first()).toBeVisible();
+  const day = page.locator('.strip [data-tip][tabindex="0"]').first();
+  await expect(day).toHaveAttribute("data-tip", /^[A-Z][a-z]{2} \d{1,2} · Sev \d · /);
+});

@@ -1,11 +1,14 @@
 import Link from "next/link";
 import type { Snapshot } from "@/lib/data";
-import { leaderboard, downNow, isGraded, liveCount, liveLevel, LIVE_LABEL, scoreFor, valueBoard } from "@/lib/views";
-import { fmtDuration, fmtPct } from "@/lib/format";
+import { dailyLoad, gradeCauses, incidentsFor, leaderboard, downNow, isGraded, liveCount, liveLevel, LIVE_LABEL, scoreFor, valueBoard } from "@/lib/views";
+import { fmtDate, fmtDuration, fmtPct, plural } from "@/lib/format";
+import { durationMinutes, WINDOW_DAYS } from "@/lib/grading";
+import { gradeInput, tierOf, type DayCell } from "@/lib/views";
 import { AREA_SHORT, AREAS } from "@/lib/severity";
 import { priceText } from "./Value";
 import { isPriced } from "@/lib/pricing";
-import { DayStrip, GradeTile, StripLegend } from "./ui";
+import { DayStrip, GradeTile, SevPill, StripLegend } from "./ui";
+import type { Grade } from "@/lib/grading";
 import { JsonLd } from "./JsonLd";
 import { absUrl } from "@/lib/site";
 import { EMPTY_FILTER, filterQuery, isFiltering, withQuery, type NeedFilter } from "@/lib/needs";
@@ -43,6 +46,7 @@ export function Board({
   basePath,
   heading: Heading = "h2",
   filter = EMPTY_FILTER,
+  raw,
 }: {
   snap: Snapshot;
   category: string;
@@ -50,6 +54,8 @@ export function Board({
   basePath: string;
   heading?: "h1" | "h2";
   filter?: NeedFilter;
+  /** The unfiltered snapshot, to count what the filter left out. */
+  raw?: Snapshot;
 }) {
   const q = filterQuery(filter);
   const picked = [filter.needs.map((n) => n.label).join(", "), filter.region?.label].filter(Boolean).join(" · ");
@@ -87,9 +93,9 @@ export function Board({
         <div className="box">
           {rows.map((r, i) => (
             <div key={r.provider.slug} className={`list-row ${r.live ?? ""}`}>
-              <div className="board-name">
+              <div className="board-name has-why">
                 <span className="rank">{r.graded ? i + 1 : "–"}</span>
-                <GradeTile grade={r.graded ? r.score.grade : null} label={`Overall grade ${r.score.grade}`} />
+                <GradeWhy snap={snap} raw={raw} providerId={r.provider.id} grade={r.graded ? r.score.grade : null} picked={isFiltering(filter) ? picked : null} />
                 <div className="stack" style={{ ["--gap" as string]: "2px", minWidth: 0 }}>
                   <div className="row" style={{ ["--gap" as string]: "8px" }}>
                     <Link href={`/p/${r.provider.slug}`}>{r.provider.name}</Link>
@@ -114,7 +120,7 @@ export function Board({
                 <div className="metric"><b>{r.score.longestMinutes ? fmtDuration(r.score.longestMinutes) : "–"}</b><span>LONGEST</span></div>
                 {isPriced(category) ? <PriceMetric v={value.get(r.provider.slug)} /> : null}
               </div>
-              <DayStrip cells={r.cells} label={`${r.provider.name}, last 60 days`} />
+              <DayStrip cells={r.cells} label={`${r.provider.name}, last 60 days`} tips={dayTips(incidentsFor(snap, r.provider.id), r.cells, snap.generatedAt)} />
             </div>
           ))}
         </div>
@@ -124,6 +130,50 @@ export function Board({
         PROD = your users hit. SHIP = you can&apos;t deploy or manage. <Link href="/about">How grades work</Link>
       </p>
     </section>
+  );
+}
+
+const short = (ms: number) => fmtDate(ms).replace(/, \d{4}$/, "");
+
+/** One line per day for the strip: "Sep 11 · Sev 2 · Redis latency, 3h 10m +1". */
+export function dayTips(list: Parameters<typeof dailyLoad>[0], cells: DayCell[], now: number): (string | null)[] {
+  return dailyLoad(list, cells.length, now).map((d, k) => {
+    if (cells[k] === "none") return null;
+    if (!d.top) return `${short(d.day)} · clean`;
+    const dur = fmtDuration(durationMinutes(gradeInput(d.top), new Date(now)));
+    return `${short(d.day)} · Sev ${d.worst} · ${d.top.title}, ${d.top.resolvedAt ? dur : "ongoing"}${d.incidents > 1 ? ` +${d.incidents - 1}` : ""}`;
+  });
+}
+
+/** The grade tile; hover or tap it for the incidents that cost the most. */
+function GradeWhy({ snap, raw, providerId, grade, picked }: { snap: Snapshot; raw?: Snapshot; providerId: number; grade: Grade | null; picked: string | null }) {
+  const { top, rest } = gradeCauses(snap, providerId);
+  const from = snap.generatedAt - WINDOW_DAYS * 86_400_000;
+  const counted = (x: Snapshot) => incidentsFor(x, providerId).filter((i) => tierOf(i) > 0 && (i.resolvedAt ?? x.generatedAt) > from).length;
+  const left = raw && picked ? counted(raw) - counted(snap) : 0;
+  return (
+    <>
+      <span className="why" tabIndex={0} aria-label={grade ? `Grade ${grade}: what caused it` : "No grade yet"}>
+        <GradeTile grade={grade} />
+      </span>
+      <span className="why-body" role="tooltip">
+        {top.length ? (
+          top.map((c) => (
+            <span key={c.incident.id} className="why-row">
+              <SevPill tier={tierOf(c.incident)} security={c.incident.security} />
+              <span className="mono" style={{ fontSize: 12 }}>
+                {short(c.incident.startedAt)} · {c.incident.resolvedAt ? fmtDuration(durationMinutes(gradeInput(c.incident))) : "ongoing"} · {Math.round(c.share * 100)}%
+              </span>
+              <span className="t">{c.incident.title}</span>
+            </span>
+          ))
+        ) : (
+          <span>Nothing counted, 90 days.</span>
+        )}
+        {rest ? <span className="mono" style={{ fontSize: 12 }}>+{rest} smaller</span> : null}
+        {left > 0 ? <span className="mono" style={{ fontSize: 12, color: "var(--hazard)" }}>{plural(left, "incident")} left out · {picked}</span> : null}
+      </span>
+    </>
   );
 }
 

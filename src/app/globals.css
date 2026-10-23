@@ -153,6 +153,17 @@ main.wrap { padding-bottom: 48px; }
 .strip { flex: 1 1 280px; min-width: 0; display: flex; gap: 1px; height: 28px; }
 .strip span { flex: 1; min-width: 1px; }
 .strip.short { height: 22px; }
+.strip:has([data-tip]) { position: relative; }
+.strip [data-tip]:hover, .strip [data-tip]:focus { outline: 2px solid var(--ink); outline-offset: 0; }
+.strip [data-tip]:hover::after, .strip [data-tip]:focus::after, .why-body { position: absolute; z-index: 4; padding: 8px 10px; background: var(--ink); color: var(--paper); font: 400 13px/1.4 var(--font-mono); box-shadow: 4px 4px 0 var(--hazard); }
+.strip [data-tip]:hover::after, .strip [data-tip]:focus::after { content: attr(data-tip); left: 0; right: 0; bottom: calc(100% + 6px); white-space: normal; pointer-events: none; }
+.has-why { position: relative; }
+.why { cursor: help; border-radius: 0; outline-offset: 2px; }
+.why-body { display: none; left: 0; top: calc(100% + 6px); width: min(480px, calc(100vw - 64px)); font-family: var(--font-display); font-size: 14px; }
+.why:hover + .why-body, .why:focus + .why-body, .why-body:hover { display: grid; gap: 8px; }
+.why-body .pill { flex: none; }
+.why-row { display: flex; gap: 4px 10px; flex-wrap: wrap; align-items: baseline; }
+.why-row .t { flex: 1 1 100%; min-width: 0; overflow-wrap: anywhere; }
 .c-up { background: var(--up); }
 .c-minor { background: var(--minor); }
 .c-major { background: var(--down); }

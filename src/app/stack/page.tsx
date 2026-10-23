@@ -10,6 +10,7 @@ import { MAX_STACK, parseStack, stackHref, togglePart, type StackPick } from "@/
 import { stackSummary } from "@/lib/stack-score";
 import { filterParams, filterQuery, parseFilter } from "@/lib/needs";
 import { NeedBar } from "@/components/NeedBar";
+import { dayTips } from "@/components/Board";
 import { DayStrip, GradeTile, SevPill, StripLegend } from "@/components/ui";
 import { Unavailable } from "@/components/Unavailable";
 import { Heatmap, dayKey } from "@/components/Heatmap";
@@ -148,7 +149,7 @@ export default async function StackPage({ searchParams }: Props) {
               {filterQuery(filter) ? <p className="body" style={{ marginTop: 6 }}>{[filter.needs.map((n) => n.label).join(", "), filter.region?.label].filter(Boolean).join(" · ")}</p> : null}
             </div>
             <div className="box">
-              {whole ? <StackRow name="Whole stack" sub={plural(rows.length, "provider")} score={whole.score} graded={whole.graded} cells={dailyCells(all, 60, now)} /> : null}
+              {whole ? <StackRow name="Whole stack" sub={plural(rows.length, "provider")} score={whole.score} graded={whole.graded} cells={dailyCells(all, 60, now)} list={all} now={now} /> : null}
               {rows.map((r) => (
                 <StackRow
                   key={r.provider.slug}
@@ -158,6 +159,8 @@ export default async function StackPage({ searchParams }: Props) {
                   score={r.score}
                   graded={r.graded}
                   cells={dailyCells(r.incidents, 60, now, dataFrom(r.provider))}
+                  list={r.incidents}
+                  now={now}
                 />
               ))}
             </div>
@@ -226,7 +229,7 @@ export default async function StackPage({ searchParams }: Props) {
   );
 }
 
-function StackRow({ name, href, sub, score: s, graded, cells }: { name: string; href?: string; sub: string; score: Score; graded: boolean; cells: ReturnType<typeof dailyCells> }) {
+function StackRow({ name, href, sub, score: s, graded, cells, list, now }: { name: string; href?: string; sub: string; score: Score; graded: boolean; cells: ReturnType<typeof dailyCells>; list: IncidentRow[]; now: number }) {
   return (
     <div className="list-row">
       <div className="board-name">
@@ -249,7 +252,7 @@ function StackRow({ name, href, sub, score: s, graded, cells }: { name: string; 
         <div className="metric"><b>{s.incidentCount}</b><span>INCIDENTS</span></div>
         <div className="metric"><b>{s.longestMinutes ? fmtDuration(s.longestMinutes) : "–"}</b><span>LONGEST</span></div>
       </div>
-      <DayStrip cells={cells} label={`${name}, last 60 days`} />
+      <DayStrip cells={cells} label={`${name}, last 60 days`} tips={dayTips(list, cells, now)} />
     </div>
   );
 }

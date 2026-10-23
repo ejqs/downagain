@@ -40,7 +40,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
         <Stat label="It was DNS" value={String(t.dns)} hint={GLOSSARY.dns} />
       </section>
 
-      <Board snap={view} category={first} sort={q.sort === "best" ? "best" : "worst"} basePath="/" filter={filter} />
+      <Board snap={view} category={first} sort={q.sort === "best" ? "best" : "worst"} basePath="/" filter={filter} raw={snap} />
       <ValueBoard snap={view} category={first} />
       <AlsoTracking snap={snap} current={first} />
     </main>
