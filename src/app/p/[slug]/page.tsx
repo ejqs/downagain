@@ -8,7 +8,7 @@ import { durationMinutes, penaltyMinutes } from "@/lib/grading";
 import { fmtAgo, fmtDate, fmtDuration, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
 import { AREA_BLURB, AREA_LABEL, AREA_SHORT, AREAS, TIER_NAMES, TIER_BLURB, TIER_WEIGHT, scopeWeight } from "@/lib/severity";
 import { STATUS_LABEL, isProblem } from "@/lib/status";
-import { gradeInput } from "@/lib/views";
+import { gradeInput, whereHit } from "@/lib/views";
 import { DayStrip, GradeTile, SevPill, Hint, Stat, StripLegend } from "@/components/ui";
 import { Unavailable } from "@/components/Unavailable";
 import { JsonLd } from "@/components/JsonLd";
@@ -61,7 +61,7 @@ function IncidentTags({ i }: { i: IncidentRow }) {
   const tags = [
     i.tierOverride == null && i.gradedBy === "claude" ? "AI-graded" : null,
     SCOPE_LABEL[i.scope ?? ""] ?? null,
-    i.components.length ? `${i.components[0]}${i.components.length > 1 ? ` +${i.components.length - 1}` : ""}` : null,
+    whereHit(i, 1) || null,
   ].filter(Boolean);
   if (!tags.length) return null;
   return (

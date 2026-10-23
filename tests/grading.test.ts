@@ -89,6 +89,8 @@ describe("score", () => {
     );
     expect(s.longestMinutes).toBe(120);
     expect(score([inc({ startedAt: at("2026-10-01T00:00:00Z"), resolvedAt: at("2026-10-01T02:00:00Z"), tier: 4, areaTiers: { shipping: 4 } })], from, to).longestMinutes).toBe(0);
+    // Still open, but began before the window: not a record for this window.
+    expect(score([inc({ startedAt: at("2026-03-01T00:00:00Z"), resolvedAt: null, tier: 1 })], from, to).longestMinutes).toBe(0);
   });
 
   it("ignores not-counted and out-of-window incidents", () => {

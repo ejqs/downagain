@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
-import { brokenComponents, coveredDays, liveLevel, communication, dailyCells, valueBoard, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals } from "@/lib/views";
+import { brokenComponents, coveredDays, liveLevel, communication, dailyCells, valueBoard, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals, whereHit } from "@/lib/views";
 
 const DAY = 86_400_000;
 const NOW = Date.parse("2026-10-22T12:00:00Z");
@@ -299,5 +299,12 @@ describe("gradeCauses", () => {
     expect(c.top.map((x) => x.incident.title)).toEqual(["long"]);
     expect(c.top[0].share).toBeCloseTo(0.75);
     expect(c.rest).toBe(1);
+  });
+});
+
+describe("whereHit", () => {
+  it("names the regions when the provider gave them, else the components", () => {
+    expect(whereHit({ regions: ["me-south-1"], components: ["AWS Resource Groups", "Amazon S3"] })).toBe("me-south-1");
+    expect(whereHit({ regions: null, components: ["API", "Builds", "Docs", "Logs"] })).toBe("API, Builds, Docs +1");
   });
 });

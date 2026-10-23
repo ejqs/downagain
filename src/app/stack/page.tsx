@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { safeSnapshot, type IncidentRow } from "@/lib/data";
 import { WINDOW_DAYS, durationMinutes, type Score } from "@/lib/grading";
-import { dailyCells, dailyLoad, dataFrom, gradeInput, tierOf } from "@/lib/views";
+import { dailyCells, dailyLoad, dataFrom, gradeInput, tierOf, whereHit } from "@/lib/views";
 import { fmtDay, fmtDuration, fmtPct, fmtTime, plural } from "@/lib/format";
 import { AREA_SHORT, AREAS } from "@/lib/severity";
 import { absUrl, pageMeta } from "@/lib/site";
@@ -195,10 +195,10 @@ export default async function StackPage({ searchParams }: Props) {
                           <Link href={`/p/${p.slug}`} style={{ fontWeight: 800, textDecoration: "none" }}>{p.name}</Link> · {i.title}
                         </span>
                         <span className="muted" style={{ fontSize: 14 }}>
-                          {i.components.slice(0, 3).join(", ")}
+                          {whereHit(i)}
                           {i.url ? (
                             <>
-                              {i.components.length ? " · " : ""}
+                              {whereHit(i) ? " · " : ""}
                               <a href={i.url} data-umami-event="status-page-outbound">source</a>
                             </>
                           ) : null}

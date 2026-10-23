@@ -174,7 +174,8 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
     // Uptime is provider-wide: a Sev 1 in one region or for one add-on doesn't take it down.
     if (tier === 1 && scopeWeight(i.scope) === 1) sev1.push([i.startedAt.getTime(), end]);
     // Longest is downtime: a Sev 3-4 left open for weeks is a papercut, not a record.
-    if (tier <= 2) longest = Math.max(longest, durationMinutes(i, to));
+    // Only incidents that began in the window: a region written off months ago is history.
+    if (tier <= 2 && i.startedAt >= from) longest = Math.max(longest, durationMinutes(i, to));
     if (i.resolvedAt) resolveTimes.push(durationMinutes(i));
 
     const minutes = penaltyMinutes(i, from, to) * scopeWeight(i.scope);

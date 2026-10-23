@@ -127,6 +127,12 @@ export function openIncidents(list: IncidentRow[]): IncidentRow[] {
  * open (a region written off for months, a page nobody closed) is history, not news,
  * so it stays out of "Happening now".
  */
+/** Where it hit, for one-line lists: the regions when the provider named them, else the first components. */
+export function whereHit(i: Pick<IncidentRow, "regions" | "components">, n = 3): string {
+  const list = i.regions?.length ? i.regions : i.components;
+  return list.length > n ? `${list.slice(0, n).join(", ")} +${list.length - n}` : list.join(", ");
+}
+
 export const LIVE_DAYS = MAX_SHOWN_DAYS;
 export function liveIncidents(list: IncidentRow[], now: number): IncidentRow[] {
   return openIncidents(list).filter((i) => i.startedAt >= now - LIVE_DAYS * 86_400_000);
