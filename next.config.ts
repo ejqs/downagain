@@ -11,7 +11,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self'",
   "img-src 'self' data: blob:",
-  "connect-src 'self' https://cloud.umami.is https://api-gateway.umami.dev",
+  "connect-src 'self' https://cloud.umami.is https://gateway.umami.is https://api-gateway.umami.dev",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
