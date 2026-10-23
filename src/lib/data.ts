@@ -76,6 +76,8 @@ export interface Snapshot {
   categories: CategoryRow[];
   providers: ProviderRow[];
   incidents: IncidentRow[]; // last RECENT_DAYS days plus anything still open, newest first
+  /** Set when the view is narrowed to what someone uses (see applyFilter): the areas that matter to them. */
+  focus?: { areas: Area[] };
 }
 
 const ms = (d: Date | null | undefined) => (d ? d.getTime() : null);

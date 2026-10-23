@@ -106,3 +106,13 @@ describe("applyFilter", () => {
     expect(applyFilter(snap, parseFilter({}))).toBe(snap);
   });
 });
+
+describe("areasFor", () => {
+  it("keeps SHIP only for Deploys and PROD for the rest", async () => {
+    const { areasFor } = await import("@/lib/needs");
+    expect(areasFor(parseFilter({ need: "compute,postgres" }))).toEqual(["production"]);
+    expect(areasFor(parseFilter({ need: "deploys" }))).toEqual(["shipping"]);
+    expect(areasFor(parseFilter({ need: "postgres,deploys" }))).toEqual(["production", "shipping"]);
+    expect(areasFor(parseFilter({ region: "sg" }))).toEqual(["production", "shipping"]);
+  });
+});

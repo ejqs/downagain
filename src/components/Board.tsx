@@ -108,7 +108,7 @@ export function Board({
               </div>
               <div className="board-metrics">
                 <div className="areas" aria-label="Area grades">
-                  {AREAS.map((a) => (
+                  {(snap.focus?.areas ?? AREAS).map((a) => (
                     <span key={a}>
                       <GradeTile grade={r.graded ? r.score.areas[a].grade : null} size="xs" label={`${a} grade ${r.score.areas[a].grade}`} />
                       {AREA_SHORT[a]}

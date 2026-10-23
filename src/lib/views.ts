@@ -1,6 +1,6 @@
 // Pure functions that turn the cached snapshot into what each page shows.
-import { durationMinutes, effectiveTier, gradeRank, incidentPoints, MAX_SHOWN_DAYS, penaltyMinutes, score, shownEnd, windowBounds, type GradeInput, type Score } from "@/lib/grading";
-import { SECURITY_PENALTY, TIER_WEIGHT } from "@/lib/severity";
+import { durationMinutes, effectiveTier, gradeFor, gradeRank, incidentPoints, MAX_SHOWN_DAYS, penaltyMinutes, score, shownEnd, windowBounds, type GradeInput, type Score } from "@/lib/grading";
+import { AREAS, SECURITY_PENALTY, TIER_WEIGHT, scopeWeight, type Area } from "@/lib/severity";
 import { PRICES, monthlyUsd, valueFrontier, type Price } from "@/lib/pricing";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
 import { isProblem, statusRank } from "@/lib/status";
@@ -55,7 +55,18 @@ export function incidentsFor(snap: Snapshot, providerId: number): IncidentRow[] 
 
 export function scoreFor(snap: Snapshot, providerId: number, days = 90, now = snap.generatedAt): Score {
   const { from, to } = windowBounds(new Date(now), days);
-  return score(incidentsFor(snap, providerId).map(gradeInput), from, to);
+  const s = score(incidentsFor(snap, providerId).map(gradeInput), from, to);
+  return snap.focus ? focusScore(s, snap.focus.areas) : s;
+}
+
+/**
+ * In a narrowed view the overall grade is what the areas that matter add up to:
+ * someone who only runs a database doesn't care that deploys were down.
+ */
+export function focusScore(s: Score, areas: Area[]): Score {
+  if (areas.length === AREAS.length) return s;
+  const points = Math.round(areas.reduce((t, a) => t + s.areas[a].points, 0));
+  return { ...s, points, grade: gradeFor(points) };
 }
 
 export type DayCell = "up" | "minor" | "major" | "none";
@@ -200,7 +211,8 @@ export function downNow(snap: Snapshot): DownItem[] {
         status: p.status,
         monitoring: open.every(isMonitoring),
       });
-    } else if (isProblem(p.status) && !openIncidents(mine).length) {
+    } else if (!snap.focus && isProblem(p.status) && !openIncidents(mine).length) {
+      // Skipped in a narrowed view: a red status page doesn't say whether it's the part you use.
       // A status page still flagged by a long-running incident isn't news either.
       const broken = p.components.filter((c) => isProblem(c.status)).map((c) => c.name);
       out.push({
@@ -384,7 +396,8 @@ export function gradeCauses(snap: Snapshot, providerId: number, n = 3, days = 90
   const { from, to } = windowBounds(new Date(snap.generatedAt), days);
   const costs = incidentsFor(snap, providerId)
     .filter((i) => tierOf(i) > 0 && i.startedAt < to.getTime() && (i.resolvedAt ?? snap.generatedAt) > from.getTime())
-    .map((incident) => ({ incident, points: incidentPoints(gradeInput(incident), from, to) }))
+    .map((incident) => ({ incident, points: focusPoints(snap, incident, from, to) }))
+    .filter((c) => c.points > 0 || !snap.focus)
     .sort((a, b) => b.points - a.points || tierOf(a.incident) - tierOf(b.incident));
   const total = costs.reduce((t, c) => t + c.points, 0);
   return {
@@ -392,4 +405,12 @@ export function gradeCauses(snap: Snapshot, providerId: number, n = 3, days = 90
     rest: Math.max(0, costs.length - n),
     total,
   };
+}
+
+/** What one incident cost the grade as shown: every area normally, only the focused ones in a narrowed view. */
+function focusPoints(snap: Snapshot, i: IncidentRow, from: Date, to: Date): number {
+  const areas = snap.focus?.areas;
+  if (!areas || areas.length === AREAS.length) return incidentPoints(gradeInput(i), from, to);
+  const minutes = penaltyMinutes(gradeInput(i), from, to) * scopeWeight(i.scope);
+  return areas.reduce((t, a) => t + (TIER_WEIGHT[i.areaTiers?.[a] ?? 0] ?? 0) * minutes, 0);
 }
