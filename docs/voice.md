@@ -19,7 +19,7 @@ A scoreboard, not a manual. The numbers do the talking.
 
 Patterns that read as machine-written. Delete on sight.
 
-- The two-beat deadpan: a flat statement, a full stop, then a wry tag. "All up. For now." "Nothing. Nice." "Yes, we know." Say the first part.
+- The two-beat deadpan: a flat statement, a full stop, then a wry tag. "All up. For now." "Nothing. Nice." Say the first part. The one kept on purpose: the footer's "Hosted on Railway. Yeah, I know." (EJ's call; rule 5).
 - A question answered by the next sentence. "Running app? Watch PROD."
 - A heading that is a quip instead of a noun. "Before you migrate." is "Compare".
 - Reassurance and reflection: "Enjoy it", "So far", "we just add it up".
