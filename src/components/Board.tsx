@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Snapshot } from "@/lib/data";
-import { leaderboard, downNow, liveCount, liveLevel, LIVE_LABEL, scoreFor, valueBoard } from "@/lib/views";
+import { leaderboard, downNow, isGraded, liveCount, liveLevel, LIVE_LABEL, scoreFor, valueBoard } from "@/lib/views";
 import { fmtDuration, fmtPct } from "@/lib/format";
 import { AREA_SHORT, AREAS } from "@/lib/severity";
 import { priceText } from "./Value";
@@ -82,12 +82,13 @@ export function Board({
           {rows.map((r, i) => (
             <div key={r.provider.slug} className={`list-row ${r.live ?? ""}`}>
               <div className="board-name">
-                <span className="rank">{i + 1}</span>
-                <GradeTile grade={r.score.grade} label={`Overall grade ${r.score.grade}`} />
+                <span className="rank">{r.graded ? i + 1 : "–"}</span>
+                <GradeTile grade={r.graded ? r.score.grade : null} label={`Overall grade ${r.score.grade}`} />
                 <div className="stack" style={{ ["--gap" as string]: "2px", minWidth: 0 }}>
                   <div className="row" style={{ ["--gap" as string]: "8px" }}>
                     <Link href={`/p/${r.provider.slug}`}>{r.provider.name}</Link>
                     {r.live ? <span className={`pill ${r.live}`}>{LIVE_LABEL[r.live]}</span> : null}
+                    {r.graded && r.covered < 90 ? <span className="pill unknown" title={`Graded on ${r.covered} of 90 days`}>{r.covered} DAYS</span> : null}
                     {value.get(r.provider.slug)?.bestValue ? <a href="#value" className="pill value" style={{ textDecoration: "none" }}>BEST VALUE</a> : null}
                   </div>
                   <span className="muted" style={{ fontSize: 14 }}>{r.provider.kind}</span>
@@ -97,12 +98,12 @@ export function Board({
                 <div className="areas" aria-label="Area grades">
                   {AREAS.map((a) => (
                     <span key={a}>
-                      <GradeTile grade={r.score.areas[a].grade} size="xs" label={`${a} grade ${r.score.areas[a].grade}`} />
+                      <GradeTile grade={r.graded ? r.score.areas[a].grade : null} size="xs" label={`${a} grade ${r.score.areas[a].grade}`} />
                       {AREA_SHORT[a]}
                     </span>
                   ))}
                 </div>
-                <div className="metric"><b>{fmtPct(r.score.admittedUptime)}</b><span>ADMITTED UPTIME</span></div>
+                <div className="metric"><b>{r.graded ? fmtPct(r.score.admittedUptime) : "–"}</b><span>ADMITTED UPTIME</span></div>
                 <div className="metric"><b>{r.score.incidentCount}</b><span>INCIDENTS</span></div>
                 <div className="metric"><b>{r.score.longestMinutes ? fmtDuration(r.score.longestMinutes) : "–"}</b><span>LONGEST</span></div>
                 {isPriced(category) ? <PriceMetric v={value.get(r.provider.slug)} /> : null}
@@ -139,6 +140,7 @@ export function AlsoTracking({ snap, current }: { snap: Snapshot; current: strin
         {others.map((c) => {
           const provs = snap.providers.filter((p) => p.category === c.slug);
           const top = provs
+            .filter((p) => isGraded(p, snap.generatedAt))
             .map((p) => ({ p, s: scoreFor(snap, p.id) }))
             .sort((a, b) => a.s.points - b.s.points)
             .slice(0, 3);
@@ -163,7 +165,7 @@ export function AlsoTracking({ snap, current }: { snap: Snapshot; current: strin
         })}
         <div className="empty stack" style={{ ["--gap" as string]: "8px", padding: 16 }}>
           <strong style={{ fontSize: 20 }}>Next up</strong>
-          <span className="body" style={{ fontSize: 15 }}>Databases, CI, CDN &amp; DNS.</span>
+          <span className="body" style={{ fontSize: 15 }}>CDN &amp; DNS.</span>
           <a href="https://github.com/ejqs/downagain/issues/new?title=Track%20a%20provider" style={{ fontSize: 14, fontWeight: 700 }}>Suggest a provider</a>
         </div>
       </div>

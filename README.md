@@ -3,7 +3,7 @@
 **Is it down again?** Live status and 90-day track records for the hosting platforms, clouds and AI APIs your apps run on, pulled from each provider's own public status page.
 
 - A **down right now** banner on every page.
-- A leaderboard per category (Hosting first, then AI APIs, Cloud and Databases), graded A+ to F on the same 90-day window for everyone.
+- A leaderboard per category (Hosting first, then AI APIs, Cloud, Databases and Dev tools), graded A+ to F on the same 90-day window for everyone.
 - Provider pages with admitted uptime for 30d / 90d / 1y, PROD and SHIP area grades, severity mix, 12-month trend, when incidents start, what breaks, how the provider communicates, full incident history, peers and a README badge.
 - An incident feed, a head-to-head compare page and a public `/api/status.json`.
 - Share cards per provider (`/p/<slug>/opengraph-image`) and for the site, drawn live from the same data.

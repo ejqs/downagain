@@ -4,7 +4,7 @@
 //   GET {base}/api/v2/incidents.json  last ~50 incidents with every update
 import type { Getter, NormalizedComponent, NormalizedIncident, ProviderSnapshot, Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
-import { worstStatus } from "@/lib/status";
+import { dropBareTwins, worstStatus } from "@/lib/status";
 
 interface SpComponent {
   id: string;
@@ -134,7 +134,7 @@ export function normalizeSpIncident(i: SpIncident, pageUrl: string): NormalizedI
     resolvedAt: date(i.resolved_at),
     sourceUpdatedAt: date(i.updated_at),
     url: i.shortlink ?? `${pageUrl.replace(/\/$/, "")}/incidents/${i.id}`,
-    components: [...names],
+    components: dropBareTwins([...names]),
     worstComponentStatus: statuses.length ? worstStatus(statuses) : null,
     postmortem: Boolean(i.postmortem_body || i.postmortem_published_at || i.status === "postmortem"),
     updates,

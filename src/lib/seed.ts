@@ -1,9 +1,9 @@
-import { eq, notInArray } from "drizzle-orm";
+import { and, eq, notInArray } from "drizzle-orm";
 import type { DB } from "@/db";
 import { categories, componentSurfaces, providers } from "@/db/schema";
 import { CATEGORIES, PROVIDERS } from "@/lib/providers";
 
-/** Idempotent: inserts or updates categories, providers and surface overrides, and disables providers no longer listed. */
+/** Idempotent: syncs categories, providers and surface overrides with the lists, and disables providers no longer listed. */
 export async function seed(database: DB) {
   for (const c of CATEGORIES) {
     await database
@@ -30,6 +30,11 @@ export async function seed(database: DB) {
       .values(values)
       .onConflictDoUpdate({ target: providers.slug, set: values })
       .returning({ id: providers.id });
+    // An override taken out of the list is taken out of the table too.
+    const names = Object.keys(p.surfaces ?? {});
+    await database
+      .delete(componentSurfaces)
+      .where(names.length ? and(eq(componentSurfaces.providerId, row.id), notInArray(componentSurfaces.componentName, names)) : eq(componentSurfaces.providerId, row.id));
     for (const [componentName, surface] of Object.entries(p.surfaces ?? {})) {
       await database
         .insert(componentSurfaces)

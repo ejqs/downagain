@@ -5,7 +5,7 @@ description: Working on downagain.dev - adding or fixing a tracked provider, cha
 
 # downagain.dev
 
-A read-only Next.js site that ranks hosting, cloud, database and AI providers by their own status-page history. Read `README.md` first; this is the checklist for the common changes.
+A read-only Next.js site that ranks hosting, cloud, database, AI and dev tool providers by their own status-page history. Read `README.md` first; this is the checklist for the common changes.
 
 ## Ground rules
 
@@ -22,6 +22,10 @@ A read-only Next.js site that ranks hosting, cloud, database and AI providers by
 3. Save a real response as a fixture in `tests/fixtures/` (file name from `fixtureName()`), add an adapter test if the format is new, run `bun run test`.
 4. Deploy, or locally: `bun run db:seed && bun run backfill --provider <slug>`.
 5. A provider is hidden until its source answers once, so check the poll route's `failed` list after deploying.
+
+## Short history
+
+A provider is graded only with 14+ days of data (`MIN_GRADED_DAYS` in `views.ts`), counted from the older of its first poll and its oldest stored incident; under 90 days the board shows "N DAYS". Feeds that list only open incidents (Azure) or the last 25 to 50 (incident.io, Statuspage) start short and fill in as the poller keeps everything. Heroku reads history from `/api/v4/incidents`.
 
 ## Railway history
 
