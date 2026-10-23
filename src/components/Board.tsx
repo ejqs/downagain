@@ -13,21 +13,20 @@ import { absUrl } from "@/lib/site";
 export function CategoryTabs({ snap, active }: { snap: Snapshot; active: string }) {
   const down = downNow(snap);
   return (
-    <nav aria-label="Categories" className="chips" style={{ paddingBottom: 14, borderBottom: "3px solid var(--ink)" }}>
+    <nav aria-label="Categories" className="tabs">
       {snap.categories.map((c) => {
         const catDown = down.filter((d) => d.provider.category === c.slug);
-        const n = liveCount(catDown);
+        const n = catDown.length;
         return (
           <Link
             key={c.slug}
             href={c.slug === snap.categories[0]?.slug ? "/" : `/c/${c.slug}`}
-            className="chip"
             aria-current={c.slug === active ? "true" : undefined}
             data-umami-event="category-filter"
             data-umami-event-category={c.slug}
           >
             {c.name}
-            {n ? <span className={`count ${catDown.some((d) => liveLevel(d) === "down") ? "" : "issues"}`}>{n}</span> : null}
+            {n ? <span className={`count ${catDown.some((d) => liveLevel(d) === "down") ? "" : "issues"}`} aria-label={liveCount(catDown) ?? undefined}>{n}</span> : null}
           </Link>
         );
       })}

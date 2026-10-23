@@ -24,4 +24,6 @@ export const GLOSSARY = {
   cost: "One reference workload a month, priced from the provider's own pricing page. ~ is an estimate.",
   bestValue: "Nobody else here costs the same or less with the same or better grade.",
   dns: "Incidents with DNS in the title or components, 90 days.",
+  sev1Count: "Sev 1 incidents across every provider, 90 days.",
+  daysSince: "Days since the last Sev 1 anywhere was resolved.",
 } as const;

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { safeSnapshot } from "@/lib/data";
 import { pageMeta } from "@/lib/site";
 import { daysSinceSev1, totals } from "@/lib/views";
-import { fmtDuration } from "@/lib/format";
 import { AlsoTracking, Board } from "@/components/Board";
 import { Stat } from "@/components/ui";
 import { Unavailable } from "@/components/Unavailable";
@@ -23,27 +22,19 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
   return (
     <main className="wrap">
       <section className="hero">
-        <div className="hero-copy">
-          <div className="eyebrow">Hosting, cloud, databases, AI &amp; dev tools</div>
-          <h1 className="h1">
-            Is it down <span className="highlight">again?</span>
-          </h1>
-          <p className="lede">
-            Who went down, for how long, by their own admission.
-          </p>
-        </div>
-        <aside aria-label="Days since a major outage" className="sign">
-          <span className="eyebrow" style={{ letterSpacing: "0.1em" }}>Days without a</span>
-          <span className="count">{days ?? "–"}</span>
-          <span className="eyebrow" style={{ letterSpacing: "0.1em" }}>Sev 1 outage</span>
-        </aside>
+        <h1 className="h1">
+          Is it down <span className="highlight">again?</span>
+        </h1>
+        <p className="lede">
+          Who went down, for how long, by their own admission.
+        </p>
       </section>
 
-      <section className="stats" style={{ marginBottom: 40 }} aria-label="Last 90 days, all providers">
-        <Stat label="Sev 1 downtime, 90d" value={fmtDuration(t.sev1Minutes)} hint={GLOSSARY.sev1Downtime} />
+      <section className="statline" style={{ marginBottom: 28 }} aria-label="Last 90 days, all providers">
+        <Stat label="Days without a Sev 1" value={days === null ? "–" : String(days)} hot hint={GLOSSARY.daysSince} />
         <Stat label="Incidents, 90d" value={String(t.incidents)} hint={GLOSSARY.incidents} />
-        <Stat label="Providers" value={String(t.providers)} />
-        <Stat label="It was DNS" value={String(t.dns)} hot hint={GLOSSARY.dns} />
+        <Stat label="Sev 1, 90d" value={String(t.sev1)} hint={GLOSSARY.sev1Count} />
+        <Stat label="It was DNS" value={String(t.dns)} hint={GLOSSARY.dns} />
       </section>
 
       <Board snap={snap} category={first} sort={sort === "best" ? "best" : "worst"} basePath="/" />
