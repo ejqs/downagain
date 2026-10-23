@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const PAGES = ["/", "/c/hosting", "/c/ai", "/incidents", "/compare", "/compare/railway-vs-vercel", "/about", "/p/vercel", "/p/railway", "/p/heroku", "/stack", "/stack?u=vercel&u=railway&u=heroku"];
+const PAGES = ["/", "/c/hosting", "/c/ai", "/incidents", "/compare", "/compare/railway-vs-vercel", "/about", "/p/vercel", "/p/railway", "/p/heroku", "/stack", "/stack?u=vercel&u=railway&u=heroku", "/?need=postgres,storage&region=sg", "/c/ai?need=llm"];
 
 /** Collect uncaught errors and console errors from our own origin. */
 function watchErrors(page: Page) {
@@ -108,4 +108,13 @@ test("the stack picker narrows a provider to the parts picked", async ({ page })
   await expect(page.locator('[role="group"] .chip[aria-pressed="true"]')).toHaveCount(1);
   await page.locator('select[aria-label="Add a provider"]').selectOption("railway");
   await expect(page).toHaveURL(/&u=railway$/);
+});
+
+test("need chips narrow the leaderboard and keep the sort", async ({ page }) => {
+  await page.goto("/?sort=best");
+  await page.locator('[aria-label="What you use"] .chip', { hasText: "Postgres" }).click();
+  await expect(page).toHaveURL(/\/\?sort=best&need=postgres$/);
+  await page.locator('select[aria-label="Region"]').selectOption("sg");
+  await expect(page).toHaveURL(/need=postgres&region=sg$/);
+  await expect(page.locator("main")).toContainText("Postgres · Singapore");
 });
