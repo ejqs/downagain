@@ -207,7 +207,8 @@ export function totals(snap: Snapshot, days = 90) {
   let downtime = 0;
   for (const p of snap.providers) downtime += scoreFor(snap, p.id, days).sev1Minutes;
   const dns = list.filter((i) => /\bdns\b/i.test(i.title) || i.components.some((c) => /\bdns\b/i.test(c))).length;
-  return { incidents: list.length, sev1Minutes: downtime, providers: snap.providers.length, dns };
+  const sev1 = list.filter((i) => tierOf(i) === 1).length;
+  return { incidents: list.length, sev1, sev1Minutes: downtime, providers: snap.providers.length, dns };
 }
 
 export function monthlyTrend(list: IncidentRow[], now: number, months = 12) {

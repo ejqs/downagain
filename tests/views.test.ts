@@ -177,7 +177,7 @@ describe("summaries", () => {
     const t = totals(
       snap([prov(1)], [inc(1, { startedAt: ago(1), title: "DNS resolution failures" }), inc(1, { startedAt: ago(200) }), inc(1, { startedAt: ago(2), tier: 0 })]),
     );
-    expect(t).toEqual({ incidents: 1, sev1Minutes: 60, providers: 1, dns: 1 });
+    expect(t).toEqual({ incidents: 1, sev1: 1, sev1Minutes: 60, providers: 1, dns: 1 });
   });
 
   it("buckets a 12-month trend", () => {
