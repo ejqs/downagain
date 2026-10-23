@@ -35,7 +35,7 @@ export function Footer({ snap }: { snap: Snapshot | null }) {
           <a href="https://github.com/ejqs/downagain">Source</a>
         </span>
         <span className="row" style={{ ["--gap" as string]: "8px 16px" }}>
-          <span className="mono" style={{ fontSize: 13 }}>Hosted on Railway.</span>
+          <span className="mono" style={{ fontSize: 13 }}>Hosted on Railway. Yeah, I know.</span>
           <a className="bmc" href="https://buymeacoffee.com/ejqs" data-umami-event="coffee">
             <CoffeeIcon />
             Buy me a coffee
