@@ -195,7 +195,7 @@ export default async function IncidentsPage({ searchParams }: Props) {
                 </div>
               ))
             ) : (
-              <span className="body">Nobody this week. Suspicious.</span>
+              <span className="body">Nobody this week.</span>
             )}
           </div>
           <div className="box pad stack" style={{ ["--gap" as string]: "6px" }}>
