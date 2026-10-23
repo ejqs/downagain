@@ -239,6 +239,7 @@ details.updates li { overflow-wrap: anywhere; }
 .cal-x { margin-left: auto; min-width: 44px; min-height: 44px; display: inline-grid; place-items: center; margin-block: -10px; font: 700 22px var(--font-mono); text-decoration: none; }
 .prov-select select { min-height: 44px; max-width: 100%; padding: 0 8px; border: 3px solid var(--ink); background: var(--paper); font: 700 15px var(--font-display); color: var(--ink); }
 .prov-select { display: flex; gap: 6px; }
+.copy-badge input { flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 0 10px; border: 2px solid var(--ink); background: var(--paper); font: 400 13px var(--font-mono); color: var(--ink); }
 .part-find input { min-height: 44px; width: 15ch; max-width: 100%; padding: 0 10px; border: 2px solid var(--ink); background: var(--paper); font: 700 13px var(--font-mono); color: var(--ink); }
 .legend i[class^="heat-"] { border-radius: 3px; }
 .day-head { font-size: 22px; font-weight: 800; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin: 0 0 8px; }

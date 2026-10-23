@@ -118,3 +118,11 @@ test("need chips narrow the leaderboard and keep the sort", async ({ page }) => 
   await expect(page).toHaveURL(/need=postgres&region=sg$/);
   await expect(page.locator("main")).toContainText("Postgres · Singapore");
 });
+
+test("a stack has a README badge", async ({ page, request }) => {
+  const badge = await request.get("/badge/stack.svg?u=vercel&u=railway&need=compute");
+  expect(badge.headers()["content-type"]).toContain("image/svg+xml");
+  expect(await badge.text()).toContain("stack");
+  await page.goto("/stack?u=vercel&need=compute&region=sg");
+  await expect(page.locator('input[aria-label="Badge Markdown"]')).toHaveValue(/\/badge\/stack\.svg\?u=vercel&need=compute&region=sg/);
+});

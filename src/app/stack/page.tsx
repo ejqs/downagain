@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { safeSnapshot, type IncidentRow } from "@/lib/data";
-import { WINDOW_DAYS, durationMinutes, score, windowBounds, type Score } from "@/lib/grading";
-import { dailyCells, dailyLoad, dataFrom, gradeInput, isGraded, tierOf } from "@/lib/views";
+import { WINDOW_DAYS, durationMinutes, type Score } from "@/lib/grading";
+import { dailyCells, dailyLoad, dataFrom, gradeInput, tierOf } from "@/lib/views";
 import { fmtDay, fmtDuration, fmtPct, fmtTime, plural } from "@/lib/format";
 import { AREA_SHORT, AREAS } from "@/lib/severity";
-import { pageMeta } from "@/lib/site";
-import { MAX_STACK, parseStack, stackHref, togglePart, stackEntries, type StackPick } from "@/lib/stack";
+import { absUrl, pageMeta } from "@/lib/site";
+import { MAX_STACK, parseStack, stackHref, togglePart, type StackPick } from "@/lib/stack";
+import { stackSummary } from "@/lib/stack-score";
+import { filterParams, filterQuery, parseFilter } from "@/lib/needs";
+import { NeedBar } from "@/components/NeedBar";
 import { DayStrip, GradeTile, SevPill, StripLegend } from "@/components/ui";
 import { Unavailable } from "@/components/Unavailable";
 import { Heatmap, dayKey } from "@/components/Heatmap";
-import { AddPart, AddProvider } from "@/components/StackControls";
+import { AddPart, AddProvider, CopyBadge } from "@/components/StackControls";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({
@@ -30,16 +33,19 @@ const EXAMPLES: { label: string; picks: StackPick[] }[] = [
   { label: "Railway, GitHub Actions", picks: [{ slug: "railway", parts: [] }, { slug: "github", parts: ["actions"] }] },
 ];
 
-type Props = { searchParams: Promise<{ u?: string | string[]; day?: string; days?: string }> };
+type Props = { searchParams: Promise<{ u?: string | string[]; day?: string; days?: string; need?: string; region?: string }> };
 
 export default async function StackPage({ searchParams }: Props) {
   const snap = await safeSnapshot();
   if (!snap) return <Unavailable />;
   const q = await searchParams;
   const picks = parseStack(q.u, snap);
-  const entries = stackEntries(snap, picks);
+  const filter = parseFilter(q);
+  const fx = filterParams(filter);
+  const href = (p: StackPick[], extra: Record<string, string> = {}) => stackHref(p, { ...fx, ...extra });
+  const sum = stackSummary(snap, picks, filter);
+  const entries = sum.entries;
   const now = snap.generatedAt;
-  const { from, to } = windowBounds(new Date(now));
   const today = Math.floor(now / DAY) * DAY;
   const asked = /^\d{4}-\d{2}-\d{2}$/.test(q.day ?? "") ? Date.parse(`${q.day}T00:00:00Z`) : NaN;
   const days = Math.min(WINDOW_DAYS, Math.max(PAGE_DAYS, Number(q.days) || PAGE_DAYS));
@@ -48,10 +54,12 @@ export default async function StackPage({ searchParams }: Props) {
   const inStack = new Set(picks.map((p) => p.slug));
   const examples = EXAMPLES.filter((e) => e.picks.every((p) => snap.providers.some((x) => x.slug === p.slug)));
 
-  const scoreOf = (list: IncidentRow[]) => score(list.map(gradeInput), from, to);
-  const rows = entries.map((e) => ({ ...e, score: scoreOf(e.incidents), graded: isGraded(e.provider, now) }));
-  const all = entries.flatMap((e) => e.incidents).sort((a, b) => b.startedAt - a.startedAt);
-  const whole = rows.length > 1 ? { score: scoreOf(all), graded: rows.every((r) => r.graded) } : null;
+  const rows = entries;
+  const all = sum.all;
+  const whole = rows.length > 1 ? sum : null;
+  const badgeQuery = href(picks).replace(/^\/stack\??/, "");
+  const badge = `![downagain stack](${absUrl(`/badge/stack.svg?${badgeQuery}`)})`;
+  const markdown = `[${badge}](${absUrl(href(picks))})`;
   const heat = dailyLoad(all, WINDOW_DAYS, now);
   const list = all.filter((i) =>
     tierOf(i) > 0 && (day === null ? (i.resolvedAt ?? now) > now - days * DAY : i.startedAt < day + DAY && (i.resolvedAt ?? now) >= day),
@@ -63,7 +71,7 @@ export default async function StackPage({ searchParams }: Props) {
     groups.get(start)!.push(i);
   }
 
-  const without = (slug: string) => stackHref(picks.filter((p) => p.slug !== slug));
+  const without = (slug: string) => href(picks.filter((p) => p.slug !== slug));
 
   return (
     <main className="wrap stack" style={{ paddingTop: 24, ["--gap" as string]: "24px" }}>
@@ -85,13 +93,13 @@ export default async function StackPage({ searchParams }: Props) {
               </div>
               {e.parts.length ? (
                 <div role="group" aria-label={`${e.provider.name} parts`} className="chips">
-                  <Link href={stackHref(togglePart(picks, e.provider.slug, null))} scroll={false} className="chip small" aria-pressed={!e.picked.length}>
+                  <Link href={href(togglePart(picks, e.provider.slug, null))} scroll={false} className="chip small" aria-pressed={!e.picked.length}>
                     All
                   </Link>
                   {chips.map((c) => (
                     <Link
                       key={c.key}
-                      href={stackHref(togglePart(picks, e.provider.slug, c.key))}
+                      href={href(togglePart(picks, e.provider.slug, c.key))}
                       scroll={false}
                       className="chip small"
                       aria-pressed={e.pick.parts.includes(c.key)}
@@ -100,7 +108,7 @@ export default async function StackPage({ searchParams }: Props) {
                       {c.name}
                     </Link>
                   ))}
-                  {rest.length ? <AddPart slug={e.provider.slug} parts={rest.map((p) => ({ key: p.key, name: p.name }))} picks={picks} /> : null}
+                  {rest.length ? <AddPart slug={e.provider.slug} parts={rest.map((p) => ({ key: p.key, name: p.name }))} picks={picks} extra={fx} /> : null}
                 </div>
               ) : null}
             </div>
@@ -109,6 +117,7 @@ export default async function StackPage({ searchParams }: Props) {
         {picks.length < MAX_STACK ? (
           <AddProvider
             picks={picks}
+            extra={fx}
             groups={snap.categories
               .map((c) => ({ name: c.name, provs: snap.providers.filter((p) => p.category === c.slug && !inStack.has(p.slug)).map((p) => ({ slug: p.slug, name: p.name })) }))
               .filter((g) => g.provs.length)}
@@ -124,7 +133,7 @@ export default async function StackPage({ searchParams }: Props) {
               <span className="eyebrow">Examples</span>
               <div className="chips">
                 {examples.map((x) => (
-                  <Link key={x.label} href={stackHref(x.picks)} className="chip">{x.label}</Link>
+                  <Link key={x.label} href={href(x.picks)} className="chip">{x.label}</Link>
                 ))}
               </div>
             </div>
@@ -132,9 +141,11 @@ export default async function StackPage({ searchParams }: Props) {
         </section>
       ) : (
         <>
+          <NeedBar category="stack" filter={filter} path="/stack" keep={stackHref(picks).replace(/^\/stack\??/, "")} />
           <section aria-label="Last 90 days" className="stack" style={{ ["--gap" as string]: "14px" }}>
             <div>
               <h2 className="h2">Last 90 days</h2>
+              {filterQuery(filter) ? <p className="body" style={{ marginTop: 6 }}>{[filter.needs.map((n) => n.label).join(", "), filter.region?.label].filter(Boolean).join(" · ")}</p> : null}
             </div>
             <div className="box">
               {whole ? <StackRow name="Whole stack" sub={plural(rows.length, "provider")} score={whole.score} graded={whole.graded} cells={dailyCells(all, 60, now)} /> : null}
@@ -158,7 +169,7 @@ export default async function StackPage({ searchParams }: Props) {
               days={heat}
               selected={day}
               now={now}
-              hrefFor={(d) => stackHref(picks, d === null ? {} : { day: dayKey(d) })}
+              hrefFor={(d) => href(picks, d === null ? {} : { day: dayKey(d) })}
               nameOf={(id) => byId.get(id)?.name ?? ""}
             />
             {groups.size === 0 ? <div className="empty">{day === null ? `Nothing in the last ${days} days.` : "Clean day."}</div> : null}
@@ -197,10 +208,17 @@ export default async function StackPage({ searchParams }: Props) {
               </div>
             ))}
             {day === null && days < WINDOW_DAYS ? (
-              <Link href={stackHref(picks, { days: String(Math.min(WINDOW_DAYS, days + 30)) })} className="btn" style={{ alignSelf: "flex-start" }} scroll={false}>
+              <Link href={href(picks, { days: String(Math.min(WINDOW_DAYS, days + 30)) })} className="btn" style={{ alignSelf: "flex-start" }} scroll={false}>
                 Older
               </Link>
             ) : null}
+          </section>
+
+          <section aria-label="README badge" className="box pad stack" style={{ ["--gap" as string]: "10px" }}>
+            <span className="eyebrow">README badge</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/badge/stack.svg?${badgeQuery}`} alt="downagain stack badge" height={20} style={{ alignSelf: "flex-start" }} />
+            <CopyBadge markdown={markdown} />
           </section>
         </>
       )}
