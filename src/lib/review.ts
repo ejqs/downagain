@@ -81,7 +81,7 @@ function rulesFor(r: Row, updates: { body: string }[], overrides: Map<number, Ma
   );
 }
 
-function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | null; summary?: string | null }, longText = false) {
+function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | null; summary?: string | null; recoveredAt?: Date | null }, longText = false) {
   return {
     tier: c.tier,
     areaTiers: c.areaTiers,
@@ -93,13 +93,14 @@ function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | 
     gradedBy: c.gradedBy ?? "rules",
     scope: c.scope ?? null,
     summary: longText && c.summary ? c.summary : null,
+    recoveredAt: c.recoveredAt ?? null,
   };
 }
 
 /** The grade to store: Claude's verdict for this exact version if we have a good one, else the rules. */
 export function finalGrade(rules: Classification, verdict: unknown, regions?: string[] | null) {
   const v = verdict == null ? null : parseVerdict(verdict);
-  if (!v) return { ...rules, gradedBy: "rules" as const, scope: rules.scope ?? null, summary: null };
+  if (!v) return { ...rules, gradedBy: "rules" as const, scope: rules.scope ?? null, summary: null, recoveredAt: null };
   const refined = applyVerdict(rules, v);
   // The rules already hold single-region incidents; Claude's grade gets the same treatment.
   if (v.data_loss) return refined;

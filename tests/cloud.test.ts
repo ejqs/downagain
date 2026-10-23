@@ -168,7 +168,7 @@ describe("regional scope", () => {
 
   it("applies to Claude's grade too", () => {
     const rules = classify({ ...base, regions: ["me-central-1"] });
-    const v: Verdict = { affected: [{ surface: "serving", tier: 1 }], not_counted: false, scope: "global", security: false, data_loss: false, confidence: "high", rationale: "EC2 was down.", summary: "" };
+    const v: Verdict = { affected: [{ surface: "serving", tier: 1 }], not_counted: false, scope: "global", security: false, data_loss: false, confidence: "high", rationale: "EC2 was down.", summary: "", recovered_at: null };
     expect(finalGrade(rules, v, ["me-central-1"])).toMatchObject({ tier: 2, areaTiers: { production: 2 }, reason: "EC2 was down. Held to Sev 2 as only me-central-1 was hit." });
     expect(finalGrade(rules, v, ["us-east-1", "eu-west-1"]).tier).toBe(1);
     expect(finalGrade(rules, { ...v, data_loss: true }, ["me-central-1"]).tier).toBe(1);

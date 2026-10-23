@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { areaFor, type Scope, securityBump, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
-export const PROMPT_VERSION = 7;
+export const PROMPT_VERSION = 8;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 
 const SURFACES = ["serving", "data", "ship", "manage", "peripheral"] as const;
@@ -25,12 +25,14 @@ export interface Verdict {
   confidence: "high" | "medium" | "low";
   rationale: string;
   summary: string;
+  /** When the updates first say service was back to normal, or null. */
+  recovered_at: Date | null;
 }
 
 const VERDICT_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["affected", "not_counted", "scope", "security", "data_loss", "confidence", "rationale", "summary"],
+  required: ["affected", "not_counted", "scope", "security", "data_loss", "confidence", "rationale", "summary", "recovered_at"],
   properties: {
     affected: {
       type: "array",
@@ -52,6 +54,7 @@ const VERDICT_SCHEMA = {
     confidence: { type: "string", enum: ["high", "medium", "low"] },
     rationale: { type: "string" },
     summary: { type: "string" },
+    recovered_at: { type: "string", description: "Timestamp copied from the first update that says service is back to normal, or an empty string" },
   },
 } as const;
 
@@ -90,7 +93,9 @@ The provider's own impact label is a hint, not the answer. Providers often call 
 
 rationale: one plain, factual sentence of at most 25 words that a reader of the site will see under the incident, naming what broke and how widely, for example "API requests failed in us-east-1 for about 40 minutes; other regions were fine." No jokes, no tier numbers.
 
-summary: the whole incident in plain words, at most 50 words, for a developer skimming a long thread of updates: what broke, who was affected, for how long, and the cause and fix if the provider gave them. Use the provider's facts only; no speculation, no jokes, no tier numbers.`;
+summary: the whole incident in plain words, at most 50 words, for a developer skimming a long thread of updates: what broke, who was affected, for how long, and the cause and fix if the provider gave them. Use the provider's facts only; no speculation, no jokes, no tier numbers.
+
+recovered_at: providers often keep an incident open long after the fix, to monitor, chase a root cause, notify customers or write a report. Copy the bracketed timestamp of the first update that says the affected services are working normally again for all customers who were hit (for example "running at normal speed", "fully recovered", "operating normally"). Improving, partly restored, restored for some plans or regions, or a backlog still draining is not recovered. If a later update says the problem came back, use the first update after that which says it is normal again. Use an empty string when the text never says service is back to normal, or when that update is the resolution itself.`;
 
 export interface ReviewInput {
   provider: string;
@@ -156,6 +161,13 @@ export function inputHash(rendered: string, model: string): string {
   return createHash("sha256").update(`${PROMPT_VERSION}\n${model}\n${rendered}`).digest("hex").slice(0, 32);
 }
 
+/** A timestamp Claude copied, or null for empty, missing (older verdicts) or garbled. */
+function parseTime(v: unknown): Date | null {
+  if (typeof v !== "string" || !v.trim()) return null;
+  const d = new Date(v.trim());
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 export function parseVerdict(v: unknown): Verdict | null {
   if (!v || typeof v !== "object") return null;
   const o = v as Record<string, unknown>;
@@ -181,6 +193,7 @@ export function parseVerdict(v: unknown): Verdict | null {
     confidence: o.confidence as Verdict["confidence"],
     rationale: o.rationale.trim().slice(0, 300),
     summary: typeof o.summary === "string" ? o.summary.trim().slice(0, 600) : "",
+    recovered_at: parseTime(o.recovered_at),
   };
 }
 
@@ -191,13 +204,14 @@ export function isLongText(updates: { body: string }[]): boolean {
 
 export interface Refined extends Classification {
   summary: string;
+  recoveredAt: Date | null;
   gradedBy: "claude";
   scope: Scope;
 }
 
 /** Turn Claude's verdict into our grade, with the same security and data-loss rules as severity.ts. */
 export function applyVerdict(rules: Classification, v: Verdict): Refined {
-  const base = { classifierVersion: rules.classifierVersion, gradedBy: "claude" as const, scope: v.scope, summary: v.summary };
+  const base = { classifierVersion: rules.classifierVersion, gradedBy: "claude" as const, scope: v.scope, summary: v.summary, recoveredAt: v.recovered_at };
   if (v.not_counted && !v.security && !v.data_loss) {
     return { ...base, tier: 0, areaTiers: {}, surfaces: [], security: false, lowConfidence: v.confidence === "low", reason: v.rationale };
   }

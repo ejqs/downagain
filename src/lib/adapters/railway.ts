@@ -69,7 +69,8 @@ export function normalizeRwIncident(i: RwIncident, pageUrl: string): NormalizedI
     impact: impactFromStatus(worst),
     status: i.status.toLowerCase(),
     startedAt: new Date(i.createdAt),
-    monitoringAt: updates.find((u) => u.status === "monitoring")?.postedAt ?? null,
+    // An incident can be flipped to monitoring without an update saying so.
+    monitoringAt: updates.find((u) => u.status === "monitoring")?.postedAt ?? (/^monitoring$/i.test(i.status) && i.updatedAt ? new Date(i.updatedAt) : null),
     resolvedAt: i.resolvedAt ? new Date(i.resolvedAt) : null,
     sourceUpdatedAt: i.updatedAt ? new Date(i.updatedAt) : null,
     url: i.slug ? `${pageUrl.replace(/\/$/, "")}/incident/${i.slug}` : pageUrl,
@@ -88,7 +89,8 @@ export async function fetchRailway(base: string, pageUrl: string, get: Getter): 
   if (!body || !Array.isArray(body.components)) throw new Error("railway status: unexpected shape");
   const components = flatten(body.components);
   const incidents = (body.incidents ?? []).map((i) => normalizeRwIncident(i, pageUrl));
-  const active = incidents.filter((i) => !i.resolvedAt).map((i) => i.worstComponentStatus ?? "degraded");
+  // An incident the team is monitoring keeps its worst impact on record, but the fix is in.
+  const active = incidents.filter((i) => !i.resolvedAt && i.status !== "monitoring").map((i) => i.worstComponentStatus ?? "degraded");
   const inMaintenance = (body.maintenances ?? []).some((m) => /IN_PROGRESS|ACTIVE/i.test(m.status ?? ""));
   return {
     // Railway has no overall field, so we derive it.

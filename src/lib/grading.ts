@@ -36,6 +36,8 @@ export interface GradeInput {
   startedAt: Date;
   monitoringAt: Date | null;
   resolvedAt: Date | null;
+  /** When the updates say service was back to normal; only counted once the incident is resolved. */
+  recoveredAt?: Date | null;
   tier: number | null;
   tierOverride: number | null;
   areaTiers: Partial<Record<Area, number>> | null;
@@ -75,10 +77,18 @@ export function durationMinutes(i: Pick<GradeInput, "startedAt" | "resolvedAt">,
 /**
  * Penalty minutes run from the start until the provider first says "monitoring"
  * (or resolves), clipped to the window, so pages left open for a day of monitoring
- * aren't over-punished.
+ * aren't over-punished. Once it's resolved, they stop earlier if the updates say
+ * service was back to normal while the page stayed open (recoveredAt).
  */
+export function penaltyEnd(i: Pick<GradeInput, "startedAt" | "monitoringAt" | "resolvedAt" | "recoveredAt">): Date | null {
+  const end = i.monitoringAt ?? i.resolvedAt;
+  const r = i.recoveredAt;
+  if (!end || !i.resolvedAt || !r || r < i.startedAt || r >= end) return end;
+  return r;
+}
+
 export function penaltyMinutes(i: GradeInput, from: Date, to: Date): number {
-  const end = i.monitoringAt ?? i.resolvedAt ?? to;
+  const end = penaltyEnd(i) ?? to;
   const s = Math.max(i.startedAt.getTime(), from.getTime());
   const e = Math.min(end.getTime(), to.getTime(), i.startedAt.getTime() + penaltyCap(effectiveTier(i)) * MIN);
   return Math.max(0, (e - s) / MIN);

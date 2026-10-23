@@ -1,5 +1,5 @@
 import { safeSnapshot } from "@/lib/data";
-import { scoreFor } from "@/lib/views";
+import { LIVE_LABEL, scoreFor } from "@/lib/views";
 import { fmtPct } from "@/lib/format";
 import { BRAND, GRADE_COLORS } from "@/lib/site";
 import type { Snapshot } from "@/lib/data";
@@ -31,9 +31,8 @@ function stackBadge(snap: Snapshot, url: URL): string {
   const [live] = s.live;
   if (live) {
     const more = s.live.length > 1 ? ` +${s.live.length - 1}` : "";
-    return live.level === "down"
-      ? svg("stack", `DOWN · ${live.name}${more}`, BRAND.down, BRAND.ink)
-      : svg("stack", `ISSUES · ${live.name}${more}`, BRAND.minor, BRAND.ink);
+    const [bg, fg] = { down: [BRAND.down, BRAND.ink], issues: [BRAND.minor, BRAND.ink], monitoring: [BRAND.upWash, BRAND.ink] }[live.level];
+    return svg("stack", `${LIVE_LABEL[live.level]} · ${live.name}${more}`, bg, fg);
   }
   if (!s.graded) return svg("stack", "too new to grade", BRAND.none, BRAND.ink);
   const [bg, fg] = GRADE_COLORS[s.score.grade];

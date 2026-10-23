@@ -14,6 +14,7 @@ const verdict = (v: Partial<Verdict> = {}): Verdict => ({
   confidence: "high",
   rationale: "Requests failed in iad1 for 30 minutes.",
   summary: "Edge requests in iad1 returned errors for 30 minutes after a bad config push, fixed by a rollback.",
+  recovered_at: null,
   ...v,
 });
 
@@ -79,6 +80,13 @@ describe("applyVerdict", () => {
 describe("parseVerdict", () => {
   it("accepts a well-formed verdict", () => {
     expect(parseVerdict(verdict())).toEqual(verdict());
+  });
+  it("reads the recovery time, and treats empty or garbled as none", () => {
+    expect(parseVerdict({ ...verdict(), recovered_at: "2026-10-22T22:49:00.000Z" })?.recovered_at?.toISOString()).toBe("2026-10-22T22:49:00.000Z");
+    expect(parseVerdict({ ...verdict(), recovered_at: "" })?.recovered_at).toBeNull();
+    expect(parseVerdict({ ...verdict(), recovered_at: "soon" })?.recovered_at).toBeNull();
+    const { recovered_at: _, ...older } = verdict();
+    expect(parseVerdict(older)?.recovered_at).toBeNull();
   });
   it.each([
     ["unknown surface", { affected: [{ surface: "vibes", tier: 2 }] }],

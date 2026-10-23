@@ -13,6 +13,7 @@ export function gradeInput(i: IncidentRow): GradeInput {
     startedAt: new Date(i.startedAt),
     monitoringAt: i.monitoringAt ? new Date(i.monitoringAt) : null,
     resolvedAt: i.resolvedAt ? new Date(i.resolvedAt) : null,
+    recoveredAt: i.recoveredAt ? new Date(i.recoveredAt) : null,
     tier: i.tier,
     tierOverride: i.tierOverride,
     areaTiers: i.areaTiers,
@@ -144,25 +145,40 @@ export interface DownItem {
   tier: number | null;
   sinceMs: number;
   status: Status;
+  /** Every open incident says the fix is in and the provider is watching it. */
+  monitoring: boolean;
 }
 
 const STATUS_TIER: Partial<Record<Status, number>> = { major_outage: 1, partial_outage: 2, degraded: 2 };
 
-/** "down" is Sev 1 or a major outage; anything milder in the banner is "issues". */
-export type LiveLevel = "down" | "issues";
-export const LIVE_LABEL: Record<LiveLevel, string> = { down: "DOWN", issues: "ISSUES" };
+/**
+ * "down" is Sev 1 or a major outage; anything milder in the banner is "issues".
+ * Once the provider says it's monitoring a fix, it's "monitoring", whatever the tier.
+ */
+export type LiveLevel = "down" | "issues" | "monitoring";
+export const LIVE_LABEL: Record<LiveLevel, string> = { down: "DOWN", issues: "ISSUES", monitoring: "MONITORING" };
 
-export function liveLevel(d: Pick<DownItem, "tier" | "status">): LiveLevel {
+export function liveLevel(d: Pick<DownItem, "tier" | "status"> & { monitoring?: boolean }): LiveLevel {
+  if (d.monitoring) return "monitoring";
   return d.tier === 1 || d.status === "major_outage" ? "down" : "issues";
 }
 
-/** "2 down · 1 issues"-style count for a set of providers, or null when all are up. */
+/** The level that colours a group of live items: down beats issues beats monitoring. */
+export function worstLevel(items: Parameters<typeof liveLevel>[0][]): LiveLevel | null {
+  const levels = items.map(liveLevel);
+  return levels.includes("down") ? "down" : levels.includes("issues") ? "issues" : levels.length ? "monitoring" : null;
+}
+
+/** "2 down · 1 issue · 1 monitoring"-style count for a set of providers, or null when all are up. */
 export function liveCount(items: DownItem[]): string | null {
-  const down = items.filter((d) => liveLevel(d) === "down").length;
-  const issues = items.length - down;
-  const parts = [down ? `${down} down` : null, issues ? `${issues} ${issues === 1 ? "issue" : "issues"}` : null].filter(Boolean);
+  const n = (l: LiveLevel) => items.filter((d) => liveLevel(d) === l).length;
+  const [down, issues, monitoring] = [n("down"), n("issues"), n("monitoring")];
+  const parts = [down ? `${down} down` : null, issues ? `${issues} ${issues === 1 ? "issue" : "issues"}` : null, monitoring ? `${monitoring} monitoring` : null].filter(Boolean);
   return parts.length ? parts.join(" · ") : null;
 }
+
+/** The provider has posted "monitoring" and nothing since says otherwise. */
+export const isMonitoring = (i: Pick<IncidentRow, "status">) => i.status === "monitoring";
 
 /**
  * Providers reporting a problem right now: an open Sev 1–3 incident, or a
@@ -182,6 +198,7 @@ export function downNow(snap: Snapshot): DownItem[] {
         tier: tierOf(worst),
         sinceMs: Math.min(...open.map((i) => i.startedAt)),
         status: p.status,
+        monitoring: open.every(isMonitoring),
       });
     } else if (isProblem(p.status) && !openIncidents(mine).length) {
       // A status page still flagged by a long-running incident isn't news either.
@@ -192,10 +209,12 @@ export function downNow(snap: Snapshot): DownItem[] {
         tier: STATUS_TIER[p.status] ?? null,
         sinceMs: p.since ?? snap.generatedAt,
         status: p.status,
+        monitoring: false,
       });
     }
   }
-  return out.sort((a, b) => (a.tier ?? 9) - (b.tier ?? 9) || a.sinceMs - b.sinceMs);
+  // Still broken first; ones the provider is watching a fix for go last.
+  return out.sort((a, b) => Number(a.monitoring) - Number(b.monitoring) || (a.tier ?? 9) - (b.tier ?? 9) || a.sinceMs - b.sinceMs);
 }
 
 /** Whole days since any tracked provider last had a Sev 1 running. */
