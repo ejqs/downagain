@@ -1,6 +1,8 @@
-// Heroku's status API: GET {base}/api/v4/current-status
-//   { status: [{ system: "Apps"|"Data"|"Tools", status: "green"|"yellow"|"red"|"blue" }],
-//     incidents: [...], scheduled: [...] }
+// Heroku's status API:
+//   GET {base}/api/v4/current-status   { status: [{ system: "Apps"|"Data"|"Tools", status: "green"|"yellow"|"red"|"blue" }],
+//                                        incidents: [...open only], scheduled: [...] }
+//   GET {base}/api/v4/incidents?per_page=N  past incidents, newest first, same shape as above
+// Heroku now posts to trust.salesforce.com first; status.heroku.com carries the same incidents.
 import type { Getter, NormalizedComponent, NormalizedIncident, ProviderSnapshot, Status } from "@/lib/types";
 import { impactFromStatus, worstStatus } from "@/lib/status";
 
@@ -52,7 +54,8 @@ export function normalizeHkIncident(i: HkIncident): NormalizedIncident {
     status: resolved ? "resolved" : (updates.at(-1)?.status ?? "investigating"),
     startedAt: new Date(i.created_at),
     monitoringAt: updates.find((u) => u.status === "monitoring")?.postedAt ?? null,
-    resolvedAt: i.resolved_at ? new Date(i.resolved_at) : null,
+    // Older incidents carry resolved: true without resolved_at; the last update is the close.
+    resolvedAt: i.resolved_at ? new Date(i.resolved_at) : resolved ? (updates.at(-1)?.postedAt ?? new Date(i.updated_at ?? i.created_at)) : null,
     sourceUpdatedAt: i.updated_at ? new Date(i.updated_at) : null,
     url: i.full_url ?? null,
     components: [...new Set((i.systems ?? []).map((s) => SYSTEM_NAMES[s.name] ?? s.name))],
@@ -63,19 +66,44 @@ export function normalizeHkIncident(i: HkIncident): NormalizedIncident {
   };
 }
 
+const HISTORY_SIZE = 100;
+
 export async function fetchHeroku(base: string, _pageUrl: string, get: Getter): Promise<ProviderSnapshot> {
-  const res = await get(`${base.replace(/\/$/, "")}/api/v4/current-status`);
-  if (res.notModified) return {};
+  const root = base.replace(/\/$/, "");
+  const [res, historyRes] = await Promise.all([
+    get(`${root}/api/v4/current-status`),
+    // History is a bonus: without it the board still shows what's open now.
+    get(`${root}/api/v4/incidents?per_page=${HISTORY_SIZE}`).catch((e: Error) => {
+      console.warn(`heroku incidents: ${e.message}`);
+      return null;
+    }),
+  ]);
+  const history = historyRes && !historyRes.notModified ? historyList(historyRes.body) : null;
+  if (res.notModified) return history ? { incidents: history.map(normalizeHkIncident) } : {};
+
   const body = res.body as { status?: { system: string; status: string }[]; incidents?: HkIncident[] };
   if (!body || !Array.isArray(body.status)) throw new Error("heroku current-status: unexpected shape");
   const components: NormalizedComponent[] = body.status.map((s) => ({
     name: SYSTEM_NAMES[s.system] ?? s.system,
     status: mapHkStatus(s.status),
   }));
+  // Open incidents from current-status win over the same id in history.
+  const byId = new Map<string, HkIncident>();
+  for (const i of history ?? []) byId.set(String(i.id), i);
+  for (const i of body.incidents ?? []) byId.set(String(i.id), i);
   return {
     status: worstStatus(components.map((c) => c.status)),
     components,
-    incidents: (body.incidents ?? []).map(normalizeHkIncident),
+    incidents: [...byId.values()].map(normalizeHkIncident),
     raw: { status: body },
   };
+}
+
+function historyList(body: unknown): HkIncident[] | null {
+  const list = Array.isArray(body) ? body : (body as { incidents?: unknown })?.incidents;
+  if (!Array.isArray(list)) {
+    console.warn("heroku incidents: unexpected shape");
+    return null;
+  }
+  return list.filter((i): i is HkIncident => Boolean(i && typeof i === "object" && "id" in i && "created_at" in i));
 }

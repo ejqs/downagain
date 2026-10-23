@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { safeSnapshot } from "@/lib/data";
 import { dailyLoad, gradeInput, openIncidents, tierOf } from "@/lib/views";
-import { WINDOW_DAYS, durationMinutes } from "@/lib/grading";
+import { WINDOW_DAYS, durationMinutes, shownEnd } from "@/lib/grading";
 import { fmtDay, fmtDuration, fmtTime, plural } from "@/lib/format";
 import { TIER_BLURB, TIER_NAMES } from "@/lib/severity";
 import { SevPill } from "@/components/ui";
@@ -59,8 +59,8 @@ export default async function IncidentsPage({ searchParams }: Props) {
     .map((p) => ({
       p,
       minutes: snap.incidents
-        .filter((i) => i.providerId === p.id && tierOf(i) > 0 && tierOf(i) <= 2 && (i.resolvedAt ?? now) > now - 7 * DAY)
-        .reduce((m, i) => m + Math.min(durationMinutes(gradeInput(i), new Date(now)), (now - Math.max(i.startedAt, now - 7 * DAY)) / 60_000), 0),
+        .filter((i) => i.providerId === p.id && tierOf(i) > 0 && tierOf(i) <= 2 && shownEnd(gradeInput(i), now) > now - 7 * DAY)
+        .reduce((m, i) => m + Math.max(0, (shownEnd(gradeInput(i), now) - Math.max(i.startedAt, now - 7 * DAY)) / 60_000), 0),
     }))
     .filter((x) => x.minutes > 0)
     .sort((a, b) => b.minutes - a.minutes)

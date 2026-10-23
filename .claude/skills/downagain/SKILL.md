@@ -23,6 +23,10 @@ A read-only Next.js site that ranks hosting, cloud, database and AI providers by
 4. Deploy, or locally: `bun run db:seed && bun run backfill --provider <slug>`.
 5. A provider is hidden until its source answers once, so check the poll route's `failed` list after deploying.
 
+## Short history
+
+A provider is graded only with 14+ days of data (`MIN_GRADED_DAYS` in `views.ts`), counted from the older of its first poll and its oldest stored incident; under 90 days the board shows "N DAYS". Feeds that list only open incidents (Azure) or the last 25 to 50 (incident.io, Statuspage) start short and fill in as the poller keeps everything. Heroku reads history from `/api/v4/incidents`.
+
 ## Railway history
 
 Railway's API (`api.railwaystatus.com/status`) only lists open incidents, and status.railway.com returns 403 to scripts. Past incidents live in `src/lib/archive/railway.json`, read by hand from status.railway.com/historical, and `bun run db:seed` (the preDeploy step) imports them idempotently. To extend it, add entries in the same shape; never re-import an incident the live poller already holds.

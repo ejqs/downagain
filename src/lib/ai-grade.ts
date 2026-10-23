@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { areaFor, type Scope, securityBump, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
-export const PROMPT_VERSION = 6;
+export const PROMPT_VERSION = 7;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 
 const SURFACES = ["serving", "data", "ship", "manage", "peripheral"] as const;
@@ -62,7 +62,7 @@ Surfaces:
 - data: databases, storage, volumes, queues, caches, backups.
 - ship: builds, deploys, CI, CLI, provisioning, logs, domains and certificates, fine-tuning, batch jobs. For hosting providers a bare "API" usually means the control plane, so it is ship unless the text says customer apps were affected.
 - manage: dashboard, console, account login and auth, API keys, teams, billing and payments: what developers need to change config and keep their account in good standing.
-- peripheral: docs, support, status page, marketing site, invoice views, usage charts, and consumer chat apps (ChatGPT, claude.ai, Sora and similar).
+- peripheral: docs, support, status page, marketing site, invoice views, usage charts, and the provider's own apps (ChatGPT, claude.ai, Sora, Codex, Claude Code, Cowork, desktop and mobile apps and similar). An incident that names only those apps is peripheral even with no component listed; count the API only when the text says API or developer requests were hit.
 
 For database providers, failing queries or connections, and the data, auth, storage and realtime APIs they serve to the customer's own users, are data. Creating or deleting databases or branches, branching, schema migrations, deploy requests, provisioning, scaling, restores and the management API are ship.
 

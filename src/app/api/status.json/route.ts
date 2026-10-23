@@ -1,5 +1,5 @@
 import { safeSnapshot } from "@/lib/data";
-import { downNow, scoreFor } from "@/lib/views";
+import { coveredDays, downNow, isGraded, scoreFor } from "@/lib/views";
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +14,16 @@ export async function GET() {
       down: down.map((d) => ({ provider: d.provider.slug, title: d.title, tier: d.tier, since: new Date(d.sinceMs).toISOString() })),
       providers: snap.providers.map((p) => {
         const s = scoreFor(snap, p.id);
+        const graded = isGraded(p, snap.generatedAt);
         return {
           slug: p.slug,
           name: p.name,
           category: p.category,
           status: p.status,
-          grade90d: s.grade,
-          areaGrades90d: { production: s.areas.production.grade, shipping: s.areas.shipping.grade },
+          // null until there are enough days of data to grade.
+          grade90d: graded ? s.grade : null,
+          areaGrades90d: graded ? { production: s.areas.production.grade, shipping: s.areas.shipping.grade } : null,
+          coveredDays90d: coveredDays(p, snap.generatedAt),
           admittedUptime90d: Number(s.admittedUptime.toFixed(6)),
           incidents90d: s.incidentCount,
         };

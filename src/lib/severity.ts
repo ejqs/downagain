@@ -18,7 +18,7 @@
 import type { Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
 
-export const CLASSIFIER_VERSION = 5;
+export const CLASSIFIER_VERSION = 6;
 
 // manage: dashboard, console, auth, billing. peripheral: docs, status page, consumer apps.
 export type Surface = "serving" | "data" | "ship" | "manage" | "peripheral";
@@ -124,7 +124,8 @@ const DATABASE_SURFACE_RULES: [Surface, RegExp][] = [
 ];
 
 export function surfaceForComponent(name: string, overrides?: Map<string, Surface>, categorySlug?: string): Surface | null {
-  const o = overrides?.get(name);
+  // Overrides name the bare component; incidents may carry it as "Group - Name".
+  const o = overrides?.get(name) ?? (name.includes(" - ") ? overrides?.get(name.slice(name.lastIndexOf(" - ") + 3)) : undefined);
   if (o) return o;
   if (categorySlug === "cloud") {
     for (const [surface, re] of CLOUD_SURFACE_RULES) if (re.test(name)) return surface;

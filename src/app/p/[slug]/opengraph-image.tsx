@@ -1,5 +1,5 @@
 import { safeSnapshot, type ProviderRow, type Snapshot } from "@/lib/data";
-import { dailyCells, downNow, incidentsFor, liveLevel, LIVE_LABEL, scoreFor } from "@/lib/views";
+import { dailyCells, dataFrom, downNow, incidentsFor, isGraded, liveLevel, LIVE_LABEL, scoreFor } from "@/lib/views";
 import { fmtDuration, fmtPct, plural } from "@/lib/format";
 import { TIER_NAMES } from "@/lib/severity";
 import { BRAND, GRADE_COLORS } from "@/lib/site";
@@ -29,10 +29,11 @@ export default async function Image({ params }: { params: Promise<{ slug: string
 
 function render(snap: Snapshot, p: ProviderRow) {
   const s = scoreFor(snap, p.id);
-  const cells = dailyCells(incidentsFor(snap, p.id), 90, snap.generatedAt, p.historyFrom);
+  const cells = dailyCells(incidentsFor(snap, p.id), 90, snap.generatedAt, dataFrom(p));
   const down = downNow(snap).find((d) => d.provider.id === p.id);
   const live = down ? liveLevel(down) : null;
-  const [gradeBg, gradeFg] = GRADE_COLORS[s.grade];
+  const grade = isGraded(p, snap.generatedAt) ? s.grade : "–";
+  const [gradeBg, gradeFg] = GRADE_COLORS[grade] ?? [BRAND.paper, BRAND.ink];
   const nameSize = p.name.length > 16 ? 76 : 104;
 
   return card(
@@ -71,7 +72,7 @@ function render(snap: Snapshot, p: ProviderRow) {
           }}
         >
           <span style={{ fontFamily: MONO, fontSize: 18, letterSpacing: "0.1em" }}>GRADE</span>
-          <span style={{ fontSize: s.grade.length > 1 ? 170 : 210, lineHeight: 0.9 }}>{s.grade}</span>
+          <span style={{ fontSize: grade.length > 1 ? 170 : 210, lineHeight: 0.9 }}>{grade}</span>
         </div>
       </div>
       <div style={{ display: "flex", gap: 3, height: 40, marginTop: 24 }}>
@@ -80,7 +81,7 @@ function render(snap: Snapshot, p: ProviderRow) {
         ))}
       </div>
     </div>,
-    `PROD ${s.areas.production.grade} · SHIP ${s.areas.shipping.grade} · ${fmtPct(s.admittedUptime)} admitted uptime`,
+    grade === "–" ? "Not enough history to grade yet" : `PROD ${s.areas.production.grade} · SHIP ${s.areas.shipping.grade} · ${fmtPct(s.admittedUptime)} admitted uptime`,
     live === "down" ? "down" : "hazard",
   );
 }

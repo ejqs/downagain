@@ -68,6 +68,8 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://www.netlifystatus.com",
     sourceKind: "statuspage",
     sourceUrl: "https://www.netlifystatus.com",
+    // An AI agent product on the same page, not hosting.
+    surfaces: { "Agent Runners": "peripheral" },
   },
   {
     slug: "render",
@@ -146,7 +148,8 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://status.claude.com",
     sourceKind: "statuspage",
     sourceUrl: "https://status.claude.com",
-    surfaces: { "Claude Code": "ship" },
+    // Like ChatGPT and Codex on OpenAI's page: Anthropic's own apps, not the API.
+    surfaces: { "claude.ai": "peripheral", "Claude Code": "peripheral", "Claude Cowork": "peripheral" },
   },
   {
     slug: "groq",
@@ -167,16 +170,6 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://status.cohere.com",
     sourceKind: "statuspage",
     sourceUrl: "https://status.cohere.com",
-  },
-  {
-    slug: "replicate",
-    name: "Replicate",
-    category: "ai",
-    kind: "Model hosting",
-    homepageUrl: "https://replicate.com",
-    statusPageUrl: "https://www.replicatestatus.com",
-    sourceKind: "statuspage",
-    sourceUrl: "https://www.replicatestatus.com",
   },
 
   // Cloud. None of the three uses Statuspage, and all three only post incidents
@@ -253,8 +246,8 @@ export const PROVIDERS: ProviderSeed[] = [
     sourceKind: "statuspage",
     sourceUrl: "https://status.mongodb.com",
     verified: "2026-10-22",
-    // "MongoDB Cloud" is the Atlas UI and Admin API, not the clusters.
-    surfaces: { "MongoDB Cloud": "manage" },
+    // "MongoDB Cloud" is the umbrella for clusters and the Admin API alike, so it says
+    // little on its own; the rules read it as data and Claude reads the text.
   },
   {
     slug: "upstash",

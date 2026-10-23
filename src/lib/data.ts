@@ -4,11 +4,12 @@
 import { unstable_cache } from "next/cache";
 import { and, asc, desc, eq, gte, inArray, isNotNull, or, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { categories, incidentReviews, incidentUpdates, incidents, providerStatus, providers } from "@/db/schema";
+import { categories, incidentReviews, incidentUpdates, incidents, providerStatus, providers, statusChanges } from "@/db/schema";
 import type { Status } from "@/lib/types";
 import type { Area } from "@/lib/severity";
 import { httpUrl } from "@/lib/format";
 import { staleEnd } from "@/lib/grading";
+import { dropBareTwins } from "@/lib/status";
 
 const SAFETY_NET_SECONDS = 600;
 const DAY = 86_400_000;
@@ -31,6 +32,8 @@ export interface ProviderRow {
   statusPageUrl: string;
   homepageUrl: string | null;
   historyFrom: number | null;
+  /** First poll. With historyFrom, where the data we hold starts (see coveredDays). */
+  trackedFrom?: number | null;
   status: Status;
   since: number | null;
   lastCheckedAt: number | null;
@@ -111,8 +114,8 @@ export function toIncidentRow(r: IncidentSelect, now = Date.now()): IncidentRow 
   return {
     ...rest,
     url: httpUrl(r.url),
-    // Some status pages list a component once per group it sits in.
-    components: [...new Set(r.components ?? [])],
+    // Some status pages list a component once per group it sits in, or bare and grouped.
+    components: dropBareTwins(r.components ?? []),
     startedAt,
     monitoringAt: ms(r.monitoringAt),
     resolvedAt: ms(r.resolvedAt) ?? end,
@@ -147,6 +150,15 @@ async function readSnapshot(): Promise<Snapshot> {
         .orderBy(desc(incidents.startedAt))
     : [];
 
+  const firstPolls = ids.length
+    ? await database
+        .select({ providerId: statusChanges.providerId, at: sql<Date | string>`min(${statusChanges.changedAt})` })
+        .from(statusChanges)
+        .where(inArray(statusChanges.providerId, ids))
+        .groupBy(statusChanges.providerId)
+    : [];
+  const trackedFrom = new Map(firstPolls.map((r) => [r.providerId, new Date(r.at).getTime()]));
+
   return {
     generatedAt: Date.now(),
     categories: cats,
@@ -160,6 +172,7 @@ async function readSnapshot(): Promise<Snapshot> {
       statusPageUrl: p.statusPageUrl,
       homepageUrl: p.homepageUrl,
       historyFrom: ms(p.historyFrom),
+      trackedFrom: trackedFrom.get(p.id) ?? null,
       status: s.status,
       since: ms(s.since),
       lastCheckedAt: ms(s.lastCheckedAt),

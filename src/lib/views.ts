@@ -1,5 +1,5 @@
 // Pure functions that turn the cached snapshot into what each page shows.
-import { durationMinutes, effectiveTier, gradeRank, penaltyMinutes, score, windowBounds, type GradeInput, type Score } from "@/lib/grading";
+import { durationMinutes, effectiveTier, gradeRank, MAX_SHOWN_DAYS, penaltyMinutes, score, shownEnd, windowBounds, type GradeInput, type Score } from "@/lib/grading";
 import { SECURITY_PENALTY, TIER_WEIGHT } from "@/lib/severity";
 import { PRICES, monthlyUsd, valueFrontier, type Price } from "@/lib/pricing";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
@@ -23,6 +23,30 @@ export function gradeInput(i: IncidentRow): GradeInput {
 }
 
 export const tierOf = (i: IncidentRow) => effectiveTier(i);
+
+/** Below this many days of data a provider gets no grade: an empty feed isn't an A+. */
+export const MIN_GRADED_DAYS = 14;
+
+/**
+ * Days of the window our data covers: from the older of the first poll and the oldest
+ * incident we hold. Feeds that only list open incidents (Azure) or the last 25 to 50
+ * (busy Statuspage and incident.io pages) start short of 90 and fill in as we poll.
+ */
+export function coveredDays(p: Pick<ProviderRow, "historyFrom" | "trackedFrom">, now: number, days = 90): number {
+  const from = dataFrom(p);
+  // Never polled is never shown, so null only means we can't tell: assume the full window.
+  return from == null ? days : Math.max(0, Math.min(days, Math.floor((now - from) / DAY)));
+}
+
+/** Where the data we hold for a provider starts, or null if we know nothing yet. */
+export function dataFrom(p: Pick<ProviderRow, "historyFrom" | "trackedFrom">): number | null {
+  const starts = [p.historyFrom, p.trackedFrom].filter((t): t is number => t != null);
+  return starts.length ? Math.min(...starts) : null;
+}
+
+export function isGraded(p: Pick<ProviderRow, "historyFrom" | "trackedFrom">, now: number): boolean {
+  return coveredDays(p, now) >= MIN_GRADED_DAYS;
+}
 
 export function incidentsFor(snap: Snapshot, providerId: number): IncidentRow[] {
   return snap.incidents.filter((i) => i.providerId === providerId);
@@ -50,7 +74,7 @@ export function dailyCells(list: IncidentRow[], days: number, now: number, since
     for (const i of list) {
       const t = tierOf(i);
       if (t === 0) continue;
-      if (i.startedAt < end && (i.resolvedAt ?? now) >= start) worst = Math.min(worst, t);
+      if (i.startedAt < end && shownEnd(gradeInput(i), now) >= start) worst = Math.min(worst, t);
     }
     cells.push(worst <= 2 ? "major" : worst <= 4 ? "minor" : "up");
   }
@@ -68,7 +92,7 @@ export interface DayLoad {
 /** Trouble per UTC day across every incident given, oldest first. */
 export function dailyLoad(list: IncidentRow[], days: number, now: number): DayLoad[] {
   const today = Math.floor(now / DAY) * DAY;
-  const long = (i: IncidentRow) => (i.resolvedAt ?? now) - i.startedAt;
+  const long = (i: IncidentRow) => shownEnd(gradeInput(i), now) - i.startedAt;
   const out: DayLoad[] = [];
   for (let d = days - 1; d >= 0; d--) {
     const start = today - d * DAY;
@@ -76,7 +100,7 @@ export function dailyLoad(list: IncidentRow[], days: number, now: number): DayLo
     const cell: DayLoad = { day: start, points: 0, incidents: 0, worst: 5, top: null };
     for (const i of list) {
       const t = tierOf(i);
-      if (t === 0 || i.startedAt >= start + DAY || (i.resolvedAt ?? now) < start) continue;
+      if (t === 0 || i.startedAt >= start + DAY || shownEnd(gradeInput(i), now) < start) continue;
       cell.incidents++;
       if (t < cell.worst || (t === cell.worst && cell.top && long(i) > long(cell.top))) cell.top = i;
       cell.worst = Math.min(cell.worst, t);
@@ -103,7 +127,7 @@ export function openIncidents(list: IncidentRow[]): IncidentRow[] {
  * open (a region written off for months, a page nobody closed) is history, not news,
  * so it stays out of "Happening now".
  */
-export const LIVE_DAYS = 7;
+export const LIVE_DAYS = MAX_SHOWN_DAYS;
 export function liveIncidents(list: IncidentRow[], now: number): IncidentRow[] {
   return openIncidents(list).filter((i) => i.startedAt >= now - LIVE_DAYS * 86_400_000);
 }
@@ -185,6 +209,10 @@ export interface BoardRow {
   cells: DayCell[];
   /** Live tag, if the provider is in the down-right-now banner. */
   live: LiveLevel | null;
+  /** Days of the 90-day window our data covers. */
+  covered: number;
+  /** False when there's too little data to grade or rank. */
+  graded: boolean;
 }
 
 export function leaderboard(snap: Snapshot, category: string, sort: "worst" | "best" = "worst"): BoardRow[] {
@@ -194,11 +222,15 @@ export function leaderboard(snap: Snapshot, category: string, sort: "worst" | "b
     .map((p) => ({
       provider: p,
       score: scoreFor(snap, p.id),
-      cells: dailyCells(incidentsFor(snap, p.id), 60, snap.generatedAt, p.historyFrom),
+      cells: dailyCells(incidentsFor(snap, p.id), 60, snap.generatedAt, dataFrom(p)),
       live: live.get(p.id) ?? null,
+      covered: coveredDays(p, snap.generatedAt),
+      graded: isGraded(p, snap.generatedAt),
     }));
   rows.sort((a, b) => b.score.points - a.score.points || a.score.admittedUptime - b.score.admittedUptime || a.provider.name.localeCompare(b.provider.name));
-  return sort === "best" ? rows.reverse() : rows;
+  const ranked = rows.filter((r) => r.graded);
+  // Too little data to rank: listed after everyone else, whichever way the board is sorted.
+  return [...(sort === "best" ? ranked.reverse() : ranked), ...rows.filter((r) => !r.graded)];
 }
 
 export function totals(snap: Snapshot, days = 90) {
@@ -302,7 +334,10 @@ export function valueBoard(snap: Snapshot, category: string): ValueRow[] {
     const score = scoreFor(snap, p.id);
     return { provider: p, score, price, usd: monthlyUsd(price) };
   });
-  const frontier = valueFrontier(rows.map((r) => ({ id: r.provider.slug, usd: r.usd, gradeRank: gradeRank(r.score.grade) })));
+  // No grade, no place on the frontier.
+  const frontier = valueFrontier(
+    rows.map((r) => ({ id: r.provider.slug, usd: isGraded(r.provider, snap.generatedAt) ? r.usd : null, gradeRank: gradeRank(r.score.grade) })),
+  );
   return rows
     .map((r) => {
       const v = frontier[r.provider.slug];

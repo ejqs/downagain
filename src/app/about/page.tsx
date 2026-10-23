@@ -122,8 +122,12 @@ export default function About() {
         </div>
         <p>
           Two area grades use the same scale. <strong>PROD</strong>: your users are hit. <strong>SHIP</strong>: you can&apos;t deploy, build or
-          manage, including dashboard, auth and billing outages. Papercuts count toward the overall grade only. <strong>Admitted uptime</strong> counts only Sev 1 time the provider posted
+          manage, including dashboard, auth and billing outages. Papercuts count toward the overall grade only. <strong>Admitted uptime</strong> counts only widespread Sev 1 time the provider posted
           itself, so it&apos;s a best case. Providers grade their own homework; we just add it up.
+        </p>
+        <p>
+          Some feeds only list open incidents or the last few dozen, so history starts when we started polling. Under 14 days of data gets no grade
+          and sits at the bottom. Under 90 days shows how many days the grade covers. Incidents left open for months paint the strips for a week, then stop.
         </p>
 
         <h2 className="h2" id="cost">Cost and bang for buck</h2>

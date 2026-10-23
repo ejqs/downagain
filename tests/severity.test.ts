@@ -27,6 +27,11 @@ describe("surfaceForComponent", () => {
     expect(surfaceForComponent("Claude API (api.anthropic.com)", undefined, "ai")).toBe("serving");
   });
 
+  it("applies an override to the grouped name too", () => {
+    const o = new Map([["Agent Runners", "peripheral" as const]]);
+    expect(surfaceForComponent("Netlify Platform - Agent Runners", o, "hosting")).toBe("peripheral");
+  });
+
   it("lets overrides win", () => {
     expect(surfaceForComponent("Live", new Map([["Live", "peripheral"]]))).toBe("peripheral");
   });

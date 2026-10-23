@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ProviderRow, Snapshot } from "@/lib/data";
-import { communication, incidentsFor, monthlyTrend, scoreFor, valueBoard, type ValueRow } from "@/lib/views";
+import { communication, incidentsFor, isGraded, monthlyTrend, scoreFor, valueBoard, type ValueRow } from "@/lib/views";
 import { WORKLOADS, isPriced } from "@/lib/pricing";
 import { priceText } from "@/components/Value";
 import { fmtDuration, fmtPct } from "@/lib/format";
@@ -15,6 +15,7 @@ interface Col {
   p: ProviderRow;
   s30: Score;
   s90: Score;
+  graded: boolean;
   s1y: Score;
   trend: { count: number }[];
   comms: ReturnType<typeof communication>;
@@ -53,6 +54,7 @@ export function Comparison({ snap, slugs, heading }: { snap: Snapshot; slugs: st
       p,
       s30: scoreFor(snap, p.id, 30),
       s90: scoreFor(snap, p.id, 90),
+      graded: isGraded(p, now),
       s1y: scoreFor(snap, p.id, 365),
       trend: monthlyTrend(list, now),
       comms: communication(list.filter((i) => i.startedAt >= now - 90 * 86_400_000), {}),
@@ -105,9 +107,9 @@ export function Comparison({ snap, slugs, heading }: { snap: Snapshot; slugs: st
           <section className="stack" style={{ ["--gap" as string]: "8px" }}>
             <h2 className="h2">Grades (90 days)</h2>
             <div className="box">
-              <Row hint={GLOSSARY.grade} label="Overall" cells={cols.map((c) => ({ text: `${c.s90.grade} · ${c.s90.points.toLocaleString("en-US")} pts`, value: c.s90.points }))} better="low" />
+              <Row hint={GLOSSARY.grade} label="Overall" cells={cols.map((c) => (c.graded ? { text: `${c.s90.grade} · ${c.s90.points.toLocaleString("en-US")} pts`, value: c.s90.points } : { text: "–", value: null }))} better="low" />
               {areas.map((a) => (
-                <Row key={a} hint={GLOSSARY[a]} label={AREA_LABEL[a]} cells={cols.map((c) => ({ text: c.s90.areas[a].grade, value: Math.round(c.s90.areas[a].points) }))} better="low" />
+                <Row key={a} hint={GLOSSARY[a]} label={AREA_LABEL[a]} cells={cols.map((c) => (c.graded ? { text: c.s90.areas[a].grade, value: Math.round(c.s90.areas[a].points) } : { text: "–", value: null }))} better="low" />
               ))}
             </div>
           </section>

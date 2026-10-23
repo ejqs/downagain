@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProviderHistory, safeSnapshot, type IncidentRow, type ProviderRow, type ReviewTrace } from "@/lib/data";
-import { brokenComponents, communication, dailyCells, downNow, incidentsFor, liveIncidents, monthlyTrend, scoreFor, startHeatmap, tierOf, topComponents, valueBoard } from "@/lib/views";
+import { brokenComponents, communication, coveredDays, dataFrom, isGraded, dailyCells, downNow, incidentsFor, liveIncidents, monthlyTrend, scoreFor, startHeatmap, tierOf, topComponents, valueBoard } from "@/lib/views";
 import { WORKLOADS, checkedMs, fmtUsd, isStale } from "@/lib/pricing";
 import { durationMinutes, penaltyMinutes } from "@/lib/grading";
 import { fmtAgo, fmtDate, fmtDuration, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
@@ -44,7 +44,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return pageMeta({
     // People search "is OpenAI down", not "is OpenAI API down".
     title: `Is ${brand(p.name)} down? ${brand(p.name) === p.name ? "Live" : p.name} status and outage history`,
-    description: `${now} Grade ${s.grade} over the last 90 days: ${plural(s.incidentCount, "incident")}, ${fmtPct(s.admittedUptime)} admitted uptime.`,
+    description: isGraded(p, snap.generatedAt)
+      ? `${now} Grade ${s.grade} over the last 90 days: ${plural(s.incidentCount, "incident")}, ${fmtPct(s.admittedUptime)} admitted uptime.`
+      : `${now} Not enough history to grade yet.`,
     path: `/p/${p.slug}`,
   });
 }
@@ -190,6 +192,8 @@ export default async function ProviderPage({ params, searchParams }: Props) {
   const s90 = win === "90d" ? s : scoreFor(snap, p.id, 90);
   const list = incidentsFor(snap, p.id);
   const now = snap.generatedAt;
+  const covered = coveredDays(p, now);
+  const graded = isGraded(p, now);
   const yearList = list.filter((i) => i.startedAt >= now - 365 * 86_400_000);
   const open = liveIncidents(list, now);
   const down = downNow(snap).find((d) => d.provider.id === p.id);
@@ -265,7 +269,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             )}
           </div>
           <p className="body" style={{ fontSize: 17 }}>
-            {p.historyFrom ? `Since ${fmtMonth(p.historyFrom)}` : "New"} · {plural(history?.total ?? list.length, "incident")} · {new URL(p.statusPageUrl).host}
+            {dataFrom(p) ? `Since ${fmtMonth(dataFrom(p)!)}` : "New"} · {plural(history?.total ?? list.length, "incident")} · {new URL(p.statusPageUrl).host}
             {p.lastCheckedAt ? ` · checked ${fmtAgo(p.lastCheckedAt, now)}` : ""}
           </p>
           <div className="row" style={{ ["--gap" as string]: "8px", marginTop: 4 }}>
@@ -275,14 +279,14 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             <a className="btn" href={p.statusPageUrl} data-umami-event="status-page-outbound">Status page</a>
           </div>
         </div>
-        <div className={`big-grade g-${s90.grade === "A+" ? "Ap" : s90.grade}`}>
+        <div className={`big-grade g-${!graded ? "none" : s90.grade === "A+" ? "Ap" : s90.grade}`}>
           <span className="eyebrow" style={{ letterSpacing: "0.1em" }}>Grade</span>
-          <span className="letter">{s90.grade}</span>
-          <span className="mono" style={{ fontSize: 13, fontWeight: 700 }}>Last 90 days</span>
+          <span className="letter">{graded ? s90.grade : "–"}</span>
+          <span className="mono" style={{ fontSize: 13, fontWeight: 700 }}>{graded ? `Last ${covered} days` : `${plural(covered, "day")} of data`}</span>
           <div className="row" style={{ ["--gap" as string]: "8px", marginTop: 10 }}>
             {AREAS.map((a) => (
               <span key={a} className="stack" style={{ alignItems: "center", ["--gap" as string]: "2px" }}>
-                <GradeTile grade={s90.areas[a].grade} size="md" label={`${AREA_LABEL[a]} grade ${s90.areas[a].grade}`} />
+                <GradeTile grade={graded ? s90.areas[a].grade : null} size="md" label={`${AREA_LABEL[a]} grade ${s90.areas[a].grade}`} />
                 <span className="mono" style={{ fontSize: 11, fontWeight: 700 }}>{AREA_SHORT[a]}</span>
               </span>
             ))}
@@ -355,7 +359,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
                     <div className="metric"><b>{s.areas[a].incidents}</b><span>INCIDENTS</span></div>
                     <div className="metric"><b>{fmtDuration(s.areas[a].downtimeMinutes)}</b><span>AFFECTED</span></div>
                   </div>
-                  <DayStrip cells={dailyCells(areaList, 60, now, p.historyFrom)} label={`${AREA_LABEL[a]}, last 60 days`} short />
+                  <DayStrip cells={dailyCells(areaList, 60, now, dataFrom(p))} label={`${AREA_LABEL[a]}, last 60 days`} short />
                 </summary>
                 <div className="area-more stack">
                   <span className="muted" style={{ fontSize: 14 }}>{AREA_BLURB[a]}</span>
