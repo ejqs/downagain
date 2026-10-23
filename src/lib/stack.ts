@@ -79,7 +79,9 @@ export const pickParam = (p: StackPick) => `${p.slug}${p.parts.length ? `:${p.pa
 export function stackHref(picks: StackPick[], extra: Record<string, string> = {}): string {
   const qs = [
     ...picks.map((p) => `u=${pickParam(p)}`),
-    ...Object.entries(extra).map(([k, v]) => `${k}=${encodeURIComponent(v)}`),
+    ...Object.entries(extra)
+      .filter(([, v]) => v)
+      .map(([k, v]) => `${k}=${encodeURIComponent(v).replace(/%2C/g, ",")}`),
   ];
   return `/stack${qs.length ? `?${qs.join("&")}` : ""}`;
 }

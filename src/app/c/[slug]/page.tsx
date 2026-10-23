@@ -48,7 +48,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           ],
         }}
       />
-      <Board snap={view} category={slug} sort={q.sort === "best" ? "best" : "worst"} basePath={`/c/${slug}`} heading="h1" filter={filter} />
+      <Board snap={view} category={slug} sort={q.sort === "best" ? "best" : "worst"} basePath={`/c/${slug}`} heading="h1" filter={filter} raw={snap} />
       <ValueBoard snap={view} category={slug} />
       <AlsoTracking snap={snap} current={slug} />
     </main>

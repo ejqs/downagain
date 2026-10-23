@@ -288,3 +288,16 @@ describe("coverage", () => {
     expect(rows.find((r) => r.provider.slug === "aws")!.bestValue).toBe(true);
   });
 });
+
+describe("gradeCauses", () => {
+  it("ranks incidents by the points they cost, with their share", async () => {
+    const { gradeCauses } = await import("@/lib/views");
+    const long = inc(1, { title: "long", startedAt: ago(5), resolvedAt: ago(5) + 3 * 3_600_000 });
+    const short = inc(1, { title: "short", startedAt: ago(3), resolvedAt: ago(3) + 3_600_000 });
+    const old = inc(1, { title: "old", startedAt: ago(120) });
+    const c = gradeCauses(snap([prov(1)], [short, long, old]), 1, 1);
+    expect(c.top.map((x) => x.incident.title)).toEqual(["long"]);
+    expect(c.top[0].share).toBeCloseTo(0.75);
+    expect(c.rest).toBe(1);
+  });
+});

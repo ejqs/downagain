@@ -22,14 +22,16 @@ export function SevPill({ tier, security, long }: { tier: number; security?: boo
   );
 }
 
-export function DayStrip({ cells, label, short }: { cells: DayCell[]; label: string; short?: boolean }) {
+/** A row of days. With tips, each troubled day explains itself on hover or tap. */
+export function DayStrip({ cells, label, short, tips }: { cells: DayCell[]; label: string; short?: boolean; tips?: (string | null)[] }) {
   const bad = cells.filter((c) => c === "major").length;
   const minor = cells.filter((c) => c === "minor").length;
   return (
     <div className={`strip ${short ? "short" : ""}`} role="img" aria-label={`${label}: ${bad} days with production trouble, ${minor} days with smaller incidents, out of ${cells.length}`}>
-      {cells.map((c, i) => (
-        <span key={i} className={`c-${c}`} />
-      ))}
+      {cells.map((c, i) => {
+        const tip = tips?.[i];
+        return tip ? <span key={i} className={`c-${c}`} data-tip={tip} tabIndex={c === "up" ? -1 : 0} aria-label={tip} /> : <span key={i} className={`c-${c}`} />;
+      })}
     </div>
   );
 }

@@ -120,6 +120,11 @@ export function filterQuery(f: NeedFilter): string {
   return qs.join("&");
 }
 
+/** The filter as query params, empty ones left out. */
+export function filterParams(f: NeedFilter): Record<string, string> {
+  return Object.fromEntries(new URLSearchParams(filterQuery(f)));
+}
+
 export const withQuery = (path: string, ...parts: string[]) => {
   const q = parts.filter(Boolean).join("&");
   return q ? `${path}?${q}` : path;
