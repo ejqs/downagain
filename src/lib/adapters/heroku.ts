@@ -46,7 +46,9 @@ export function normalizeHkIncident(i: HkIncident): NormalizedIncident {
     .map((u) => ({ externalId: String(u.id), status: u.update_type, body: u.contents ?? "", postedAt: new Date(u.created_at) }))
     .sort((a, b) => a.postedAt.getTime() - b.postedAt.getTime());
   const worst = worstStatus((i.systems ?? []).map((s) => mapHkStatus(s.status)));
-  const resolved = i.resolved || Boolean(i.resolved_at);
+  // Past incidents often carry neither resolved nor resolved_at; a "resolved" update
+  // (not always the last one, and not always after "investigating") closes them.
+  const resolved = Boolean(i.resolved || i.resolved_at || i.state === "resolved" || updates.some((u) => u.status === "resolved"));
   return {
     externalId: String(i.id),
     title: i.title,
@@ -54,7 +56,7 @@ export function normalizeHkIncident(i: HkIncident): NormalizedIncident {
     status: resolved ? "resolved" : (updates.at(-1)?.status ?? "investigating"),
     startedAt: new Date(i.created_at),
     monitoringAt: updates.find((u) => u.status === "monitoring")?.postedAt ?? null,
-    // Older incidents carry resolved: true without resolved_at; the last update is the close.
+    // Without resolved_at, the last update is the close.
     resolvedAt: i.resolved_at ? new Date(i.resolved_at) : resolved ? (updates.at(-1)?.postedAt ?? new Date(i.updated_at ?? i.created_at)) : null,
     sourceUpdatedAt: i.updated_at ? new Date(i.updated_at) : null,
     url: i.full_url ?? null,
@@ -72,8 +74,10 @@ export async function fetchHeroku(base: string, _pageUrl: string, get: Getter): 
   const root = base.replace(/\/$/, "");
   const [res, historyRes] = await Promise.all([
     get(`${root}/api/v4/current-status`),
-    // History is a bonus: without it the board still shows what's open now.
-    get(`${root}/api/v4/incidents?per_page=${HISTORY_SIZE}`).catch((e: Error) => {
+    // History is a bonus: without it the board still shows what's open now. Always
+    // fetched whole: a 304 here would leave only open incidents in the snapshot, and
+    // the poller closes anything open that a snapshot leaves out.
+    get(`${root}/api/v4/incidents?per_page=${HISTORY_SIZE}`, { fresh: true }).catch((e: Error) => {
       console.warn(`heroku incidents: ${e.message}`);
       return null;
     }),
