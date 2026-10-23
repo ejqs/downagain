@@ -12,7 +12,7 @@ type Props = { searchParams: Promise<{ p?: string; a?: string; b?: string; c?: s
 
 export const metadata: Metadata = pageMeta({
   title: "Compare uptime",
-  description: "Hosting platforms, clouds, databases and AI APIs side by side: grades, admitted uptime, incidents, time to fix and cost.",
+  description: "Hosting platforms, clouds, databases, dev tools and APIs side by side: grades, admitted uptime, incidents, time to fix and cost.",
   path: "/compare",
 });
 

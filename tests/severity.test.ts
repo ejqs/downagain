@@ -203,3 +203,48 @@ describe("dev tools", () => {
     expect(c.areaTiers).toEqual({ shipping: 2 });
   });
 });
+
+describe("dev APIs", () => {
+  it.each([
+    ["Single Email", "serving"],
+    ["SMTP", "serving"],
+    ["Webhooks", "serving"],
+    ["Authentication & User", "serving"],
+    ["SMS, Latin America", "serving"],
+    ["Media Delivery", "serving"],
+    ["Upload API - EU", "serving"],
+    ["Admin API - US", "ship"],
+    ["API - Sandbox", "ship"],
+    ["Platform API", "ship"],
+    ["Ably Control API", "ship"],
+    ["Events & Logs", "ship"],
+    ["Debugger & Alarms", "ship"],
+    ["Toll-Free Verification Portal", "ship"],
+    ["Dashboard", "manage"],
+    ["Control Panel", "manage"],
+    ["Console", "manage"],
+    ["Billing", "manage"],
+    ["Accounts", "manage"],
+    ["Website", "peripheral"],
+    ["Documentation", "peripheral"],
+    ["Stats and Analytics", "peripheral"],
+    ["Marketing Website", "peripheral"],
+  ])("%s is %s", (name, surface) => {
+    expect(surfaceForComponent(name, undefined, "apis")).toBe(surface);
+  });
+
+  const api = { ...base, categorySlug: "apis" };
+  it("counts an email sending outage against PROD", () => {
+    const c = classify({ ...api, title: "Resend API with elevated error rate", impact: "minor", components: [] });
+    expect(c.areaTiers).toEqual({ production: 2 });
+  });
+  it("counts a dashboard outage against SHIP, not PROD", () => {
+    const c = classify({ ...api, title: "Seller dashboard logins are failing with timeouts", impact: "minor", components: [] });
+    expect(c.surfaces).toEqual(["manage"]);
+    expect(c.areaTiers.production).toBeUndefined();
+  });
+  it("reads Clerk Billing as production through its override", () => {
+    const c = classify({ ...api, title: "Billing errors", impact: "major", components: ["Billing"] }, new Map([["Billing", "serving" as const]]));
+    expect(c.areaTiers).toEqual({ production: 1 });
+  });
+});

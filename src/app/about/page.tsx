@@ -20,7 +20,7 @@ const DATASET_LD = {
   "@type": "Dataset",
   name: "Hosting, cloud, database and AI API incident history",
   description:
-    "Incidents posted on the official status pages of hosting platforms, clouds, databases and AI APIs, polled every 5 minutes, with a severity tier, duration and 90-day grade for each provider.",
+    "Incidents posted on the official status pages of hosting platforms, clouds, databases, dev tools and APIs, polled every 5 minutes, with a severity tier, duration and 90-day grade for each provider.",
   url: absUrl("/about"),
   creator: { "@type": "Person", name: "ejqs", url: "https://ejqs.net" },
   includedInDataCatalog: { "@type": "DataCatalog", name: SITE_NAME, url: `${SITE}/` },

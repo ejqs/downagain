@@ -1,4 +1,4 @@
-// The tracked list: Hosting, AI, Cloud, Databases, Dev tools. Adding a provider is a new entry here,
+// The tracked list: Hosting, AI, Cloud, Databases, Dev tools, Dev APIs. Adding a provider is a new entry here,
 // then `bun run db:seed` and `bun run backfill --provider <slug>`.
 //
 // A provider only appears on the site once its status source has answered at
@@ -35,6 +35,7 @@ export const CATEGORIES: CategorySeed[] = [
   { slug: "cloud", name: "Cloud", sortOrder: 3 },
   { slug: "databases", name: "Databases", sortOrder: 4 },
   { slug: "devtools", name: "Dev tools", sortOrder: 5 },
+  { slug: "apis", name: "Dev APIs", sortOrder: 6 },
 ];
 
 export const PROVIDERS: ProviderSeed[] = [
@@ -304,5 +305,187 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://www.dockerstatus.com",
     sourceKind: "statuspage",
     sourceUrl: "https://www.dockerstatus.com",
+  },
+
+  // Dev APIs: email, auth, payments, messaging and media APIs that run inside the
+  // customer's app, so nearly all PROD. Rules are in severity.ts (API_SURFACE_RULES).
+  // Left out for now: Stripe (status.stripe.com has no incident feed; /current is
+  // frozen in 2024), Postmark (Sorry app, HTML only), Auth0 (custom page), Stytch
+  // and Kinde (Instatus, RSS only). SendGrid is on Twilio's page, so it counts there.
+  // incident.io pages (Resend, Clerk, Paddle, Plaid, Inngest, MailerSend) list no
+  // components on incidents, so their grades come from titles and Claude.
+  {
+    slug: "resend",
+    name: "Resend",
+    category: "apis",
+    kind: "Email API",
+    homepageUrl: "https://resend.com",
+    statusPageUrl: "https://resend-status.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://resend-status.com",
+    verified: "2026-10-23",
+    surfaces: { "MCP Server": "peripheral" },
+  },
+  {
+    slug: "mailgun",
+    name: "Mailgun",
+    category: "apis",
+    kind: "Email API",
+    homepageUrl: "https://www.mailgun.com",
+    statusPageUrl: "https://status.mailgun.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.mailgun.com",
+    verified: "2026-10-23",
+    // Deliverability tools a developer checks by hand; nothing sends through them.
+    surfaces: { "Inbox Placement": "peripheral", "Spam Trap Network": "peripheral", "Email Previews": "peripheral" },
+  },
+  {
+    slug: "mailersend",
+    name: "MailerSend",
+    category: "apis",
+    kind: "Email API",
+    homepageUrl: "https://www.mailersend.com",
+    statusPageUrl: "https://status.mailersend.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.mailersend.com",
+    verified: "2026-10-23",
+    surfaces: { "MailerSend APP": "manage" },
+  },
+  {
+    slug: "loops",
+    name: "Loops",
+    category: "apis",
+    kind: "Email API",
+    homepageUrl: "https://loops.so",
+    statusPageUrl: "https://status.loops.so",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.loops.so",
+    verified: "2026-10-23",
+    // app.loops.so, the dashboard.
+    surfaces: { App: "manage" },
+  },
+  {
+    slug: "clerk",
+    name: "Clerk",
+    category: "apis",
+    kind: "Auth",
+    homepageUrl: "https://clerk.com",
+    statusPageUrl: "https://status.clerk.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.clerk.com",
+    verified: "2026-10-23",
+    // The sign-in pages and subscriptions Clerk serves to the customer's own users.
+    surfaces: { "Hosted UIs (Account Portal)": "serving", Billing: "serving" },
+  },
+  {
+    slug: "workos",
+    name: "WorkOS",
+    category: "apis",
+    kind: "Auth",
+    homepageUrl: "https://workos.com",
+    statusPageUrl: "https://status.workos.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.workos.com",
+    verified: "2026-10-23",
+    // The Admin Portal is where the customer's own customers set up SSO; Audit Logs is an API product.
+    surfaces: { "Admin Portal": "serving", "Audit Logs": "serving" },
+  },
+  {
+    slug: "paddle",
+    name: "Paddle",
+    category: "apis",
+    kind: "Payments",
+    homepageUrl: "https://www.paddle.com",
+    statusPageUrl: "https://paddlestatus.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://paddlestatus.com",
+    verified: "2026-10-23",
+    // Paddle Billing is the product here, not Paddle's invoice to the customer.
+    surfaces: { "Production - Billing": "serving", "Production - Classic": "serving" },
+  },
+  {
+    slug: "plaid",
+    name: "Plaid",
+    category: "apis",
+    kind: "Banking API",
+    homepageUrl: "https://plaid.com",
+    statusPageUrl: "https://status.plaid.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.plaid.com",
+    verified: "2026-10-23",
+  },
+  {
+    slug: "twilio",
+    name: "Twilio",
+    category: "apis",
+    kind: "SMS, voice and SendGrid email",
+    homepageUrl: "https://www.twilio.com",
+    statusPageUrl: "https://status.twilio.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.twilio.com",
+    verified: "2026-10-23",
+    surfaces: { "Zipwhip Support Ticketing": "peripheral" },
+  },
+  {
+    slug: "ably",
+    name: "Ably",
+    category: "apis",
+    kind: "Realtime messaging",
+    homepageUrl: "https://ably.com",
+    statusPageUrl: "https://status.ably.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.ably.com",
+    verified: "2026-10-23",
+  },
+  {
+    slug: "pusher",
+    name: "Pusher",
+    category: "apis",
+    kind: "Realtime messaging",
+    homepageUrl: "https://pusher.com",
+    statusPageUrl: "https://status.pusher.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.pusher.com",
+    verified: "2026-10-23",
+    // Pusher's own billing, not a payments product.
+    surfaces: { "Payment API": "manage" },
+  },
+  {
+    slug: "inngest",
+    name: "Inngest",
+    category: "apis",
+    kind: "Background jobs",
+    homepageUrl: "https://www.inngest.com",
+    statusPageUrl: "https://status.inngest.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.inngest.com",
+    verified: "2026-10-23",
+    // The management API; events and function runs are "Event API" and "Function execution".
+    surfaces: { "API (REST and GraphQL)": "ship" },
+  },
+  {
+    slug: "cloudinary",
+    name: "Cloudinary",
+    category: "apis",
+    kind: "Media API",
+    homepageUrl: "https://cloudinary.com",
+    statusPageUrl: "https://status.cloudinary.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.cloudinary.com",
+    verified: "2026-10-23",
+    // Cloudinary's own notification emails.
+    surfaces: { Emails: "peripheral" },
+  },
+  {
+    slug: "mapbox",
+    name: "Mapbox",
+    category: "apis",
+    kind: "Maps API",
+    homepageUrl: "https://www.mapbox.com",
+    statusPageUrl: "https://status.mapbox.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.mapbox.com",
+    verified: "2026-10-23",
+    surfaces: { Contribute: "peripheral", Atlas: "peripheral" },
   },
 ];

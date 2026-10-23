@@ -4,7 +4,7 @@ import { BRAND } from "@/lib/site";
 import { DISPLAY, MONO, OG_SIZE, cachedCard, card } from "@/lib/og";
 
 export const dynamic = "force-dynamic";
-export const alt = "downagain.dev: Is it down again? Live status and track records for hosting platforms, clouds, databases and AI APIs.";
+export const alt = "downagain.dev: Is it down again? Live status and track records for hosting platforms, clouds, databases, dev tools and APIs.";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 

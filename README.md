@@ -5,7 +5,7 @@
 **Is it down again?** Live status and 90-day track records for the hosting platforms, clouds and AI APIs your apps run on, pulled from each provider's own public status page.
 
 - A **down right now** banner on every page.
-- A leaderboard per category (Hosting first, then AI APIs, Cloud, Databases and Dev tools), graded A+ to F on the same 90-day window for everyone.
+- A leaderboard per category (Hosting first, then AI APIs, Cloud, Databases, Dev tools and Dev APIs), graded A+ to F on the same 90-day window for everyone.
 - Provider pages with admitted uptime for 30d / 90d / 1y, PROD and SHIP area grades, severity mix, 12-month trend, when incidents start, what breaks, how the provider communicates, full incident history, peers and a README badge.
 - Filters for what you use (Postgres, storage, a region...) on every leaderboard, and a `/stack` page with its own README badge.
 - An incident feed, a head-to-head compare page and a public `/api/status.json`.
@@ -81,7 +81,7 @@ See `.claude/skills/downagain/SKILL.md`. In short: confirm the status API format
 ## Not yet built
 
 - The status-page history crawler for incidents older than what the APIs return.
-- Dev tools and other categories.
+- Dev APIs without a Statuspage-compatible feed: Stripe, Postmark, Auth0, and Instatus pages (Stytch, Kinde).
 - Azure's incident history: its RSS only lists open incidents, so older ones need the history crawler.
 - Alerts by email.
 - Share-card images.

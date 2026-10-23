@@ -19,7 +19,7 @@ import type { Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
 import { isLocation } from "@/lib/status";
 
-export const CLASSIFIER_VERSION = 7;
+export const CLASSIFIER_VERSION = 8;
 
 // manage: dashboard, console, auth, billing. peripheral: docs, status page, consumer apps.
 export type Surface = "serving" | "data" | "ship" | "manage" | "peripheral";
@@ -135,6 +135,18 @@ const DEVTOOLS_SURFACE_RULES: [Surface, RegExp][] = [
   ["ship", /git|actions|pull requests|\bapi\b|webhook|packages?|registry|install|publish|download|pull|push|build|hub|search|token/i],
 ];
 
+// Dev APIs (email, auth, payments, messaging, media): the API runs inside the
+// customer's app, so sending, sign-in, checkout and delivery are PROD, and anything
+// left over counts as serving too. Sandboxes, management APIs and logs are SHIP;
+// the provider's own dashboard and billing are manage. The generic rules would
+// call "Email" peripheral and "Payments" or "Auth" a console login.
+const API_SURFACE_RULES: [Surface, RegExp][] = [
+  ["peripheral", /docs|documentation|support|status page|community|marketing|website|\bwww\.|blog|ask ai|mcp server|analytics|stats\b|reporting|insights|telemetry|metrics|usage/i],
+  ["ship", /sandbox|test mode|development instances?|admin api|management api|platform api|control api|provision|go live|verification portal|\bcli\b|deploy|logs?\b|debugger|observability|bulk export|activity|studio/i],
+  ["manage", /dashboard|console|control panel|billing|accounts?\b|settings|portal/i],
+  ["serving", /./],
+];
+
 export function surfaceForComponent(name: string, overrides?: Map<string, Surface>, categorySlug?: string): Surface | null {
   // Overrides name the bare component; incidents may carry it as "Group - Name".
   const o = overrides?.get(name) ?? (name.includes(" - ") ? overrides?.get(name.slice(name.lastIndexOf(" - ") + 3)) : undefined);
@@ -144,6 +156,9 @@ export function surfaceForComponent(name: string, overrides?: Map<string, Surfac
   }
   if (categorySlug === "devtools") {
     for (const [surface, re] of DEVTOOLS_SURFACE_RULES) if (re.test(name)) return surface;
+  }
+  if (categorySlug === "apis") {
+    for (const [surface, re] of API_SURFACE_RULES) if (re.test(name)) return surface;
   }
   if (categorySlug === "databases") {
     for (const [surface, re] of DATABASE_SURFACE_RULES) if (re.test(name)) return surface;

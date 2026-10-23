@@ -91,6 +91,7 @@ const BY_CATEGORY: Record<string, { needs: string[]; regions: boolean }> = {
   databases: { needs: ["postgres", "redis", "storage"], regions: true },
   ai: { needs: ["llm"], regions: false },
   devtools: { needs: [], regions: false },
+  apis: { needs: [], regions: false },
 };
 
 export function choicesFor(category: string): { needs: Need[]; regions: Region[] } {
