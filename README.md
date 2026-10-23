@@ -30,7 +30,7 @@ Railway cron (*/5) ──POST──▶ web: /api/cron/poll ──GET (ETag)─�
 
 ## Stack
 
-Next.js 16 (App Router), Drizzle ORM, Postgres, all on Railway. Umami Cloud for analytics, proxied through `/stats` on our own domain.
+Next.js 16 (App Router), Drizzle ORM, Postgres, all on Railway. Umami Cloud for analytics (its standard script, production only).
 
 ## Local development
 

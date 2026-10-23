@@ -3,15 +3,15 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 
 // No nonces: every page is dynamic anyway, but nonces would mean a proxy on every
-// request for little gain on a read-only site with no logins. Analytics come from
-// our own origin through /stats (src/app/stats), so 'self' covers them.
+// request for little gain on a read-only site with no logins. Umami Cloud is the
+// one third party: its script, and the events it sends back.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' https://cloud.umami.is${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self'",
   "img-src 'self' data: blob:",
-  "connect-src 'self'",
+  "connect-src 'self' https://cloud.umami.is https://api-gateway.umami.dev",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
