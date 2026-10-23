@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const PAGES = ["/", "/c/hosting", "/c/ai", "/incidents", "/compare", "/compare/railway-vs-vercel", "/about", "/p/vercel", "/p/railway", "/p/heroku"];
+const PAGES = ["/", "/c/hosting", "/c/ai", "/incidents", "/compare", "/compare/railway-vs-vercel", "/about", "/p/vercel", "/p/railway", "/p/heroku", "/stack", "/stack?u=vercel&u=railway&u=heroku"];
 
 /** Collect uncaught errors and console errors from our own origin. */
 function watchErrors(page: Page) {
@@ -96,4 +96,16 @@ test("the provider picker narrows the incidents page", async ({ page }) => {
   await page.getByLabel("Provider", { exact: true }).selectOption("vercel");
   await expect(page).toHaveURL(/[?&]p=vercel/);
   await expect(page.locator(".cal a.cal-d")).toHaveCount(90);
+});
+
+test("the stack picker narrows a provider to the parts picked", async ({ page }) => {
+  await page.goto("/stack?u=vercel");
+  const all = page.locator('[role="group"] .chip', { hasText: "All" });
+  await expect(all).toHaveAttribute("aria-pressed", "true");
+  const part = page.locator('[role="group"] .chip:not([aria-pressed="true"])').first();
+  await part.click();
+  await expect(page).toHaveURL(/[?&]u=vercel:[a-z0-9-]+/);
+  await expect(page.locator('[role="group"] .chip[aria-pressed="true"]')).toHaveCount(1);
+  await page.locator('select[aria-label="Add a provider"]').selectOption("railway");
+  await expect(page).toHaveURL(/&u=railway$/);
 });

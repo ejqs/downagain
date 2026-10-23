@@ -86,7 +86,7 @@ p { margin: 0; }
 .nav { display: flex; flex-wrap: wrap; gap: 2px; font-weight: 600; font-size: 15px; }
 .nav a { padding: 12px 8px; text-decoration: none; border-bottom: 3px solid transparent; margin-bottom: -3px; }
 .nav a[aria-current="page"] { border-bottom-color: var(--ink); font-weight: 800; }
-@media (max-width: 420px) { .nav a { padding: 12px 6px; font-size: 14px; } }
+@media (max-width: 420px) { .nav a { padding: 12px 5px; font-size: 13.5px; } }
 
 main.wrap { padding-bottom: 48px; }
 .section { margin-top: 40px; }
@@ -124,6 +124,7 @@ main.wrap { padding-bottom: 48px; }
 .chip.small { border-width: 2px; font: 700 13px var(--font-mono); padding: 0 12px; }
 .chip[aria-current="true"], .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .chip.small[aria-current="true"] { background: var(--hazard); color: var(--ink); }
+.chip.small[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .chip .count { font-family: var(--font-mono); font-size: 11px; background: var(--down); color: var(--ink); padding: 1px 5px; }
 .chip .count.issues { background: var(--minor); }
 .btn { min-height: 44px; display: inline-flex; align-items: center; padding: 0 16px; border: 3px solid var(--ink); font-weight: 700; text-decoration: none; background: var(--paper); color: var(--ink); font-family: var(--font-display); font-size: 15px; cursor: pointer; }
@@ -238,6 +239,7 @@ details.updates li { overflow-wrap: anywhere; }
 .cal-x { margin-left: auto; min-width: 44px; min-height: 44px; display: inline-grid; place-items: center; margin-block: -10px; font: 700 22px var(--font-mono); text-decoration: none; }
 .prov-select select { min-height: 44px; max-width: 100%; padding: 0 8px; border: 3px solid var(--ink); background: var(--paper); font: 700 15px var(--font-display); color: var(--ink); }
 .prov-select { display: flex; gap: 6px; }
+.part-find input { min-height: 44px; width: 15ch; max-width: 100%; padding: 0 10px; border: 2px solid var(--ink); background: var(--paper); font: 700 13px var(--font-mono); color: var(--ink); }
 .legend i[class^="heat-"] { border-radius: 3px; }
 .day-head { font-size: 22px; font-weight: 800; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin: 0 0 8px; }
 
