@@ -106,6 +106,29 @@ describe("heroku adapter", () => {
     expect(snap.incidents!.find((i) => i.externalId === "2890")!.resolvedAt).toEqual(new Date("2026-09-30T15:10:00Z"));
   });
 
+  it("closes a past incident by its resolved update when the flags are missing", async () => {
+    const hk = { slug: "heroku", sourceKind: "heroku" as const, sourceUrl: "https://hk.test", statusPageUrl: "https://hk.test" };
+    const snap = await readProvider(hk, async (url) => ({
+      notModified: false,
+      body: url.includes("/incidents")
+        ? [
+            {
+              id: 9,
+              title: "Heroku Feature Degradation",
+              created_at: "2026-08-10T15:19:00Z",
+              systems: [{ name: "Apps", status: "yellow" }],
+              updates: [
+                { id: 1, created_at: "2026-08-10T15:19:00Z", contents: "Incident resolved.", update_type: "resolved" },
+                { id: 2, created_at: "2026-08-10T15:26:00Z", contents: "Investigating.", update_type: "investigating" },
+                { id: 3, created_at: "2026-08-10T15:46:00Z", contents: "Rolled back.", update_type: "update" },
+              ],
+            },
+          ]
+        : { status: [{ system: "Apps", status: "green" }], incidents: [] },
+    }));
+    expect(snap.incidents![0]).toMatchObject({ status: "resolved", resolvedAt: new Date("2026-08-10T15:46:00Z") });
+  });
+
   it("keeps current-status when the history call fails", async () => {
     const hk = { slug: "heroku", sourceKind: "heroku" as const, sourceUrl: "https://hk.test", statusPageUrl: "https://hk.test" };
     const snap = await readProvider(hk, async (url) => {
