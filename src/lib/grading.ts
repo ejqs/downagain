@@ -11,6 +11,18 @@ export const MAX_PENALTY_MINUTES = 72 * 60;
 export const MAX_PENALTY_MINUTES_MILD = 24 * 60;
 export const penaltyCap = (tier: number) => (tier <= 1 ? MAX_PENALTY_MINUTES : MAX_PENALTY_MINUTES_MILD);
 
+/** Longest an incident paints day-by-day views; matches "Happening now" (LIVE_DAYS). */
+export const MAX_SHOWN_DAYS = 7;
+
+/**
+ * When an incident stops showing on day-by-day views (strips, heatmap, the 7-day list):
+ * at its end, or a week in. A region gone dark for months shouldn't paint the whole
+ * board, the same way it can't sink the grade.
+ */
+export function shownEnd(i: Pick<GradeInput, "startedAt" | "resolvedAt">, now: number): number {
+  return Math.min(i.resolvedAt?.getTime() ?? now, i.startedAt.getTime() + MAX_SHOWN_DAYS * DAY);
+}
+
 // A provider that leaves an incident open but posts nothing for a week has moved
 // on. We end it at its last update instead of counting it as ongoing for months.
 export const STALE_OPEN_DAYS = 7;
@@ -158,7 +170,8 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
     sevCounts[tier - 1]++;
     if (i.security) securityCount++;
     const end = (i.resolvedAt ?? to).getTime();
-    if (tier === 1) sev1.push([i.startedAt.getTime(), end]);
+    // Uptime is provider-wide: a Sev 1 in one region or for one add-on doesn't take it down.
+    if (tier === 1 && scopeWeight(i.scope) === 1) sev1.push([i.startedAt.getTime(), end]);
     longest = Math.max(longest, durationMinutes(i, to));
     if (i.resolvedAt) resolveTimes.push(durationMinutes(i));
 

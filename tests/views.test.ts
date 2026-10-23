@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
-import { brokenComponents, liveLevel, communication, dailyCells, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals } from "@/lib/views";
+import { brokenComponents, coveredDays, liveLevel, communication, dailyCells, valueBoard, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals } from "@/lib/views";
 
 const DAY = 86_400_000;
 const NOW = Date.parse("2026-10-22T12:00:00Z");
@@ -143,6 +143,12 @@ describe("dailyCells", () => {
     expect(dailyCells([], 3, NOW, ago(1))).toEqual(["none", "up", "up"]);
   });
 
+  it("stops painting a long-open incident after a week", () => {
+    const cells = dailyCells([inc(1, { startedAt: ago(30), resolvedAt: null, tier: 1 })], 30, NOW);
+    expect(cells.filter((c) => c === "major")).toHaveLength(7);
+    expect(cells.at(-1)).toBe("up");
+  });
+
   it("paints every day an open incident spans", () => {
     expect(dailyCells([inc(1, { startedAt: ago(2), resolvedAt: null, tier: 2 })], 4, NOW)).toEqual(["up", "major", "major", "major"]);
   });
@@ -157,6 +163,20 @@ describe("leaderboard", () => {
   it("ranks worst first within a category", () => {
     expect(leaderboard(s, "hosting").map((r) => r.provider.name)).toEqual(["Chaos", "Calm", "Also calm"]);
     expect(leaderboard(s, "hosting", "best")[0].provider.name).toBe("Also calm");
+  });
+
+  it("lists providers with under 14 days of data last, ungraded, both ways round", () => {
+    const t = snap(
+      [prov(1, { name: "Old", historyFrom: ago(200) }), prov(2, { name: "New", trackedFrom: ago(3) }), prov(3, { name: "Busy", historyFrom: ago(20), trackedFrom: ago(1) })],
+      [inc(3, { startedAt: ago(5) })],
+    );
+    const rows = leaderboard(t, "hosting");
+    expect(rows.map((r) => [r.provider.name, r.graded, r.covered])).toEqual([
+      ["Busy", true, 20],
+      ["Old", true, 90],
+      ["New", false, 3],
+    ]);
+    expect(leaderboard(t, "hosting", "best").map((r) => r.provider.name)).toEqual(["Old", "Busy", "New"]);
   });
 
   it("gives every row 60 days of cells", () => {
@@ -251,5 +271,20 @@ describe("liveLevel", () => {
     expect(liveLevel({ tier: 2, status: "major_outage" })).toBe("down");
     expect(liveLevel({ tier: 2, status: "degraded" })).toBe("issues");
     expect(liveLevel({ tier: 3, status: "operational" })).toBe("issues");
+  });
+});
+
+describe("coverage", () => {
+  it("counts from the older of first poll and oldest incident, capped at the window", () => {
+    expect(coveredDays(prov(1, { historyFrom: ago(40), trackedFrom: ago(2) }), NOW)).toBe(40);
+    expect(coveredDays(prov(1, { historyFrom: null, trackedFrom: ago(2) }), NOW)).toBe(2);
+    expect(coveredDays(prov(1, { historyFrom: ago(400) }), NOW)).toBe(90);
+  });
+
+  it("keeps ungraded providers off the best-value frontier", () => {
+    const t = snap([prov(1, { slug: "azure", category: "cloud", trackedFrom: ago(1) }), prov(2, { slug: "aws", category: "cloud", historyFrom: ago(300) })], []);
+    const rows = valueBoard(t, "cloud");
+    expect(rows.find((r) => r.provider.slug === "azure")!.bestValue).toBe(false);
+    expect(rows.find((r) => r.provider.slug === "aws")!.bestValue).toBe(true);
   });
 });

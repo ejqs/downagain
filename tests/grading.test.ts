@@ -47,6 +47,13 @@ describe("score", () => {
     expect(s.areas.shipping.grade).toBe("A+");
   });
 
+  it("a Sev 1 in one region doesn't cost provider-wide uptime", () => {
+    const s = score([inc({ startedAt: at("2026-10-01T10:00:00Z"), resolvedAt: at("2026-10-01T12:00:00Z"), scope: "regional" })], from, to);
+    expect(s.admittedUptime).toBe(1);
+    expect(s.sevCounts[0]).toBe(1);
+    expect(s.points).toBe(360);
+  });
+
   it("overlapping Sev 1s count once for uptime", () => {
     const s = score(
       [

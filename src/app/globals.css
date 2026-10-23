@@ -168,6 +168,7 @@ main.wrap { padding-bottom: 48px; }
 .g-C { background: var(--hazard); color: var(--ink); }
 .g-D { background: var(--down); color: var(--ink); }
 .g-F { background: var(--ink); color: var(--hazard); }
+.g-none { background: var(--none); color: var(--muted); }
 .areas { display: flex; gap: 4px; }
 .areas > span { display: flex; flex-direction: column; align-items: center; gap: 2px; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
 .pill { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; padding: 2px 6px; white-space: nowrap; display: inline-block; }

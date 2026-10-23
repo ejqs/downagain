@@ -2,6 +2,7 @@ import path from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { readProvider } from "@/lib/adapters";
 import { fixtureName, makeGetter } from "@/lib/fetcher";
+import { dropBareTwins } from "@/lib/status";
 import { CATEGORIES, PROVIDERS } from "@/lib/providers";
 import type { Surface } from "@/lib/severity";
 
@@ -74,6 +75,12 @@ describe("railway adapter", () => {
   });
 });
 
+describe("dropBareTwins", () => {
+  it("keeps the grouped name and drops its bare twin", () => {
+    expect(dropBareTwins(["Builds", "Build & Deploy - Builds", "Dashboard", "Dashboard"])).toEqual(["Build & Deploy - Builds", "Dashboard"]);
+  });
+});
+
 describe("heroku adapter", () => {
   it("maps systems and incidents", async () => {
     const snap = await readProvider(
@@ -85,6 +92,28 @@ describe("heroku adapter", () => {
     expect(i.externalId).toBe("2901");
     expect(i.impact).toBe("critical");
     expect(i.components).toEqual(["Apps (runtime)"]);
+  });
+
+  it("reads history from the incidents endpoint, open incidents from current-status", async () => {
+    const snap = await readProvider(
+      { slug: "heroku", sourceKind: "heroku", sourceUrl: "https://status.heroku.com", statusPageUrl: "https://status.heroku.com" },
+      makeGetter({}),
+    );
+    expect(snap.incidents!.map((i) => i.externalId).sort()).toEqual(["2890", "2901"]);
+    // The open one comes from current-status (red), not the stale history copy (yellow).
+    expect(snap.incidents!.find((i) => i.externalId === "2901")!.impact).toBe("critical");
+    // No resolved_at: the last update closes it.
+    expect(snap.incidents!.find((i) => i.externalId === "2890")!.resolvedAt).toEqual(new Date("2026-09-30T15:10:00Z"));
+  });
+
+  it("keeps current-status when the history call fails", async () => {
+    const hk = { slug: "heroku", sourceKind: "heroku" as const, sourceUrl: "https://hk.test", statusPageUrl: "https://hk.test" };
+    const snap = await readProvider(hk, async (url) => {
+      if (url.includes("/incidents")) throw new Error("hk.test answered 500");
+      return { notModified: false, body: { status: [{ system: "Apps", status: "green" }], incidents: [] } };
+    });
+    expect(snap.status).toBe("operational");
+    expect(snap.incidents).toEqual([]);
   });
 });
 

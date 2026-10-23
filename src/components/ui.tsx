@@ -2,11 +2,12 @@ import type { Grade } from "@/lib/grading";
 import { TIER_NAMES } from "@/lib/severity";
 import type { DayCell } from "@/lib/views";
 
-export function GradeTile({ grade, size, label }: { grade: Grade; size?: "xs" | "md"; label?: string }) {
-  const cls = grade === "A+" ? "g-Ap" : `g-${grade}`;
+/** A null grade is "not enough data yet": shown as a dash. */
+export function GradeTile({ grade, size, label }: { grade: Grade | null; size?: "xs" | "md"; label?: string }) {
+  const cls = grade === null ? "g-none" : grade === "A+" ? "g-Ap" : `g-${grade}`;
   return (
-    <span className={`grade ${size ?? ""} ${cls}`} aria-label={label ?? `Grade ${grade}`}>
-      {grade}
+    <span className={`grade ${size ?? ""} ${cls}`} aria-label={grade === null ? "No grade yet" : (label ?? `Grade ${grade}`)}>
+      {grade ?? "–"}
     </span>
   );
 }

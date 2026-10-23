@@ -1,4 +1,4 @@
-// The tracked list: Hosting, AI, Cloud, Databases. Adding a provider is a new entry here,
+// The tracked list: Hosting, AI, Cloud, Databases, Dev tools. Adding a provider is a new entry here,
 // then `bun run db:seed` and `bun run backfill --provider <slug>`.
 //
 // A provider only appears on the site once its status source has answered at
@@ -34,6 +34,7 @@ export const CATEGORIES: CategorySeed[] = [
   { slug: "ai", name: "AI APIs", sortOrder: 2 },
   { slug: "cloud", name: "Cloud", sortOrder: 3 },
   { slug: "databases", name: "Databases", sortOrder: 4 },
+  { slug: "devtools", name: "Dev tools", sortOrder: 5 },
 ];
 
 export const PROVIDERS: ProviderSeed[] = [
@@ -68,6 +69,8 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://www.netlifystatus.com",
     sourceKind: "statuspage",
     sourceUrl: "https://www.netlifystatus.com",
+    // An AI agent product on the same page, not hosting.
+    surfaces: { "Agent Runners": "peripheral" },
   },
   {
     slug: "render",
@@ -146,7 +149,8 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://status.claude.com",
     sourceKind: "statuspage",
     sourceUrl: "https://status.claude.com",
-    surfaces: { "Claude Code": "ship" },
+    // Like ChatGPT and Codex on OpenAI's page: Anthropic's own apps, not the API.
+    surfaces: { "claude.ai": "peripheral", "Claude Code": "peripheral", "Claude Cowork": "peripheral" },
   },
   {
     slug: "groq",
@@ -167,16 +171,6 @@ export const PROVIDERS: ProviderSeed[] = [
     statusPageUrl: "https://status.cohere.com",
     sourceKind: "statuspage",
     sourceUrl: "https://status.cohere.com",
-  },
-  {
-    slug: "replicate",
-    name: "Replicate",
-    category: "ai",
-    kind: "Model hosting",
-    homepageUrl: "https://replicate.com",
-    statusPageUrl: "https://www.replicatestatus.com",
-    sourceKind: "statuspage",
-    sourceUrl: "https://www.replicatestatus.com",
   },
 
   // Cloud. None of the three uses Statuspage, and all three only post incidents
@@ -253,8 +247,8 @@ export const PROVIDERS: ProviderSeed[] = [
     sourceKind: "statuspage",
     sourceUrl: "https://status.mongodb.com",
     verified: "2026-10-22",
-    // "MongoDB Cloud" is the Atlas UI and Admin API, not the clusters.
-    surfaces: { "MongoDB Cloud": "manage" },
+    // "MongoDB Cloud" is the umbrella for clusters and the Admin API alike, so it says
+    // little on its own; the rules read it as data and Claude reads the text.
   },
   {
     slug: "upstash",
@@ -277,5 +271,38 @@ export const PROVIDERS: ProviderSeed[] = [
     sourceKind: "statuspage",
     sourceUrl: "https://status.cockroachlabs.cloud",
     verified: "2026-10-22",
+  },
+
+  // Dev tools: where code, packages and images come from. Nearly all SHIP.
+  // Rules for their components are in severity.ts (DEVTOOLS_SURFACE_RULES).
+  {
+    slug: "github",
+    name: "GitHub",
+    category: "devtools",
+    kind: "Git hosting and CI",
+    homepageUrl: "https://github.com",
+    statusPageUrl: "https://www.githubstatus.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://www.githubstatus.com",
+  },
+  {
+    slug: "npm",
+    name: "npm",
+    category: "devtools",
+    kind: "Package registry",
+    homepageUrl: "https://www.npmjs.com",
+    statusPageUrl: "https://status.npmjs.org",
+    sourceKind: "statuspage",
+    sourceUrl: "https://status.npmjs.org",
+  },
+  {
+    slug: "docker",
+    name: "Docker Hub",
+    category: "devtools",
+    kind: "Container registry",
+    homepageUrl: "https://hub.docker.com",
+    statusPageUrl: "https://www.dockerstatus.com",
+    sourceKind: "statuspage",
+    sourceUrl: "https://www.dockerstatus.com",
   },
 ];

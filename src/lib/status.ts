@@ -45,3 +45,13 @@ export function impactFromStatus(s: Status | null | undefined): Impact {
       return "none";
   }
 }
+
+/**
+ * Statuspage names a component bare on the incident ("Builds") and with its group in
+ * the updates ("Build & Deploy - Builds"). Keep the grouped name, drop the bare twin.
+ */
+export function dropBareTwins(names: string[]): string[] {
+  const unique = [...new Set(names)];
+  const grouped = new Set(unique.filter((n) => n.includes(" - ")).map((n) => n.slice(n.lastIndexOf(" - ") + 3)));
+  return unique.filter((n) => n.includes(" - ") || !grouped.has(n));
+}
