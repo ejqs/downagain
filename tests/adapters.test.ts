@@ -140,6 +140,48 @@ describe("heroku adapter", () => {
   });
 });
 
+describe("instatus adapter", () => {
+  const read = (h: string) =>
+    readProvider({ slug: h, sourceKind: "instatus", sourceUrl: `https://${h}`, statusPageUrl: `https://${h}` }, makeGetter({}));
+
+  it("reads components, history from RSS, and impact from the summary", async () => {
+    const snap = await read("status.stytch.com");
+    expect(snap.status).toBe("operational");
+    expect(snap.components?.map((c) => c.name)).toContain("Live API");
+    // Maintenance items are left out.
+    expect(snap.incidents?.some((i) => /maintenance/i.test(i.title))).toBe(false);
+    const sms = snap.incidents!.find((i) => i.externalId === "cmvjtpi4g00k71ms0l3d7zqcu")!;
+    expect(sms.title).toBe("Missing or delayed SMS OTPs");
+    expect(sms.impact).toBe("major");
+    expect(sms.components).toEqual(["Message deliverability"]);
+    expect(sms.startedAt.toISOString()).toBe("2026-10-22T16:00:12.000Z");
+    expect(sms.monitoringAt?.toISOString()).toBe("2026-10-22T18:15:39.000Z");
+    expect(sms.resolvedAt?.toISOString()).toBe("2026-10-22T18:29:01.000Z");
+    expect(sms.updates.map((u) => u.status)).toEqual(["investigating", "monitoring", "resolved"]);
+    expect(sms.updates[0].body).toMatch(/^We are investigating missing or delayed SMS OTPs/);
+    expect(sms.url).toBe("https://status.stytch.com/incident/cmvjtpi4g00k71ms0l3d7zqcu");
+  });
+
+  it("dedupes repeated component names and drops group rows", async () => {
+    const snap = await read("status.kinde.com");
+    expect(snap.components?.some((c) => c.name === "AU region")).toBe(false);
+    const i = snap.incidents!.find((x) => x.externalId === "cmueej0oo01g31arghodsxtd0")!;
+    expect(i.components).toEqual(["Authentication", "Discord community", "Admin area"]);
+    const pm = snap.incidents!.find((x) => x.externalId === "cmt8hez8g00h20ko4z88uijqa")!;
+    expect(pm.postmortem).toBe(true);
+    expect(pm.resolvedAt?.toISOString()).toBe("2026-08-25T09:46:00.000Z");
+  });
+
+  it("rolls an update past New Year into the next year", async () => {
+    const { parseIsDescription } = await import("@/lib/adapters/instatus");
+    const d = parseIsDescription(
+      "Type: Incident\nAffected Components: API\nJan 1, 00:10:00 GMT+0 - Resolved - Fixed. Dec 31, 23:50:00 GMT+0 - Investigating - Looking.",
+      new Date("2026-12-31T23:50:00Z"),
+    );
+    expect(d.updates.map((u) => u.postedAt.toISOString())).toEqual(["2026-12-31T23:50:00.000Z", "2027-01-01T00:10:00.000Z"]);
+  });
+});
+
 describe("adapter edge cases", () => {
   const sp = { slug: "x", sourceKind: "statuspage" as const, sourceUrl: "https://x.test/", statusPageUrl: "https://x.test/" };
   const serve = (bodies: Record<string, unknown>) => async (url: string) => ({ notModified: false as const, body: bodies[new URL(url).pathname] });

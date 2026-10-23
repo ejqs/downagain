@@ -47,7 +47,7 @@ export function stripHtml(html: string): string {
 
 /** A tiny RSS 2.0 reader: enough for a status feed, no dependency. */
 export function parseRss(xml: string): RssItem[] {
-  if (!/<rss[\s>]/i.test(xml) || !/<channel[\s>]/i.test(xml)) throw new Error("azure feed: unexpected shape");
+  if (!/<rss[\s>]/i.test(xml) || !/<channel[\s>]/i.test(xml)) throw new Error("rss feed: unexpected shape");
   return [...xml.matchAll(/<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/gi)].map(([, body]) => {
     const pub = tag(body, "pubDate");
     const d = pub ? new Date(pub.replace(/ Z$/, " GMT")) : null;

@@ -310,8 +310,8 @@ export const PROVIDERS: ProviderSeed[] = [
   // Dev APIs: email, auth, payments, messaging and media APIs that run inside the
   // customer's app, so nearly all PROD. Rules are in severity.ts (API_SURFACE_RULES).
   // Left out for now: Stripe (status.stripe.com has no incident feed; /current is
-  // frozen in 2024), Postmark (Sorry app, HTML only), Auth0 (custom page), Stytch
-  // and Kinde (Instatus, RSS only). SendGrid is on Twilio's page, so it counts there.
+  // frozen in 2024), Postmark (Sorry app, HTML only), Auth0 (custom page). SendGrid
+  // is on Twilio's page, so it counts there.
   // incident.io pages (Resend, Clerk, Paddle, Plaid, Inngest, MailerSend) list no
   // components on incidents, so their grades come from titles and Claude.
   {
@@ -389,6 +389,31 @@ export const PROVIDERS: ProviderSeed[] = [
     verified: "2026-10-23",
     // The Admin Portal is where the customer's own customers set up SSO; Audit Logs is an API product.
     surfaces: { "Admin Portal": "serving", "Audit Logs": "serving" },
+  },
+  {
+    slug: "stytch",
+    name: "Stytch",
+    category: "apis",
+    kind: "Auth",
+    homepageUrl: "https://stytch.com",
+    statusPageUrl: "https://status.stytch.com",
+    sourceKind: "instatus",
+    sourceUrl: "https://status.stytch.com",
+    verified: "2026-10-23",
+    surfaces: { "Test API": "ship" },
+  },
+  {
+    slug: "kinde",
+    name: "Kinde",
+    category: "apis",
+    kind: "Auth",
+    homepageUrl: "https://kinde.com",
+    statusPageUrl: "https://status.kinde.com",
+    sourceKind: "instatus",
+    sourceUrl: "https://status.kinde.com",
+    verified: "2026-10-23",
+    // Kinde's own admin, where developers configure it.
+    surfaces: { "Admin area": "manage" },
   },
   {
     slug: "paddle",

@@ -1,0 +1,838 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Stytch Status - Incident history</title>
+    <link>https://status.stytch.com</link>
+    <description>Stytch</description>
+    <pubDate>Thu, 22 Oct 2026 16:00:12 +0000</pubDate>
+    
+<item>
+  <title>Missing or delayed SMS OTPs</title>
+  <description>
+    Type: Incident
+    Duration: 2 hours and 29 minutes
+
+    Affected Components: Message deliverability
+    Oct 22, 18:29:01 GMT+0 - Resolved - This incident has been resolved. Oct 22, 18:15:39 GMT+0 - Monitoring - We&#039;ve failed over to our secondary messaging provider and are monitoring deliverability rates. Oct 22, 16:00:12 GMT+0 - Investigating - We are investigating missing or delayed SMS OTPs from our primary messaging provider to VOIP phone numbers. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 2 hours and 29 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Oct <var data-var='date'> 22</var>, <var data-var='time'>18:29:01</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Oct <var data-var='date'> 22</var>, <var data-var='time'>18:15:39</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We&#039;ve failed over to our secondary messaging provider and are monitoring deliverability rates..</p>
+<p><small>Oct <var data-var='date'> 22</var>, <var data-var='time'>16:00:12</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are investigating missing or delayed SMS OTPs from our primary messaging provider to VOIP phone numbers..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 22 Oct 2026 16:00:12 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmvjtpi4g00k71ms0l3d7zqcu</link>
+  <guid>https://status.stytch.com/incident/cmvjtpi4g00k71ms0l3d7zqcu</guid>
+</item>
+
+<item>
+  <title>Increase in 500 errors</title>
+  <description>
+    Type: Incident
+    Duration: 59 minutes
+
+    Affected Components: Live API
+    Oct 6, 16:49:00 GMT+0 - Resolved - This incident has been resolved. Oct 6, 16:48:00 GMT+0 - Investigating - We&#039;re investigating an increase in 500 errors in our Live API. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 59 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Oct <var data-var='date'> 6</var>, <var data-var='time'>16:49:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Oct <var data-var='date'> 6</var>, <var data-var='time'>16:48:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We&#039;re investigating an increase in 500 errors in our Live API..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 6 Oct 2026 16:48:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmuwxilb002zw1bplcf8ofz3i</link>
+  <guid>https://status.stytch.com/incident/cmuwxilb002zw1bplcf8ofz3i</guid>
+</item>
+
+<item>
+  <title>Scheduled Test API DB maintenance</title>
+  <description>
+    Type: Maintenance
+    Duration: 30 minutes
+
+    Affected Components: Test API
+    Sep 10, 03:30:00 GMT+0 - Completed - Maintenance has completed successfully Sep 10, 03:00:01 GMT+0 - Identified - Maintenance is now in progress Sep 8, 16:57:29 GMT+0 - Identified - We are planning for a scheduled maintenance during this time.
+
+We expect single digit minutes of increased latency during this window. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Maintenance</p>
+    <p><strong>Duration:</strong> 30 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Sep <var data-var='date'> 10</var>, <var data-var='time'>03:30:00</var> GMT+0</small><br><strong>Completed</strong> -
+  Maintenance has completed successfully.</p>
+<p><small>Sep <var data-var='date'> 10</var>, <var data-var='time'>03:00:01</var> GMT+0</small><br><strong>Identified</strong> -
+  Maintenance is now in progress.</p>
+<p><small>Sep <var data-var='date'> 8</var>, <var data-var='time'>16:57:29</var> GMT+0</small><br><strong>Identified</strong> -
+  We are planning for a scheduled maintenance during this time.
+
+We expect single digit minutes of increased latency during this window..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 10 Sep 2026 03:00:00 +0000</pubDate>
+  <link>https://status.stytch.com/maintenance/cmtswx9470au513pqpc432583</link>
+  <guid>https://status.stytch.com/maintenance/cmtswx9470au513pqpc432583</guid>
+</item>
+
+<item>
+  <title>Investigating SMS deliverability issues to AT&amp;T Wireless</title>
+  <description>
+    Type: Incident
+    Duration: 2 hours and 16 minutes
+
+    Affected Components: Message deliverability
+    Sep 9, 17:00:00 GMT+0 - Resolved - SMS are being sent successfully to AT&amp;T numbers. Sep 9, 16:43:00 GMT+0 - Monitoring - We&#039;ve switched to an alternative messaging provider and are monitoring the result. Sep 9, 14:30:00 GMT+0 - Investigating - We&#039;re currently investigating SMS deliverability issues to AT&amp;T Wireless. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 2 hours and 16 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Sep <var data-var='date'> 9</var>, <var data-var='time'>17:00:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  SMS are being sent successfully to AT&amp;T numbers..</p>
+<p><small>Sep <var data-var='date'> 9</var>, <var data-var='time'>16:43:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We&#039;ve switched to an alternative messaging provider and are monitoring the result..</p>
+<p><small>Sep <var data-var='date'> 9</var>, <var data-var='time'>14:30:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We&#039;re currently investigating SMS deliverability issues to AT&amp;T Wireless..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 9 Sep 2026 14:30:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmtubw3qh0my413mrwz4gpxr7</link>
+  <guid>https://status.stytch.com/incident/cmtubw3qh0my413mrwz4gpxr7</guid>
+</item>
+
+<item>
+  <title>Small percentage of SMS requests resulting in 500 errors</title>
+  <description>
+    Type: Incident
+    Duration: 57 minutes
+
+    Affected Components: Message deliverability
+    Sep 1, 17:27:00 GMT+0 - Resolved - This issue has been resolved. Sep 1, 16:30:00 GMT+0 - Investigating - A small percentage of SMS requests are currently resulting in 500 / internal\_server\_errors due to an upstream messaging issue. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 57 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Sep <var data-var='date'> 1</var>, <var data-var='time'>17:27:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This issue has been resolved..</p>
+<p><small>Sep <var data-var='date'> 1</var>, <var data-var='time'>16:30:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  A small percentage of SMS requests are currently resulting in 500 / internal\_server\_errors due to an upstream messaging issue..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 1 Sep 2026 16:30:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmtixrkeo0nvq13o1twzafs5p</link>
+  <guid>https://status.stytch.com/incident/cmtixrkeo0nvq13o1twzafs5p</guid>
+</item>
+
+<item>
+  <title>Delayed Event Log Streams</title>
+  <description>
+    Type: Incident
+    Duration: 31 minutes
+
+    Affected Components: Dashboard
+    Aug 28, 23:00:01 GMT+0 - Resolved - This incident has been resolved.  
+  
+Delayed logs are now delivered. Aug 28, 22:29:00 GMT+0 - Investigating - We are currently investigating delayed logs in our Event Log Streaming feature. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 31 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Aug <var data-var='date'> 28</var>, <var data-var='time'>23:00:01</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved.  
+  
+Delayed logs are now delivered..</p>
+<p><small>Aug <var data-var='date'> 28</var>, <var data-var='time'>22:29:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating delayed logs in our Event Log Streaming feature..</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 28 Aug 2026 22:29:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmtdjykwn03vv13miug34t66r</link>
+  <guid>https://status.stytch.com/incident/cmtdjykwn03vv13miug34t66r</guid>
+</item>
+
+<item>
+  <title>Emails not being delivered</title>
+  <description>
+    Type: Incident
+    Duration: 5 hours and 18 minutes
+
+    Affected Components: Message deliverability
+    Aug 18, 00:00:00 GMT+0 - Postmortem - We extend our sincerest apologies for this outage. On 17 August 2026, between 02:15 and 05:15 PT (09:15–12:15 UTC), all outbound email from Stytch failed, including email magic links, email OTPs, and password reset emails. Service was restored at 05:15 PT.  
+  
+**What happened**: This outage was triggered by abuse of free-tier email sending, a pattern we defend against continuously. In this case, our abuse controls did not engage in time, and a large volume of spam was sent before we intervened. That volume exhausted our sending quota with our primary email provider, which normally handles the majority of traffic. Automated failover and alerting fired, and our on-call engineer fully failed over to our secondary email provider within 20 minutes.  
+  
+That failover appeared to succeed: The secondary provider accepted our sends and reported them as successful 200s. However, the secondary provider was not delivering those emails due to the previous spam volume. As a result, we believed email had been restored when it had not. We received customer reports beginning at 03:15 PT and confirmed the true state of email sends at 05:01 PT. We restored service at 05:15 PT, banned the malicious accounts, and implemented new safeguards against the abuse seen.  
+  
+**Impact**: All email sent during the window failed permanently. Any authentication email a user requested between 02:15 and 05:15 PT never arrived, and users would need to request a new one after 05:15 PT.  
+  
+**Ongoing impact on deliverability**: The spam volume sent from our infrastructure has affected our sender reputation for `login@stytch.com`. For some time, a higher-than-normal share of legitimate emails may land in recipients&#039; spam folders. We are working with our providers on reputation remediation and expect this to improve over the coming days. No action is required. If your users report missing authentication emails, please ask them to check their spam folder.  
+  
+**What we&#039;re changing**: We have already implemented new safeguards against the abuse seen.  
+To prevent future attacks, we are also reviewing our systems and processes, including:
+
+* Rate limits and quotas
+* Verification of failover paths
+* Abuse detection at signup and message send time Aug 17, 13:00:00 GMT+0 - Resolved - The incident should be resolved; we have put in mitigations and will continue to monitor. A small percentage of users may see some lingering deliverability issues as we catch up. We apologize for the inconvenience. Aug 17, 12:14:00 GMT+0 - Monitoring - We&#039;ve mitigated the issue and emails are now being delivered. Currently monitoring. Aug 17, 09:27:00 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 5 hours and 18 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Aug <var data-var='date'> 18</var>, <var data-var='time'>00:00:00</var> GMT+0</small><br><strong>Postmortem</strong> -
+  We extend our sincerest apologies for this outage. On 17 August 2026, between 02:15 and 05:15 PT (09:15–12:15 UTC), all outbound email from Stytch failed, including email magic links, email OTPs, and password reset emails. Service was restored at 05:15 PT.  
+  
+**What happened**: This outage was triggered by abuse of free-tier email sending, a pattern we defend against continuously. In this case, our abuse controls did not engage in time, and a large volume of spam was sent before we intervened. That volume exhausted our sending quota with our primary email provider, which normally handles the majority of traffic. Automated failover and alerting fired, and our on-call engineer fully failed over to our secondary email provider within 20 minutes.  
+  
+That failover appeared to succeed: The secondary provider accepted our sends and reported them as successful 200s. However, the secondary provider was not delivering those emails due to the previous spam volume. As a result, we believed email had been restored when it had not. We received customer reports beginning at 03:15 PT and confirmed the true state of email sends at 05:01 PT. We restored service at 05:15 PT, banned the malicious accounts, and implemented new safeguards against the abuse seen.  
+  
+**Impact**: All email sent during the window failed permanently. Any authentication email a user requested between 02:15 and 05:15 PT never arrived, and users would need to request a new one after 05:15 PT.  
+  
+**Ongoing impact on deliverability**: The spam volume sent from our infrastructure has affected our sender reputation for `login@stytch.com`. For some time, a higher-than-normal share of legitimate emails may land in recipients&#039; spam folders. We are working with our providers on reputation remediation and expect this to improve over the coming days. No action is required. If your users report missing authentication emails, please ask them to check their spam folder.  
+  
+**What we&#039;re changing**: We have already implemented new safeguards against the abuse seen.  
+To prevent future attacks, we are also reviewing our systems and processes, including:
+
+* Rate limits and quotas
+* Verification of failover paths
+* Abuse detection at signup and message send time.</p>
+<p><small>Aug <var data-var='date'> 17</var>, <var data-var='time'>13:00:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  The incident should be resolved; we have put in mitigations and will continue to monitor. A small percentage of users may see some lingering deliverability issues as we catch up. We apologize for the inconvenience..</p>
+<p><small>Aug <var data-var='date'> 17</var>, <var data-var='time'>12:14:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We&#039;ve mitigated the issue and emails are now being delivered. Currently monitoring..</p>
+<p><small>Aug <var data-var='date'> 17</var>, <var data-var='time'>09:27:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 17 Aug 2026 09:27:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmsx7bm7805qd10pi1zmp87a5</link>
+  <guid>https://status.stytch.com/incident/cmsx7bm7805qd10pi1zmp87a5</guid>
+</item>
+
+<item>
+  <title>Increase in 500 errors</title>
+  <description>
+    Type: Incident
+    Duration: 1 minute
+
+    Affected Components: Javascript SDK, Test API, Live API
+    Jul 27, 01:11:05 GMT+0 - Postmortem - An update to our DB caused around 1.5 minutes of increased 500&#039;s in our API.
+
+Apologies for the interruption.  Jul 27, 00:36:00 GMT+0 - Resolved - This incident has been resolved. Jul 27, 00:35:00 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 minute</p>
+    <p><strong>Affected Components:</strong> , , </p>
+    <p><small>Jul <var data-var='date'> 27</var>, <var data-var='time'>01:11:05</var> GMT+0</small><br><strong>Postmortem</strong> -
+  An update to our DB caused around 1.5 minutes of increased 500&#039;s in our API.
+
+Apologies for the interruption. .</p>
+<p><small>Jul <var data-var='date'> 27</var>, <var data-var='time'>00:36:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Jul <var data-var='date'> 27</var>, <var data-var='time'>00:35:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 27 Jul 2026 00:35:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cms2i0x1f0pir1aqd1b4erlfm</link>
+  <guid>https://status.stytch.com/incident/cms2i0x1f0pir1aqd1b4erlfm</guid>
+</item>
+
+<item>
+  <title>Increase in 5XX errors</title>
+  <description>
+    Type: Incident
+    Duration: 15 minutes
+
+    Affected Components: Live API
+    Jul 24, 17:00:00 GMT+0 - Postmortem - A network connectivity degradation in one of the regions where our infrastructure is hosted disrupted traffic, resulting in some timeouts. Steps will be taken to mitigate this in the future. Jul 24, 11:11:00 GMT+0 - Resolved - This incident has been resolved. Jul 24, 10:56:00 GMT+0 - Investigating - We are investigating an increase in 5XX errors in the Stytch API. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 15 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Jul <var data-var='date'> 24</var>, <var data-var='time'>17:00:00</var> GMT+0</small><br><strong>Postmortem</strong> -
+  A network connectivity degradation in one of the regions where our infrastructure is hosted disrupted traffic, resulting in some timeouts. Steps will be taken to mitigate this in the future..</p>
+<p><small>Jul <var data-var='date'> 24</var>, <var data-var='time'>11:11:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Jul <var data-var='date'> 24</var>, <var data-var='time'>10:56:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are investigating an increase in 5XX errors in the Stytch API..</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 24 Jul 2026 10:56:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmrywd58x08910rlc3kazjxdr</link>
+  <guid>https://status.stytch.com/incident/cmrywd58x08910rlc3kazjxdr</guid>
+</item>
+
+<item>
+  <title>Issue causing invalid_email errors for some valid B2B email addresses</title>
+  <description>
+    Type: Incident
+    Duration: 16 hours and 46 minutes
+
+    Affected Components: Message deliverability
+    Jun 16, 14:53:00 GMT+0 - Resolved - This issue has been resolved. Jun 15, 22:07:00 GMT+0 - Investigating - We&#039;ve identified an issue causing invalid\_email errors for some B2B users with valid email addresses. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 16 hours and 46 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Jun <var data-var='date'> 16</var>, <var data-var='time'>14:53:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This issue has been resolved..</p>
+<p><small>Jun <var data-var='date'> 15</var>, <var data-var='time'>22:07:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We&#039;ve identified an issue causing invalid\_email errors for some B2B users with valid email addresses..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 15 Jun 2026 22:07:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmqgt9ndj00kn2jo3e1419uxv</link>
+  <guid>https://status.stytch.com/incident/cmqgt9ndj00kn2jo3e1419uxv</guid>
+</item>
+
+<item>
+  <title>SMS delivery is currently experiencing some delays.</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 2 minutes
+
+    Affected Components: Message deliverability
+    Jun 2, 19:00:00 GMT+0 - Resolved - This incident has been resolved. Jun 2, 18:41:00 GMT+0 - Monitoring - We have failed over to our secondary messaging provider and are monitoring the status. You may see fewer SMSDelivery event logs than expected during this time. Jun 2, 18:00:00 GMT+0 - Investigating - We are actively investigating SMS delivery delays with our primary messaging provider. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 2 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Jun <var data-var='date'> 2</var>, <var data-var='time'>19:00:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Jun <var data-var='date'> 2</var>, <var data-var='time'>18:41:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We have failed over to our secondary messaging provider and are monitoring the status. You may see fewer SMSDelivery event logs than expected during this time..</p>
+<p><small>Jun <var data-var='date'> 2</var>, <var data-var='time'>18:00:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are actively investigating SMS delivery delays with our primary messaging provider..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 2 Jun 2026 18:00:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmpx0175q0042p4nq1scqiq2f</link>
+  <guid>https://status.stytch.com/incident/cmpx0175q0042p4nq1scqiq2f</guid>
+</item>
+
+<item>
+  <title>Errors with custom auth domain creation</title>
+  <description>
+    Type: Incident
+    Duration: 4 hours and 30 minutes
+
+    Affected Components: Dashboard
+    May 29, 22:41:34 GMT+0 - Resolved - This incident has been resolved. May 29, 18:12:00 GMT+0 - Identified - We have identified the root cause and are currently implementing a fix for errors with custom auth domain creation. Existing custom domains are not impacted. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 4 hours and 30 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>May <var data-var='date'> 29</var>, <var data-var='time'>22:41:34</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>May <var data-var='date'> 29</var>, <var data-var='time'>18:12:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We have identified the root cause and are currently implementing a fix for errors with custom auth domain creation. Existing custom domains are not impacted..</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 29 May 2026 18:12:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmprgti1u01hkqxjh9ysthtk9</link>
+  <guid>https://status.stytch.com/incident/cmprgti1u01hkqxjh9ysthtk9</guid>
+</item>
+
+<item>
+  <title>Issues with Email Risk API</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 52 minutes
+
+    Affected Components: Device Fingerprinting
+    Apr 6, 17:00:00 GMT+0 - Resolved - This incident has been resolved. Apr 6, 16:45:00 GMT+0 - Monitoring - A fix has been implemented and we are currently monitoring the result. Apr 6, 14:52:56 GMT+0 - Investigating - We are currently investigating elevated 500 errors in the email risk API. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 52 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Apr <var data-var='date'> 6</var>, <var data-var='time'>17:00:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Apr <var data-var='date'> 6</var>, <var data-var='time'>16:45:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  A fix has been implemented and we are currently monitoring the result..</p>
+<p><small>Apr <var data-var='date'> 6</var>, <var data-var='time'>14:52:56</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating elevated 500 errors in the email risk API..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 6 Apr 2026 14:52:56 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmnnb818v0qr6yn6v75phe0ci</link>
+  <guid>https://status.stytch.com/incident/cmnnb818v0qr6yn6v75phe0ci</guid>
+</item>
+
+<item>
+  <title>Internal Logging Disruption</title>
+  <description>
+    Type: Incident
+    Duration: 4 hours and 51 minutes
+
+    
+    Jan 28, 20:55:00 GMT+0 - Resolved - This incident has been resolved. Jan 28, 20:23:00 GMT+0 - Identified - Event log streaming and internal logging in the Dashboard were interrupted for approximately 32 minutes. A fix was deployed, and the issue has been resolved. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 4 hours and 51 minutes</p>
+    
+    <p><small>Jan <var data-var='date'> 28</var>, <var data-var='time'>20:55:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Jan <var data-var='date'> 28</var>, <var data-var='time'>20:23:00</var> GMT+0</small><br><strong>Identified</strong> -
+  Event log streaming and internal logging in the Dashboard were interrupted for approximately 32 minutes. A fix was deployed, and the issue has been resolved..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 28 Jan 2026 20:23:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmkyikbok054dah4dhiwrbqid</link>
+  <guid>https://status.stytch.com/incident/cmkyikbok054dah4dhiwrbqid</guid>
+</item>
+
+<item>
+  <title>Outlook incident - emails not getting delivered</title>
+  <description>
+    Type: Incident
+    
+
+    
+    Jan 27, 13:00:00 GMT+0 - Resolved - We are currently aware of an upstream incident with Microsoft Outlook impacting email deliveries with several of our messaging providers over the past several days.  
+This has been widely reported across the industry, but Microsoft has not shared any public commentary as of yet. We&#039;re looking into any ways we may be able to mitigate this until Microsoft addresses the issue.
+
+Though these issues are not causing any downtime in Stytch services, due to the popularity of Microsoft Outlook, we&#039;ve created this incident for posterity for customers investigating downtime in their own systems.
+
+Customers that feel they are continuing to observe excessive deferrals and/or blocks should fill out the OLC Support request form at [https://olcsupport.office.com.](https://olcsupport.office.com/) 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    
+    
+    <p><small>Jan <var data-var='date'> 27</var>, <var data-var='time'>13:00:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  We are currently aware of an upstream incident with Microsoft Outlook impacting email deliveries with several of our messaging providers over the past several days.  
+This has been widely reported across the industry, but Microsoft has not shared any public commentary as of yet. We&#039;re looking into any ways we may be able to mitigate this until Microsoft addresses the issue.
+
+Though these issues are not causing any downtime in Stytch services, due to the popularity of Microsoft Outlook, we&#039;ve created this incident for posterity for customers investigating downtime in their own systems.
+
+Customers that feel they are continuing to observe excessive deferrals and/or blocks should fill out the OLC Support request form at [https://olcsupport.office.com.](https://olcsupport.office.com/).</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 27 Jan 2026 13:00:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmkwydalq0033ff6nvlej3xjw</link>
+  <guid>https://status.stytch.com/incident/cmkwydalq0033ff6nvlej3xjw</guid>
+</item>
+
+<item>
+  <title>Gmail incident - delayed emails</title>
+  <description>
+    Type: Incident
+    Duration: 14 hours and 29 minutes
+
+    Affected Components: Message deliverability
+    Jan 25, 03:30:57 GMT+0 - Resolved - This incident has been resolved. Jan 24, 21:12:10 GMT+0 - Monitoring - Reports of delivery issues has dropped but is still not back to normal.
+
+We&#039;re continuing to monitor. Jan 24, 17:22:06 GMT+0 - Monitoring - Continuing to monitor. Jan 24, 13:02:00 GMT+0 - Investigating - Gmail is currently experiencing an incident that is causing delayed emails for end users. 
+
+You can follow along with their incident here: &lt;https://www.google.com/appsstatus/dashboard/incidents/NNnDkY9CJ36annsfytjQ&gt;
+
+We&#039;ll be monitoring and will resolve this incident when we&#039;ve confirmed delivery returns to normal for Gmail users. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 14 hours and 29 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Jan <var data-var='date'> 25</var>, <var data-var='time'>03:30:57</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Jan <var data-var='date'> 24</var>, <var data-var='time'>21:12:10</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Reports of delivery issues has dropped but is still not back to normal.
+
+We&#039;re continuing to monitor..</p>
+<p><small>Jan <var data-var='date'> 24</var>, <var data-var='time'>17:22:06</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Continuing to monitor..</p>
+<p><small>Jan <var data-var='date'> 24</var>, <var data-var='time'>13:02:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  Gmail is currently experiencing an incident that is causing delayed emails for end users. 
+
+You can follow along with their incident here: &lt;https://www.google.com/appsstatus/dashboard/incidents/NNnDkY9CJ36annsfytjQ&gt;
+
+We&#039;ll be monitoring and will resolve this incident when we&#039;ve confirmed delivery returns to normal for Gmail users..</p>
+]]>
+  </content:encoded>
+  <pubDate>Sat, 24 Jan 2026 13:02:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmksksz0j0jkj8iu99xldo8fy</link>
+  <guid>https://status.stytch.com/incident/cmksksz0j0jkj8iu99xldo8fy</guid>
+</item>
+
+<item>
+  <title>Increased 4XX and 5XX errors with Connected Apps</title>
+  <description>
+    Type: Incident
+    Duration: 36 minutes
+
+    Affected Components: Device Fingerprinting, Test API, Live API, Dashboard, Javascript SDK, Message deliverability
+    Dec 22, 22:35:00 GMT+0 - Resolved - This incident has been resolved. Dec 22, 22:30:00 GMT+0 - Monitoring - We implemented a fix and are currently monitoring the result. Dec 22, 21:59:00 GMT+0 - Identified - We have identified an issue with Connected Apps caused by a recent change and are currently implementing a fix. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 36 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , , </p>
+    <p><small>Dec <var data-var='date'> 22</var>, <var data-var='time'>22:35:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Dec <var data-var='date'> 22</var>, <var data-var='time'>22:30:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix and are currently monitoring the result..</p>
+<p><small>Dec <var data-var='date'> 22</var>, <var data-var='time'>21:59:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We have identified an issue with Connected Apps caused by a recent change and are currently implementing a fix..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 22 Dec 2025 21:59:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmjhptdsw08jo14bla3r0ftv0</link>
+  <guid>https://status.stytch.com/incident/cmjhptdsw08jo14bla3r0ftv0</guid>
+</item>
+
+<item>
+  <title>Elevated error rates for SAML SSO flow </title>
+  <description>
+    Type: Incident
+    Duration: 9 minutes
+
+    Affected Components: Test API, Live API
+    Dec 19, 16:52:00 GMT+0 - Resolved - This incident has been resolved. SAML SSO traffic is healthy. Dec 19, 16:51:00 GMT+0 - Monitoring - We implemented a fix and are currently monitoring the result. Dec 19, 16:30:00 GMT+0 - Investigating - We are actively investigating an elevated rate of SAML SSO errors. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 9 minutes</p>
+    <p><strong>Affected Components:</strong> , </p>
+    <p><small>Dec <var data-var='date'> 19</var>, <var data-var='time'>16:52:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved. SAML SSO traffic is healthy..</p>
+<p><small>Dec <var data-var='date'> 19</var>, <var data-var='time'>16:51:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix and are currently monitoring the result..</p>
+<p><small>Dec <var data-var='date'> 19</var>, <var data-var='time'>16:30:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are actively investigating an elevated rate of SAML SSO errors..</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 19 Dec 2025 16:30:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmjd3r38v04jk9pamutqhsi6d</link>
+  <guid>https://status.stytch.com/incident/cmjd3r38v04jk9pamutqhsi6d</guid>
+</item>
+
+<item>
+  <title>Inability to load frontend script from Cloudflare custom domain</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 40 minutes
+
+    Affected Components: Device Fingerprinting
+    Nov 18, 12:10:00 GMT+0 - Resolved - During [Cloudflare&#039;s 2025-11-18 incident](https://blog.cloudflare.com/18-november-2025-outage/), loading of Device Fingerprinting&#039;s frontend script was inaccessible for customers using a custom domain powered by Cloudflare.
+
+Any client that normally would have been fingerprinted during this time would have failed to do so and received no telemetry.
+
+Clients that had already loaded the script before this time period were unaffected. Nov 18, 11:30:00 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 40 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Nov <var data-var='date'> 18</var>, <var data-var='time'>12:10:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  During [Cloudflare&#039;s 2025-11-18 incident](https://blog.cloudflare.com/18-november-2025-outage/), loading of Device Fingerprinting&#039;s frontend script was inaccessible for customers using a custom domain powered by Cloudflare.
+
+Any client that normally would have been fingerprinted during this time would have failed to do so and received no telemetry.
+
+Clients that had already loaded the script before this time period were unaffected..</p>
+<p><small>Nov <var data-var='date'> 18</var>, <var data-var='time'>11:30:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 18 Nov 2025 11:30:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmi6np63m00t0ekn395p7bgpy</link>
+  <guid>https://status.stytch.com/incident/cmi6np63m00t0ekn395p7bgpy</guid>
+</item>
+
+<item>
+  <title>Elevated error rate in API</title>
+  <description>
+    Type: Incident
+    
+
+    Affected Components: Test API, Live API, Javascript SDK
+    Nov 18, 12:10:00 GMT+0 - Resolved - During [Cloudflare&#039;s 2025-11-18 incident](https://blog.cloudflare.com/18-november-2025-outage/), Stytch&#039;s services continued to operate as normal.
+
+However Stytch customers that use Cloudflare in their own infrastructure may have seen their requests to Stytch, either client or server side requests, fail to make it to the Stytch API, thus causing their auth flows to fail.
+
+Though the Cloudflare incident did not cause any downtime in Stytch services, due to the popularity of Cloudflare, we&#039;ve created this incident for posterity for customers investigating downtime in their own systems. Nov 18, 12:01:00 GMT+0 - Monitoring - Services are recovering in the upstream provider, Cloudflare. Customers may continue to observe higher-than-normal error rates if they utilized Cloudflare in the meantime. Nov 18, 11:30:00 GMT+0 - Investigating - We are currently investigating an increase in errors in the Stytch API due to impact from an upstream provider outage. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    
+    <p><strong>Affected Components:</strong> , , </p>
+    <p><small>Nov <var data-var='date'> 18</var>, <var data-var='time'>12:10:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  During [Cloudflare&#039;s 2025-11-18 incident](https://blog.cloudflare.com/18-november-2025-outage/), Stytch&#039;s services continued to operate as normal.
+
+However Stytch customers that use Cloudflare in their own infrastructure may have seen their requests to Stytch, either client or server side requests, fail to make it to the Stytch API, thus causing their auth flows to fail.
+
+Though the Cloudflare incident did not cause any downtime in Stytch services, due to the popularity of Cloudflare, we&#039;ve created this incident for posterity for customers investigating downtime in their own systems..</p>
+<p><small>Nov <var data-var='date'> 18</var>, <var data-var='time'>12:01:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Services are recovering in the upstream provider, Cloudflare. Customers may continue to observe higher-than-normal error rates if they utilized Cloudflare in the meantime..</p>
+<p><small>Nov <var data-var='date'> 18</var>, <var data-var='time'>11:30:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating an increase in errors in the Stytch API due to impact from an upstream provider outage..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 18 Nov 2025 11:30:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmi4jnk9j0003hilezbsh2r0k</link>
+  <guid>https://status.stytch.com/incident/cmi4jnk9j0003hilezbsh2r0k</guid>
+</item>
+
+<item>
+  <title>Increased latency in the live API</title>
+  <description>
+    Type: Incident
+    Duration: 34 minutes
+
+    Affected Components: Live API
+    Nov 13, 14:20:00 GMT+0 - Resolved - This incident has been resolved. Nov 13, 14:17:00 GMT+0 - Monitoring - We implemented a fix and are currently monitoring the result. Nov 13, 14:06:00 GMT+0 - Investigating - We are currently investigating issues with increased latency in the live API. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 34 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Nov <var data-var='date'> 13</var>, <var data-var='time'>14:20:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Nov <var data-var='date'> 13</var>, <var data-var='time'>14:17:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix and are currently monitoring the result..</p>
+<p><small>Nov <var data-var='date'> 13</var>, <var data-var='time'>14:06:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating issues with increased latency in the live API..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 13 Nov 2025 14:06:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmhximlrs03jwhqpozv9o1sgu</link>
+  <guid>https://status.stytch.com/incident/cmhximlrs03jwhqpozv9o1sgu</guid>
+</item>
+
+<item>
+  <title>Device Fingerprinting pages unavailable in the Dashboard</title>
+  <description>
+    Type: Incident
+    Duration: 47 minutes
+
+    Affected Components: Dashboard, Message deliverability
+    Nov 10, 20:16:30 GMT+0 - Resolved - This incident has been resolved. Nov 10, 17:20:00 GMT+0 - Investigating - For customers with access to Device Fingerprinting, the Device Fingerprinting Logs and Device Fingerprinting Rules pages are inaccessible.
+
+Fingerprint Lookups and other API calls are unaffected. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 47 minutes</p>
+    <p><strong>Affected Components:</strong> , </p>
+    <p><small>Nov <var data-var='date'> 10</var>, <var data-var='time'>20:16:30</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Nov <var data-var='date'> 10</var>, <var data-var='time'>17:20:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  For customers with access to Device Fingerprinting, the Device Fingerprinting Logs and Device Fingerprinting Rules pages are inaccessible.
+
+Fingerprint Lookups and other API calls are unaffected..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 10 Nov 2025 17:20:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmhtl0iz3013i119rtwr51pzr</link>
+  <guid>https://status.stytch.com/incident/cmhtl0iz3013i119rtwr51pzr</guid>
+</item>
+
+<item>
+  <title>Elevated SMS OTP errors/ delays</title>
+  <description>
+    Type: Incident
+    Duration: 3 hours and 39 minutes
+
+    Affected Components: Message deliverability
+    Oct 20, 18:40:00 GMT+0 - Resolved - This incident has been resolved.
+
+We experienced elevated SMS OTP errors and delays, affecting roughly 9% of all messages and about 14% of SMS and WhatsApp messages. Oct 20, 18:38:00 GMT+0 - Monitoring - The SMS OTP errors have subsided. We will continue to monitor the situation while our primary messaging provider investigates the incident. Oct 20, 16:57:00 GMT+0 - Investigating - SMS OTP error rates and delays are currently elevated due to an incident from our primary messaging provider (related to AWS outage). We&#039;re assessing whether it makes sense to switch to a backup provider. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 3 hours and 39 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>18:40:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved.
+
+We experienced elevated SMS OTP errors and delays, affecting roughly 9% of all messages and about 14% of SMS and WhatsApp messages..</p>
+<p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>18:38:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  The SMS OTP errors have subsided. We will continue to monitor the situation while our primary messaging provider investigates the incident..</p>
+<p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>16:57:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  SMS OTP error rates and delays are currently elevated due to an incident from our primary messaging provider (related to AWS outage). We&#039;re assessing whether it makes sense to switch to a backup provider..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 20 Oct 2025 16:57:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmgzdh3ty05sszejad6bwsml3</link>
+  <guid>https://status.stytch.com/incident/cmgzdh3ty05sszejad6bwsml3</guid>
+</item>
+
+<item>
+  <title>SAML SSO requests failing</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 12 minutes
+
+    Affected Components: Test API, Live API, Javascript SDK
+    Oct 21, 21:27:25 GMT+0 - Postmortem - **Issue**
+
+All SAML SSO Logins failed in the Stytch Platform.
+
+**Timeline**
+
+October 20th, 2025
+
+16:30 - 18:01 UTC
+
+**Cause**
+
+A widespread outage in AWS created a knock-on effect that uncovered a latent certificate management issue within the Stytch SSO service. Other Stytch services, like the core Authentication API, responded appropriately in the face of downtime and continued to operate as expected. The result was that all SAML SSO login attempts during this incident returned an invalid certificate error and prevented users from logging in.
+
+**Remediation**
+
+Stytch updated the SSO service to handle certificate management so that it aligns with our other services that did not error. This reconfiguration will prevent this error from recurring in the event of AWS failure again in the future. Oct 20, 18:01:00 GMT+0 - Resolved - This incident has been resolved. Oct 20, 16:29:00 GMT+0 - Investigating - SAML SSO requests are currently failing as a downstream affect of the AWS outage. We&#039;re currently investigating ways to mitigate the issue. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 12 minutes</p>
+    <p><strong>Affected Components:</strong> , , </p>
+    <p><small>Oct <var data-var='date'> 21</var>, <var data-var='time'>21:27:25</var> GMT+0</small><br><strong>Postmortem</strong> -
+  **Issue**
+
+All SAML SSO Logins failed in the Stytch Platform.
+
+**Timeline**
+
+October 20th, 2025
+
+16:30 - 18:01 UTC
+
+**Cause**
+
+A widespread outage in AWS created a knock-on effect that uncovered a latent certificate management issue within the Stytch SSO service. Other Stytch services, like the core Authentication API, responded appropriately in the face of downtime and continued to operate as expected. The result was that all SAML SSO login attempts during this incident returned an invalid certificate error and prevented users from logging in.
+
+**Remediation**
+
+Stytch updated the SSO service to handle certificate management so that it aligns with our other services that did not error. This reconfiguration will prevent this error from recurring in the event of AWS failure again in the future..</p>
+<p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>18:01:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>16:29:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  SAML SSO requests are currently failing as a downstream affect of the AWS outage. We&#039;re currently investigating ways to mitigate the issue..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 20 Oct 2025 16:29:00 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmgzdn6k903jgjzg6u94ljjdh</link>
+  <guid>https://status.stytch.com/incident/cmgzdn6k903jgjzg6u94ljjdh</guid>
+</item>
+
+<item>
+  <title>Elevated BLOCK rates</title>
+  <description>
+    Type: Incident
+    Duration: 23 minutes
+
+    Affected Components: Device Fingerprinting
+    Oct 20, 16:19:56 GMT+0 - Resolved - This incident has been resolved. Oct 20, 15:57:01 GMT+0 - Investigating - We are currently investigating elevated DFP BLOCK rates. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 23 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>16:19:56</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>15:57:01</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating elevated DFP BLOCK rates..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 20 Oct 2025 15:57:01 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmgzbjcbr03huvl2l9w8k0f2z</link>
+  <guid>https://status.stytch.com/incident/cmgzbjcbr03huvl2l9w8k0f2z</guid>
+</item>
+
+<item>
+  <title>Investigating report of email deliverability issues</title>
+  <description>
+    Type: Incident
+    Duration: 1 day
+
+    Affected Components: Message deliverability
+    Oct 10, 00:10:00 GMT+0 - Resolved - This incident has been resolved. Oct 9, 00:10:04 GMT+0 - Investigating - We&#039;ve received several reports of potential issues with delivery login emails to Yahoo Email inboxes. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 day</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Oct <var data-var='date'> 10</var>, <var data-var='time'>00:10:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Oct <var data-var='date'> 9</var>, <var data-var='time'>00:10:04</var> GMT+0</small><br><strong>Investigating</strong> -
+  We&#039;ve received several reports of potential issues with delivery login emails to Yahoo Email inboxes..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 9 Oct 2025 00:10:04 +0000</pubDate>
+  <link>https://status.stytch.com/incident/cmginv6no00yysf24z9d323ze</link>
+  <guid>https://status.stytch.com/incident/cmginv6no00yysf24z9d323ze</guid>
+</item>
+
+<item>
+  <title>Scheduled maintenance in our Test environment</title>
+  <description>
+    Type: Maintenance
+    Duration: 1 hour
+
+    Affected Components: Test API
+    Sep 20, 19:00:00 GMT+0 - Completed - Maintenance has completed successfully Sep 20, 18:00:01 GMT+0 - Identified - Maintenance is now in progress Sep 20, 18:00:00 GMT+0 - Identified - We are performing routine database maintenance and our Test environment may experience some brief instability. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Maintenance</p>
+    <p><strong>Duration:</strong> 1 hour</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Sep <var data-var='date'> 20</var>, <var data-var='time'>19:00:00</var> GMT+0</small><br><strong>Completed</strong> -
+  Maintenance has completed successfully.</p>
+<p><small>Sep <var data-var='date'> 20</var>, <var data-var='time'>18:00:01</var> GMT+0</small><br><strong>Identified</strong> -
+  Maintenance is now in progress.</p>
+<p><small>Sep <var data-var='date'> 20</var>, <var data-var='time'>18:00:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We are performing routine database maintenance and our Test environment may experience some brief instability..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 20 Sep 2023 18:00:00 +0000</pubDate>
+  <link>https://status.stytch.com/maintenance/clms17owm34372bnodonp8z8a3</link>
+  <guid>https://status.stytch.com/maintenance/clms17owm34372bnodonp8z8a3</guid>
+</item>
+
+<item>
+  <title> Scheduled maintenance in our Test environment</title>
+  <description>
+    Type: Maintenance
+    Duration: 5 minutes
+
+    Affected Components: Test API
+    Sep 20, 17:05:00 GMT+0 - Completed - Maintenance has completed successfully Sep 20, 17:00:01 GMT+0 - Identified - Maintenance is now in progress Sep 20, 17:00:00 GMT+0 - Identified - We are planning for some scheduled maintenance in our Test environment. There may be increased 500&#039;s in our Test API during this time, there will be no impact to our Live environment. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Maintenance</p>
+    <p><strong>Duration:</strong> 5 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Sep <var data-var='date'> 20</var>, <var data-var='time'>17:05:00</var> GMT+0</small><br><strong>Completed</strong> -
+  Maintenance has completed successfully.</p>
+<p><small>Sep <var data-var='date'> 20</var>, <var data-var='time'>17:00:01</var> GMT+0</small><br><strong>Identified</strong> -
+  Maintenance is now in progress.</p>
+<p><small>Sep <var data-var='date'> 20</var>, <var data-var='time'>17:00:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We are planning for some scheduled maintenance in our Test environment. There may be increased 500&#039;s in our Test API during this time, there will be no impact to our Live environment..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 20 Sep 2023 17:00:00 +0000</pubDate>
+  <link>https://status.stytch.com/maintenance/clmkswt8n162658bnonbb03fc9y</link>
+  <guid>https://status.stytch.com/maintenance/clmkswt8n162658bnonbb03fc9y</guid>
+</item>
+
+  </channel>
+  </rss>

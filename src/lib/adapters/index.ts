@@ -5,6 +5,7 @@ import { fetchHeroku } from "./heroku";
 import { fetchGcp } from "./gcp";
 import { fetchAws } from "./aws";
 import { fetchAzure } from "./azure";
+import { fetchInstatus } from "./instatus";
 
 const ADAPTERS = {
   statuspage: fetchStatuspage,
@@ -13,6 +14,7 @@ const ADAPTERS = {
   gcp: fetchGcp,
   aws: fetchAws,
   azure: fetchAzure,
+  instatus: fetchInstatus,
 } as const;
 
 export function readProvider(p: ProviderSource, get: Getter): Promise<ProviderSnapshot> {

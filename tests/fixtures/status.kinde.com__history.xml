@@ -1,0 +1,804 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Kinde Status - Incident history</title>
+    <link>https://status.kinde.com</link>
+    <description>Kinde</description>
+    <pubDate>Wed, 23 Sep 2026 17:53:28 +0000</pubDate>
+    
+<item>
+  <title>504 gateway errors for some domains</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 12 minutes
+
+    Affected Components: Authentication, Authentication, Discord community, Authentication, Authentication, Authentication, Admin area
+    Sep 23, 19:05:50 GMT+0 - Resolved - This incident has been resolved. Sep 23, 18:20:00 GMT+0 - Monitoring - All services are returning to normal, we are monitoring. Sep 23, 17:53:28 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 12 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , , , </p>
+    <p><small>Sep <var data-var='date'> 23</var>, <var data-var='time'>19:05:50</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Sep <var data-var='date'> 23</var>, <var data-var='time'>18:20:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  All services are returning to normal, we are monitoring..</p>
+<p><small>Sep <var data-var='date'> 23</var>, <var data-var='time'>17:53:28</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 23 Sep 2026 17:53:28 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmueej0oo01g31arghodsxtd0</link>
+  <guid>https://status.kinde.com/incident/cmueej0oo01g31arghodsxtd0</guid>
+</item>
+
+<item>
+  <title>UK data region</title>
+  <description>
+    Type: Incident
+    Duration: 18 minutes
+
+    Affected Components: Authentication, Email delivery, Webhooks, Custom domains, User export and import, SMS delivery, Management API, New user registration
+    Aug 25, 14:57:54 GMT+0 - Postmortem - The outage was caused by our internal reverse proxy failing to scale cleanly, resulting in incoming traffic not routing though our infrastructure correctly. A manual redeployment rectified the issue and service was restored. We have identified the cause for the failed scale and are putting changes in place to prevent re-occurrence. Aug 25, 09:46:00 GMT+0 - Resolved - This incident has been resolved. Aug 25, 09:32:00 GMT+0 - Identified - We are continuing to work on a fix for this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 18 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , , , , </p>
+    <p><small>Aug <var data-var='date'> 25</var>, <var data-var='time'>14:57:54</var> GMT+0</small><br><strong>Postmortem</strong> -
+  The outage was caused by our internal reverse proxy failing to scale cleanly, resulting in incoming traffic not routing though our infrastructure correctly. A manual redeployment rectified the issue and service was restored. We have identified the cause for the failed scale and are putting changes in place to prevent re-occurrence..</p>
+<p><small>Aug <var data-var='date'> 25</var>, <var data-var='time'>09:46:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Aug <var data-var='date'> 25</var>, <var data-var='time'>09:32:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We are continuing to work on a fix for this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 25 Aug 2026 09:32:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmt8hez8g00h20ko4z88uijqa</link>
+  <guid>https://status.kinde.com/incident/cmt8hez8g00h20ko4z88uijqa</guid>
+</item>
+
+<item>
+  <title>Timeouts in US region</title>
+  <description>
+    Type: Incident
+    Duration: 19 minutes
+
+    Affected Components: Authentication, Management API
+    Jun 22, 16:21:00 GMT+0 - Resolved - This incident has been resolved. Jun 22, 16:02:00 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 19 minutes</p>
+    <p><strong>Affected Components:</strong> , </p>
+    <p><small>Jun <var data-var='date'> 22</var>, <var data-var='time'>16:21:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Jun <var data-var='date'> 22</var>, <var data-var='time'>16:02:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 22 Jun 2026 16:02:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmqpgaatw00q42io4wngi1vah</link>
+  <guid>https://status.kinde.com/incident/cmqpgaatw00q42io4wngi1vah</guid>
+</item>
+
+<item>
+  <title>[Third Party] x.com auth experiencing issue</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 38 minutes
+
+    Affected Components: Authentication, Authentication, Authentication, Authentication, Authentication
+    Jun 16, 15:33:04 GMT+0 - Resolved - [x.com](http://x.com) OAuth2 is now resolving and working.  Jun 16, 13:54:34 GMT+0 - Identified - [x.com](http://x.com) OAuth2 is currently experiencing issues resulting in a too many redirect errors.
+
+If you rely or use [x.com](http://x.com) login on your application, please reach to support and we will assist with your options. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 38 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , </p>
+    <p><small>Jun <var data-var='date'> 16</var>, <var data-var='time'>15:33:04</var> GMT+0</small><br><strong>Resolved</strong> -
+  [x.com](http://x.com) OAuth2 is now resolving and working. .</p>
+<p><small>Jun <var data-var='date'> 16</var>, <var data-var='time'>13:54:34</var> GMT+0</small><br><strong>Identified</strong> -
+  [x.com](http://x.com) OAuth2 is currently experiencing issues resulting in a too many redirect errors.
+
+If you rely or use [x.com](http://x.com) login on your application, please reach to support and we will assist with your options..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 16 Jun 2026 13:54:34 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmqgpegxt00an2ou48bepruq3</link>
+  <guid>https://status.kinde.com/incident/cmqgpegxt00an2ou48bepruq3</guid>
+</item>
+
+<item>
+  <title>Degraded performance</title>
+  <description>
+    Type: Incident
+    Duration: 30 minutes
+
+    Affected Components: Management API, Authentication, New user registration, User export and import
+    Jun 12, 06:45:00 GMT+0 - Resolved - This incident has been resolved and our identified the issue. Jun 12, 06:15:00 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 30 minutes</p>
+    <p><strong>Affected Components:</strong> , , , </p>
+    <p><small>Jun <var data-var='date'> 12</var>, <var data-var='time'>06:45:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved and our identified the issue..</p>
+<p><small>Jun <var data-var='date'> 12</var>, <var data-var='time'>06:15:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 12 Jun 2026 06:15:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmqepoxdi01022jpftu9vfwwi</link>
+  <guid>https://status.kinde.com/incident/cmqepoxdi01022jpftu9vfwwi</guid>
+</item>
+
+<item>
+  <title>High latency for AU region</title>
+  <description>
+    Type: Incident
+    Duration: 2 hours and 47 minutes
+
+    Affected Components: Custom domains, Management API, SMS delivery, Webhooks, Authentication, New user registration, Admin area, User export and import, Email delivery
+    Apr 17, 06:14:44 GMT+0 - Resolved - This incident has been resolved, and a solution has been rolled out. Latency has resolved to baseline levels. Apr 17, 05:52:09 GMT+0 - Monitoring - Our team is working on a fix and is actively monitoring to ensure latency returns to baseline levels. Apr 17, 05:28:44 GMT+0 - Postmortem - We experienced high latency in our caching layer, which caused problems for a majority of our customers in the AU region. We have applied mitigations and will be prioritizing more performance enhancements soon. Apr 17, 04:06:08 GMT+0 - Resolved - This incident has been resolved. The team will continue to monitor. Apr 17, 03:58:05 GMT+0 - Monitoring - We are continuing to monitor. Latency is returning to normal levels, and the team is actively working to return to baseline. Apr 17, 03:42:41 GMT+0 - Monitoring - We are currently monitoring the result. Latency is returning to normal. Apr 17, 03:27:31 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 2 hours and 47 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , , , , , </p>
+    <p><small>Apr <var data-var='date'> 17</var>, <var data-var='time'>06:14:44</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved, and a solution has been rolled out. Latency has resolved to baseline levels..</p>
+<p><small>Apr <var data-var='date'> 17</var>, <var data-var='time'>05:52:09</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Our team is working on a fix and is actively monitoring to ensure latency returns to baseline levels..</p>
+<p><small>Apr <var data-var='date'> 17</var>, <var data-var='time'>05:28:44</var> GMT+0</small><br><strong>Postmortem</strong> -
+  We experienced high latency in our caching layer, which caused problems for a majority of our customers in the AU region. We have applied mitigations and will be prioritizing more performance enhancements soon..</p>
+<p><small>Apr <var data-var='date'> 17</var>, <var data-var='time'>04:06:08</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved. The team will continue to monitor..</p>
+<p><small>Apr <var data-var='date'> 17</var>, <var data-var='time'>03:58:05</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We are continuing to monitor. Latency is returning to normal levels, and the team is actively working to return to baseline..</p>
+<p><small>Apr <var data-var='date'> 17</var>, <var data-var='time'>03:42:41</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We are currently monitoring the result. Latency is returning to normal..</p>
+<p><small>Apr <var data-var='date'> 17</var>, <var data-var='time'>03:27:31</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 17 Apr 2026 03:27:31 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmo2ckyns07sx7ds83v42kurq</link>
+  <guid>https://status.kinde.com/incident/cmo2ckyns07sx7ds83v42kurq</guid>
+</item>
+
+<item>
+  <title>500 errors on auth flow</title>
+  <description>
+    Type: Incident
+    Duration: 45 minutes
+
+    Affected Components: User export and import, Management API, Authentication, New user registration, New user registration, Management API, Authentication, New user registration, Management API, Management API, Authentication, Authentication, New user registration, Management API, Authentication, New user registration
+    Apr 16, 20:10:00 GMT+0 - Resolved - This incident has been resolved. Apr 16, 19:55:00 GMT+0 - Identified - We are continuing to work on a fix for this incident. Apr 16, 19:25:00 GMT+0 - Resolved - This incident has been resolved. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 45 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , , , , , , , , , , , , </p>
+    <p><small>Apr <var data-var='date'> 16</var>, <var data-var='time'>20:10:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Apr <var data-var='date'> 16</var>, <var data-var='time'>19:55:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We are continuing to work on a fix for this incident..</p>
+<p><small>Apr <var data-var='date'> 16</var>, <var data-var='time'>19:25:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 16 Apr 2026 19:25:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmo1yh2mj0003exdxerqkparr</link>
+  <guid>https://status.kinde.com/incident/cmo1yh2mj0003exdxerqkparr</guid>
+</item>
+
+<item>
+  <title>High latency for AU region</title>
+  <description>
+    Type: Incident
+    Duration: 22 minutes
+
+    Affected Components: Custom domains, Management API, SMS delivery, Webhooks, Authentication, New user registration, User export and import, Email delivery
+    Apr 16, 08:34:32 GMT+0 - Resolved - This incident has been resolved. We will continue to monitor latency internally. Apr 16, 08:21:42 GMT+0 - Monitoring - Latency has returned to normal. We are currently monitoring the result. Apr 16, 08:12:19 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 22 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , , , , </p>
+    <p><small>Apr <var data-var='date'> 16</var>, <var data-var='time'>08:34:32</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved. We will continue to monitor latency internally..</p>
+<p><small>Apr <var data-var='date'> 16</var>, <var data-var='time'>08:21:42</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Latency has returned to normal. We are currently monitoring the result..</p>
+<p><small>Apr <var data-var='date'> 16</var>, <var data-var='time'>08:12:19</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 16 Apr 2026 08:12:19 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmo17bdkr09c6labi3psuyqfv</link>
+  <guid>https://status.kinde.com/incident/cmo17bdkr09c6labi3psuyqfv</guid>
+</item>
+
+<item>
+  <title>Increased errors</title>
+  <description>
+    Type: Incident
+    Duration: 47 minutes
+
+    Affected Components: SMS delivery, Custom domains, Management API, Webhooks, Authentication, New user registration, Admin area, User export and import, Email delivery
+    Apr 11, 10:58:00 GMT+0 - Resolved - This incident has been resolved and the team is monitoring and will investigate the cause. Apr 11, 10:11:00 GMT+0 - Monitoring - We implemented a fix and are currently monitoring the result. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 47 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , , , , , </p>
+    <p><small>Apr <var data-var='date'> 11</var>, <var data-var='time'>10:58:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved and the team is monitoring and will investigate the cause..</p>
+<p><small>Apr <var data-var='date'> 11</var>, <var data-var='time'>10:11:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix and are currently monitoring the result..</p>
+]]>
+  </content:encoded>
+  <pubDate>Sat, 11 Apr 2026 10:11:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmnu7x1eu028cfi9ay7wiopsd</link>
+  <guid>https://status.kinde.com/incident/cmnu7x1eu028cfi9ay7wiopsd</guid>
+</item>
+
+<item>
+  <title>Intermittent 5xx timeouts for auth flows in AU region</title>
+  <description>
+    Type: Incident
+    Duration: 32 minutes
+
+    Affected Components: Authentication, Admin area
+    Mar 17, 03:10:28 GMT+0 - Resolved - This incident has been resolved. Please reach out to the team if you need any assistance. Mar 17, 02:46:37 GMT+0 - Monitoring - We are currently monitoring. Mar 17, 02:38:38 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 32 minutes</p>
+    <p><strong>Affected Components:</strong> , </p>
+    <p><small>Mar <var data-var='date'> 17</var>, <var data-var='time'>03:10:28</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved. Please reach out to the team if you need any assistance..</p>
+<p><small>Mar <var data-var='date'> 17</var>, <var data-var='time'>02:46:37</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We are currently monitoring..</p>
+<p><small>Mar <var data-var='date'> 17</var>, <var data-var='time'>02:38:38</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 17 Mar 2026 02:38:38 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmmu06ola03cpj48zrqwg4crr</link>
+  <guid>https://status.kinde.com/incident/cmmu06ola03cpj48zrqwg4crr</guid>
+</item>
+
+<item>
+  <title>Delay with webhooks in London region</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 48 minutes
+
+    Affected Components: Webhooks
+    Feb 3, 14:21:35 GMT+0 - Resolved - We have resolved the webhook delay. Feb 3, 12:33:06 GMT+0 - Investigating - We are currently investigating a delay with webhooks in the London region 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 48 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Feb <var data-var='date'> 3</var>, <var data-var='time'>14:21:35</var> GMT+0</small><br><strong>Resolved</strong> -
+  We have resolved the webhook delay..</p>
+<p><small>Feb <var data-var='date'> 3</var>, <var data-var='time'>12:33:06</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating a delay with webhooks in the London region.</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 3 Feb 2026 12:33:06 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cml6kxeam00267prgal796ut3</link>
+  <guid>https://status.kinde.com/incident/cml6kxeam00267prgal796ut3</guid>
+</item>
+
+<item>
+  <title>One Time Password (OTP) Email errors</title>
+  <description>
+    Type: Incident
+    Duration: 16 minutes
+
+    Affected Components: Authentication, Authentication, Authentication, Authentication, Authentication
+    Jan 7, 14:14:11 GMT+0 - Resolved - This incident has been resolved. Jan 7, 13:58:35 GMT+0 - Identified - The issue has been identified and a fix is currently being deployed. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 16 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , </p>
+    <p><small>Jan <var data-var='date'> 7</var>, <var data-var='time'>14:14:11</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Jan <var data-var='date'> 7</var>, <var data-var='time'>13:58:35</var> GMT+0</small><br><strong>Identified</strong> -
+  The issue has been identified and a fix is currently being deployed..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 7 Jan 2026 13:58:35 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmk433chl06atrzjerc1519vg</link>
+  <guid>https://status.kinde.com/incident/cmk433chl06atrzjerc1519vg</guid>
+</item>
+
+<item>
+  <title>SMS delivery problems to Vodafone Australia numbers</title>
+  <description>
+    Type: Incident
+    Duration: 20 hours and 55 minutes
+
+    Affected Components: SMS delivery
+    Dec 9, 04:21:33 GMT+0 - Resolved - This incident has been resolved. Dec 9, 03:51:31 GMT+0 - Monitoring - An update has been applied to unblock delivery to Vodafone Australia. The team will continue monitoring until there&#039;s a sufficient volume of successful messages.  Dec 8, 07:27:00 GMT+0 - Identified - We are working with out SMS provider to unblock these. At the moment, any messages from Kinde businesses based in the Sydney AU data region being sent to numbers with Vodafone Australia will not be delivered. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 20 hours and 55 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Dec <var data-var='date'> 9</var>, <var data-var='time'>04:21:33</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Dec <var data-var='date'> 9</var>, <var data-var='time'>03:51:31</var> GMT+0</small><br><strong>Monitoring</strong> -
+  An update has been applied to unblock delivery to Vodafone Australia. The team will continue monitoring until there&#039;s a sufficient volume of successful messages. .</p>
+<p><small>Dec <var data-var='date'> 8</var>, <var data-var='time'>07:27:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We are working with out SMS provider to unblock these. At the moment, any messages from Kinde businesses based in the Sydney AU data region being sent to numbers with Vodafone Australia will not be delivered..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 8 Dec 2025 07:27:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmiy0rt3b0kylxw9510yo1ro0</link>
+  <guid>https://status.kinde.com/incident/cmiy0rt3b0kylxw9510yo1ro0</guid>
+</item>
+
+<item>
+  <title>Connections from the UK to Kinde&#039;s AU region are timing out</title>
+  <description>
+    Type: Incident
+    Duration: 22 days and 13 minutes
+
+    Affected Components: Custom domains, Authentication
+    Dec 9, 05:18:18 GMT+0 - Resolved - This is a network routing issue between Sky’s infrastructure and AWS Sydney, and is also affecting other services hosted in this region. Sky customers have reported similar issues in Sky’s support forums.  
+  
+There is currently no ETA for resolution from Sky. We do have a workaround available, if you’re affected by this issue, please reach out to our support team.  
+  
+We’ll update this status as more information becomes available. Dec 9, 03:53:37 GMT+0 - Resolved - This is a network routing issue between Sky’s infrastructure and AWS Sydney, and is also affecting other services hosted in this region. Sky customers have reported similar issues in Sky’s support forums.
+
+There is currently no ETA for resolution from Sky. We do have a workaround available, if you’re affected by this issue, please reach out to our support team.
+
+For now, we&#039;re going to mark this as closed and will update this status post as more information becomes available. Dec 5, 23:07:59 GMT+0 - Identified - Our cloud provider has acknowledged the issue is affecting all of their customers and not just Kinde. And are continuing their investigation to provide a resolution. Dec 5, 20:44:18 GMT+0 - Identified - Based on regional testing, it looks like users using Sky as their ISP in the UK are not able to connect to Kinde businesses in the AU data region. We&#039;re in contact with our cloud provider and continuing to troubleshoot this issue.  Dec 5, 18:41:24 GMT+0 - Investigating - We are currently investigating this incident.
+
+Connections from the UK to Kinde&#039;s AU region are timing out. Currently only the ISP &quot;Sky&quot; has been identified. This will impact users who are connecting from the UK and trying to accessing Kinde businesses that run in the AU data region.  
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 22 days and 13 minutes</p>
+    <p><strong>Affected Components:</strong> , </p>
+    <p><small>Dec <var data-var='date'> 9</var>, <var data-var='time'>05:18:18</var> GMT+0</small><br><strong>Resolved</strong> -
+  This is a network routing issue between Sky’s infrastructure and AWS Sydney, and is also affecting other services hosted in this region. Sky customers have reported similar issues in Sky’s support forums.  
+  
+There is currently no ETA for resolution from Sky. We do have a workaround available, if you’re affected by this issue, please reach out to our support team.  
+  
+We’ll update this status as more information becomes available..</p>
+<p><small>Dec <var data-var='date'> 9</var>, <var data-var='time'>03:53:37</var> GMT+0</small><br><strong>Resolved</strong> -
+  This is a network routing issue between Sky’s infrastructure and AWS Sydney, and is also affecting other services hosted in this region. Sky customers have reported similar issues in Sky’s support forums.
+
+There is currently no ETA for resolution from Sky. We do have a workaround available, if you’re affected by this issue, please reach out to our support team.
+
+For now, we&#039;re going to mark this as closed and will update this status post as more information becomes available..</p>
+<p><small>Dec <var data-var='date'> 5</var>, <var data-var='time'>23:07:59</var> GMT+0</small><br><strong>Identified</strong> -
+  Our cloud provider has acknowledged the issue is affecting all of their customers and not just Kinde. And are continuing their investigation to provide a resolution..</p>
+<p><small>Dec <var data-var='date'> 5</var>, <var data-var='time'>20:44:18</var> GMT+0</small><br><strong>Identified</strong> -
+  Based on regional testing, it looks like users using Sky as their ISP in the UK are not able to connect to Kinde businesses in the AU data region. We&#039;re in contact with our cloud provider and continuing to troubleshoot this issue. .</p>
+<p><small>Dec <var data-var='date'> 5</var>, <var data-var='time'>18:41:24</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident.
+
+Connections from the UK to Kinde&#039;s AU region are timing out. Currently only the ISP &quot;Sky&quot; has been identified. This will impact users who are connecting from the UK and trying to accessing Kinde businesses that run in the AU data region. .</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 5 Dec 2025 18:41:24 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmit7nxxv021y4uvkl8hjhagh</link>
+  <guid>https://status.kinde.com/incident/cmit7nxxv021y4uvkl8hjhagh</guid>
+</item>
+
+<item>
+  <title>AU region SMS delivery experiencing issues with the SMS provider. Not affecting Twilio setups</title>
+  <description>
+    Type: Incident
+    Duration: 4 hours and 4 minutes
+
+    Affected Components: SMS delivery
+    Dec 4, 10:24:00 GMT+0 - Resolved - This incident has been resolved. Dec 4, 06:20:00 GMT+0 - Identified - We are continuing to work on a fix for this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 4 hours and 4 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Dec <var data-var='date'> 4</var>, <var data-var='time'>10:24:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Dec <var data-var='date'> 4</var>, <var data-var='time'>06:20:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We are continuing to work on a fix for this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 4 Dec 2025 06:20:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmir23zli02cnud1e9fo7ji3f</link>
+  <guid>https://status.kinde.com/incident/cmir23zli02cnud1e9fo7ji3f</guid>
+</item>
+
+<item>
+  <title>Increase in SMS sending errors</title>
+  <description>
+    Type: Incident
+    Duration: 2 hours and 44 minutes
+
+    Affected Components: SMS delivery, SMS delivery, SMS delivery, SMS delivery, SMS delivery
+    Nov 20, 08:31:33 GMT+0 - Resolved - This incident has been resolved. Nov 20, 08:12:28 GMT+0 - Monitoring - We implemented a fix and are currently monitoring the result. Nov 20, 05:48:00 GMT+0 - Identified - Impacting custom SMS providers, not the default Kinde SMS sending. We are continuing to work on a fix for this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 2 hours and 44 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , </p>
+    <p><small>Nov <var data-var='date'> 20</var>, <var data-var='time'>08:31:33</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Nov <var data-var='date'> 20</var>, <var data-var='time'>08:12:28</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix and are currently monitoring the result..</p>
+<p><small>Nov <var data-var='date'> 20</var>, <var data-var='time'>05:48:00</var> GMT+0</small><br><strong>Identified</strong> -
+  Impacting custom SMS providers, not the default Kinde SMS sending. We are continuing to work on a fix for this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 20 Nov 2025 05:48:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmi73go6x0779orooxfxvvu68</link>
+  <guid>https://status.kinde.com/incident/cmi73go6x0779orooxfxvvu68</guid>
+</item>
+
+<item>
+  <title>US custom domain timeouts</title>
+  <description>
+    Type: Incident
+    Duration: 54 minutes
+
+    Affected Components: Authentication, Custom domains
+    Nov 3, 02:16:19 GMT+0 - Resolved - This incident has been resolved. Nov 3, 01:24:40 GMT+0 - Monitoring - Custom domains are back online and we&#039;re currently monitoring Nov 3, 01:22:45 GMT+0 - Investigating - We are currently investigating this incident. This is impacting Kinde businesses in the US region running on a custom domain. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 54 minutes</p>
+    <p><strong>Affected Components:</strong> , </p>
+    <p><small>Nov <var data-var='date'> 3</var>, <var data-var='time'>02:16:19</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Nov <var data-var='date'> 3</var>, <var data-var='time'>01:24:40</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Custom domains are back online and we&#039;re currently monitoring.</p>
+<p><small>Nov <var data-var='date'> 3</var>, <var data-var='time'>01:22:45</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident. This is impacting Kinde businesses in the US region running on a custom domain..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 3 Nov 2025 01:22:45 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmhiggyft04wxu5ed36cd8q2q</link>
+  <guid>https://status.kinde.com/incident/cmhiggyft04wxu5ed36cd8q2q</guid>
+</item>
+
+<item>
+  <title>AU region API experiencing degraded performance</title>
+  <description>
+    Type: Incident
+    Duration: 38 minutes
+
+    Affected Components: Management API
+    Oct 20, 06:18:48 GMT+0 - Resolved - This incident has been resolved and team is investigation the cause. Oct 20, 06:01:42 GMT+0 - Monitoring - Error have decreased and our team are currently monitoring. Oct 20, 05:41:00 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 38 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>06:18:48</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved and team is investigation the cause..</p>
+<p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>06:01:42</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Error have decreased and our team are currently monitoring..</p>
+<p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>05:41:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 20 Oct 2025 05:41:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmgyq13lu02s5zejajek16hf2</link>
+  <guid>https://status.kinde.com/incident/cmgyq13lu02s5zejajek16hf2</guid>
+</item>
+
+<item>
+  <title>Some customers experience high latency in EU region</title>
+  <description>
+    Type: Incident
+    Duration: 49 minutes
+
+    Affected Components: Authentication, Email delivery, Custom domains, User export and import, Management API, , New user registration, SMS delivery, 
+EU region →
+    Oct 16, 10:28:08 GMT+0 - Resolved - This incident has been resolved. Oct 16, 10:13:15 GMT+0 - Monitoring - We implemented a fix and are currently monitoring the result. Oct 16, 09:39:00 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 49 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , , , , </p>
+    <p><small>Oct <var data-var='date'> 16</var>, <var data-var='time'>10:28:08</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Oct <var data-var='date'> 16</var>, <var data-var='time'>10:13:15</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix and are currently monitoring the result..</p>
+<p><small>Oct <var data-var='date'> 16</var>, <var data-var='time'>09:39:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 16 Oct 2025 09:39:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmgt8u8rs00i1733t55782g5l</link>
+  <guid>https://status.kinde.com/incident/cmgt8u8rs00i1733t55782g5l</guid>
+</item>
+
+<item>
+  <title>High latency for AU region</title>
+  <description>
+    Type: Incident
+    Duration: 39 minutes
+
+    Affected Components: SMS delivery, Authentication, User export and import, Email delivery, New user registration, Admin area, , Custom domains, Management API, 
+AU region →
+    Sep 4, 06:59:05 GMT+0 - Resolved - This incident has been resolved and our team will continue to monitor. Sep 4, 06:51:04 GMT+0 - Monitoring - Latency has returned to normal and we&#039;re monitoring performance now Sep 4, 06:20:00 GMT+0 - Investigating - We are currently investigating this. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 39 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , , , , , </p>
+    <p><small>Sep <var data-var='date'> 4</var>, <var data-var='time'>06:59:05</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved and our team will continue to monitor..</p>
+<p><small>Sep <var data-var='date'> 4</var>, <var data-var='time'>06:51:04</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Latency has returned to normal and we&#039;re monitoring performance now.</p>
+<p><small>Sep <var data-var='date'> 4</var>, <var data-var='time'>06:20:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 4 Sep 2025 06:20:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmf51gqks004s8wqu58g5b12u</link>
+  <guid>https://status.kinde.com/incident/cmf51gqks004s8wqu58g5b12u</guid>
+</item>
+
+<item>
+  <title>Known authentication errors</title>
+  <description>
+    Type: Incident
+    Duration: 6 hours and 58 minutes
+
+    Affected Components: Authentication, Authentication, Authentication, Authentication, Admin area, Authentication
+    Sep 8, 11:47:11 GMT+0 - Postmortem - **Post-incident report now available.**  
+  
+Following the incident of 3 September 2025, we&#039;ve now prepared a post-incident report, containing detailed information about the root cause, remedies, future actions, etc.  
+  
+[View post-incident report](https://kinde.com/blog/post-mortem/2025-09-03-authenticated-to-wrong-user-profile).  
+  
+If you have any questions, or need any additional information, please reach out to us by [email](mailto:support@kinde.com), or in our [Slack](https://join.slack.com/t/thekindecommunity/shared%5Finvite/zt-25gshkj52-AAn0R3V86WWsWkd8IH~~0g) and [Discord](https://discord.gg/wHX6j7wG5d) communities. We&#039;re here to support you however we can.  
+Again, we are deeply apologetic for the inconvenience caused to you and your customers. We are making it impossible to happen again. Sep 4, 00:20:07 GMT+0 - Resolved - A brief update to the summary from yesterday.
+
+Incident window on September 3 between 10:40am to 11:41am Sydney time (12:40am to 01:41am UTC).
+
+This was not a malicious attack and there was no Kinde data breach from an external attacker. We caused it.
+
+The deployment was rolled back 61 minutes after the bug appeared, fixing the issue. Users who logged in outside of the incident window are not affected.
+
+Only OAuth and OIDC type connections were impacted, such as all social authentication connections and the Entra OAuth enterprise connection.
+
+Email, username, SMS, and SAML connections were not impacted.
+
+There was no cross-business profile exposure.
+
+For each of your OAuth2 or OIDC connections, the first user to authenticate during the incident window became the profile for subsequent users on that OAuth2 or OIDC connection.
+
+For example, say user 1 authenticated at the beginning of the incident. When any subsequent user authenticated (e.g. user 2, 3, and 4) they were shown the profile for user 1.
+
+Less than 100 user profiles globally were exposed by this incident.
+
+Sessions and tokens during the incident window were identified and invalidated by the evening of Sep 3 Sydney time.
+
+The Kinde team are actively reaching out directly to impacted Kinde businesses who have had authentication sessions during the incident window to provide further information and assistance. Sep 3, 08:04:58 GMT+0 - Resolved - We will be closing this incident on the status page, however updates will still be provided here publicly and directly to customers where required.
+
+Only users who logged in during the hour long incident window were impacted.
+
+The initial bug from this morning was resolved. All impacted sessions and tokens for the Kinde admin have been invalidated. Additionally all customer sessions during the incident window have been invalidated on the Kinde side.
+
+We are compiling a list of users impacted and will be reaching out directly to customers to verify if there are any cached access or refresh tokens that need to be invalidated. Sep 3, 06:02:08 GMT+0 - Monitoring - The team are continuing to investigate the total breadth of the incident, specifically with the invalidation of logins during the incident. We will continue to update this status page with high level information and directly to customers for information specific to their business. Sep 3, 04:00:21 GMT+0 - Monitoring - \\-- -- Apologies for the broken formatting on this longer update. We will provide a nicer view of this report in the coming days as part of a post mortem -- -- To all the Kinde customers impacted by the authentication incident that occurred today (3 September 2025) at 10:40am Sydney time, we are so sorry for the impact this has had on your businesses. It was entirely our fault. We fu\\\*#ed up. We accidentally introduced an authentication bug during a routine feature deployment. The bug has been fixed and we are swarming to respond and remediate. More updates will be posted to our status page, where you can subscribe to the incident and receive updates. If you have one, please use your dedicated channel in Kinde Slack. \\-- -- Summary -- -- This was not a malicious attack and there was no Kinde data breach. We caused it. Social auth connections were impacted (not enterprise connections). End-users who authenticated during the incident were signed in to a profile that was not theirs. We are working to invalidate all sessions that were signed into during the incident period. This will invalidate auth tokens and force the affected users to sign in again. The deployment was rolled back 68 minutes after the bug appeared, fixing the issue. Users who sign in to your app now, will be unaffected. This is being treated as a security incident due to the impact to users when using our customer’s products, however Kinde has not been breached. \\-- -- What we know -- -- A recent code change was deployed introducing a bug that redirected authenticated users to the wrong profile. They signed in as usual via social authentication, but the bug assigned the incorrect user ID to them when returning to the app. This effectively showed them the profile of another user after the login. Users logging into the Kinde admin were also impacted when using the Google or Github authentication options, and were directed to the incorrect organisation selector. To the best of our knowledge, enterprise connections (such as SAML and MS Entra OAuth2) were not impacted by this bug. \\-- -- Current actions -- -- The bug is fixed. Here’s what we are doing right now: Determining how many users were affected. i.e. the scope of the incident Working out the best remedy (i.e. invalidate invalid sessions) to impact the least users Running diffs with a restored copy of the data prior to the incident for validation Performing a code analysis of the change We will reach out to customers directly with more information, as we have it. \\-- -- Incident timeline - 3 September 2025 -- -- Change deployed at 10:40 am Sydney time First notification of incorrect logins is 11:07 am Sydney time Change reverted at 11:41 am Sydney time Total duration where a user could log into the wrong profile: 61 minutes Sep 3, 02:22:00 GMT+0 - Monitoring - Sydney region is operational and user sessions are in the process of being invalidated. Sep 3, 02:19:00 GMT+0 - Identified - There is high latency for the Sydney region currently. Sep 3, 02:08:36 GMT+0 - Monitoring - We are currently working on invalidating all sessions that took place during the incident. Sep 3, 01:41:00 GMT+0 - Monitoring - We implemented a fix that resolves the issue and are currently monitoring the result. This is being treated as a serious incident and our team is working urgently. Sep 3, 01:37:23 GMT+0 - Identified - We have identified a critical authentication error affecting Social SSO, email and SMS.  
+  
+Enterprise Connections/SSO are not affected. Sep 3, 01:07:00 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 6 hours and 58 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , , </p>
+    <p><small>Sep <var data-var='date'> 8</var>, <var data-var='time'>11:47:11</var> GMT+0</small><br><strong>Postmortem</strong> -
+  **Post-incident report now available.**  
+  
+Following the incident of 3 September 2025, we&#039;ve now prepared a post-incident report, containing detailed information about the root cause, remedies, future actions, etc.  
+  
+[View post-incident report](https://kinde.com/blog/post-mortem/2025-09-03-authenticated-to-wrong-user-profile).  
+  
+If you have any questions, or need any additional information, please reach out to us by [email](mailto:support@kinde.com), or in our [Slack](https://join.slack.com/t/thekindecommunity/shared%5Finvite/zt-25gshkj52-AAn0R3V86WWsWkd8IH~~0g) and [Discord](https://discord.gg/wHX6j7wG5d) communities. We&#039;re here to support you however we can.  
+Again, we are deeply apologetic for the inconvenience caused to you and your customers. We are making it impossible to happen again..</p>
+<p><small>Sep <var data-var='date'> 4</var>, <var data-var='time'>00:20:07</var> GMT+0</small><br><strong>Resolved</strong> -
+  A brief update to the summary from yesterday.
+
+Incident window on September 3 between 10:40am to 11:41am Sydney time (12:40am to 01:41am UTC).
+
+This was not a malicious attack and there was no Kinde data breach from an external attacker. We caused it.
+
+The deployment was rolled back 61 minutes after the bug appeared, fixing the issue. Users who logged in outside of the incident window are not affected.
+
+Only OAuth and OIDC type connections were impacted, such as all social authentication connections and the Entra OAuth enterprise connection.
+
+Email, username, SMS, and SAML connections were not impacted.
+
+There was no cross-business profile exposure.
+
+For each of your OAuth2 or OIDC connections, the first user to authenticate during the incident window became the profile for subsequent users on that OAuth2 or OIDC connection.
+
+For example, say user 1 authenticated at the beginning of the incident. When any subsequent user authenticated (e.g. user 2, 3, and 4) they were shown the profile for user 1.
+
+Less than 100 user profiles globally were exposed by this incident.
+
+Sessions and tokens during the incident window were identified and invalidated by the evening of Sep 3 Sydney time.
+
+The Kinde team are actively reaching out directly to impacted Kinde businesses who have had authentication sessions during the incident window to provide further information and assistance..</p>
+<p><small>Sep <var data-var='date'> 3</var>, <var data-var='time'>08:04:58</var> GMT+0</small><br><strong>Resolved</strong> -
+  We will be closing this incident on the status page, however updates will still be provided here publicly and directly to customers where required.
+
+Only users who logged in during the hour long incident window were impacted.
+
+The initial bug from this morning was resolved. All impacted sessions and tokens for the Kinde admin have been invalidated. Additionally all customer sessions during the incident window have been invalidated on the Kinde side.
+
+We are compiling a list of users impacted and will be reaching out directly to customers to verify if there are any cached access or refresh tokens that need to be invalidated..</p>
+<p><small>Sep <var data-var='date'> 3</var>, <var data-var='time'>06:02:08</var> GMT+0</small><br><strong>Monitoring</strong> -
+  The team are continuing to investigate the total breadth of the incident, specifically with the invalidation of logins during the incident. We will continue to update this status page with high level information and directly to customers for information specific to their business..</p>
+<p><small>Sep <var data-var='date'> 3</var>, <var data-var='time'>04:00:21</var> GMT+0</small><br><strong>Monitoring</strong> -
+  \\-- -- Apologies for the broken formatting on this longer update. We will provide a nicer view of this report in the coming days as part of a post mortem -- -- To all the Kinde customers impacted by the authentication incident that occurred today (3 September 2025) at 10:40am Sydney time, we are so sorry for the impact this has had on your businesses. It was entirely our fault. We fu\\\*#ed up. We accidentally introduced an authentication bug during a routine feature deployment. The bug has been fixed and we are swarming to respond and remediate. More updates will be posted to our status page, where you can subscribe to the incident and receive updates. If you have one, please use your dedicated channel in Kinde Slack. \\-- -- Summary -- -- This was not a malicious attack and there was no Kinde data breach. We caused it. Social auth connections were impacted (not enterprise connections). End-users who authenticated during the incident were signed in to a profile that was not theirs. We are working to invalidate all sessions that were signed into during the incident period. This will invalidate auth tokens and force the affected users to sign in again. The deployment was rolled back 68 minutes after the bug appeared, fixing the issue. Users who sign in to your app now, will be unaffected. This is being treated as a security incident due to the impact to users when using our customer’s products, however Kinde has not been breached. \\-- -- What we know -- -- A recent code change was deployed introducing a bug that redirected authenticated users to the wrong profile. They signed in as usual via social authentication, but the bug assigned the incorrect user ID to them when returning to the app. This effectively showed them the profile of another user after the login. Users logging into the Kinde admin were also impacted when using the Google or Github authentication options, and were directed to the incorrect organisation selector. To the best of our knowledge, enterprise connections (such as SAML and MS Entra OAuth2) were not impacted by this bug. \\-- -- Current actions -- -- The bug is fixed. Here’s what we are doing right now: Determining how many users were affected. i.e. the scope of the incident Working out the best remedy (i.e. invalidate invalid sessions) to impact the least users Running diffs with a restored copy of the data prior to the incident for validation Performing a code analysis of the change We will reach out to customers directly with more information, as we have it. \\-- -- Incident timeline - 3 September 2025 -- -- Change deployed at 10:40 am Sydney time First notification of incorrect logins is 11:07 am Sydney time Change reverted at 11:41 am Sydney time Total duration where a user could log into the wrong profile: 61 minutes.</p>
+<p><small>Sep <var data-var='date'> 3</var>, <var data-var='time'>02:22:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Sydney region is operational and user sessions are in the process of being invalidated..</p>
+<p><small>Sep <var data-var='date'> 3</var>, <var data-var='time'>02:19:00</var> GMT+0</small><br><strong>Identified</strong> -
+  There is high latency for the Sydney region currently..</p>
+<p><small>Sep <var data-var='date'> 3</var>, <var data-var='time'>02:08:36</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We are currently working on invalidating all sessions that took place during the incident..</p>
+<p><small>Sep <var data-var='date'> 3</var>, <var data-var='time'>01:41:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix that resolves the issue and are currently monitoring the result. This is being treated as a serious incident and our team is working urgently..</p>
+<p><small>Sep <var data-var='date'> 3</var>, <var data-var='time'>01:37:23</var> GMT+0</small><br><strong>Identified</strong> -
+  We have identified a critical authentication error affecting Social SSO, email and SMS.  
+  
+Enterprise Connections/SSO are not affected..</p>
+<p><small>Sep <var data-var='date'> 3</var>, <var data-var='time'>01:07:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 3 Sep 2025 01:07:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmf3amlrv00gqt7jdrmenhscq</link>
+  <guid>https://status.kinde.com/incident/cmf3amlrv00gqt7jdrmenhscq</guid>
+</item>
+
+<item>
+  <title>SMS delivery for Sydney region failing</title>
+  <description>
+    Type: Incident
+    Duration: 44 minutes
+
+    Affected Components: SMS delivery
+    Sep 2, 08:34:38 GMT+0 - Resolved - This incident has been resolved. Sep 2, 08:10:31 GMT+0 - Monitoring - We implemented a fix and are currently monitoring the result. Sep 2, 07:50:14 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 44 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Sep <var data-var='date'> 2</var>, <var data-var='time'>08:34:38</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Sep <var data-var='date'> 2</var>, <var data-var='time'>08:10:31</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix and are currently monitoring the result..</p>
+<p><small>Sep <var data-var='date'> 2</var>, <var data-var='time'>07:50:14</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 2 Sep 2025 07:50:14 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmf290gwd001f7gxhrgck20wy</link>
+  <guid>https://status.kinde.com/incident/cmf290gwd001f7gxhrgck20wy</guid>
+</item>
+
+<item>
+  <title>Access to Kinde admin errors</title>
+  <description>
+    Type: Incident
+    Duration: 17 minutes
+
+    Affected Components: Admin area
+    Aug 22, 07:20:00 GMT+0 - Resolved - Fix has been applied and Kinde admin errors are now resolved Aug 22, 07:03:00 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 17 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Aug <var data-var='date'> 22</var>, <var data-var='time'>07:20:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  Fix has been applied and Kinde admin errors are now resolved.</p>
+<p><small>Aug <var data-var='date'> 22</var>, <var data-var='time'>07:03:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 22 Aug 2025 07:03:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmemihffd0001g1ejt1680sxi</link>
+  <guid>https://status.kinde.com/incident/cmemihffd0001g1ejt1680sxi</guid>
+</item>
+
+<item>
+  <title>Performance issues with auth</title>
+  <description>
+    Type: Incident
+    Duration: 47 minutes
+
+    Affected Components: Email delivery, SMS delivery, Custom domains, SMS delivery, User export and import, Authentication, User export and import, New user registration, Authentication, Admin area, , , New user registration, Custom domains, Management API, Email delivery, Management API, 
+AU region → 
+US region →
+    Aug 22, 05:18:24 GMT+0 - Resolved - This incident has been resolved. Aug 22, 04:39:03 GMT+0 - Monitoring - We implemented a fix and are currently monitoring. Aug 22, 04:31:12 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 47 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , , , , , , , , , , , , , </p>
+    <p><small>Aug <var data-var='date'> 22</var>, <var data-var='time'>05:18:24</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Aug <var data-var='date'> 22</var>, <var data-var='time'>04:39:03</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix and are currently monitoring..</p>
+<p><small>Aug <var data-var='date'> 22</var>, <var data-var='time'>04:31:12</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 22 Aug 2025 04:31:12 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmemc25o00001140wia9nhmve</link>
+  <guid>https://status.kinde.com/incident/cmemc25o00001140wia9nhmve</guid>
+</item>
+
+<item>
+  <title>SMS 2FA delivery</title>
+  <description>
+    Type: Incident
+    Duration: 6 hours and 27 minutes
+
+    Affected Components: SMS delivery, SMS delivery, SMS delivery, SMS delivery, SMS delivery
+    Jun 4, 15:59:00 GMT+0 - Resolved - This incident has been resolved. Jun 4, 15:44:15 GMT+0 - Monitoring - We have resolved the issue with our provider and are currently monitoring the result. Jun 4, 13:31:45 GMT+0 - Identified - We&#039;re currently working with our upstream SMS provider to resolve the delivery problems Jun 4, 10:29:00 GMT+0 - Identified - SMS for 2FA are currently not delivering, we have identified an issue with our provider and are working to resolve this. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 6 hours and 27 minutes</p>
+    <p><strong>Affected Components:</strong> , , , , </p>
+    <p><small>Jun <var data-var='date'> 4</var>, <var data-var='time'>15:59:00</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Jun <var data-var='date'> 4</var>, <var data-var='time'>15:44:15</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We have resolved the issue with our provider and are currently monitoring the result..</p>
+<p><small>Jun <var data-var='date'> 4</var>, <var data-var='time'>13:31:45</var> GMT+0</small><br><strong>Identified</strong> -
+  We&#039;re currently working with our upstream SMS provider to resolve the delivery problems.</p>
+<p><small>Jun <var data-var='date'> 4</var>, <var data-var='time'>10:29:00</var> GMT+0</small><br><strong>Identified</strong> -
+  SMS for 2FA are currently not delivering, we have identified an issue with our provider and are working to resolve this..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 4 Jun 2025 10:29:00 +0000</pubDate>
+  <link>https://status.kinde.com/incident/cmbhw5lii0001bq5g0cv6rv91</link>
+  <guid>https://status.kinde.com/incident/cmbhw5lii0001bq5g0cv6rv91</guid>
+</item>
+
+<item>
+  <title>Import feature updates</title>
+  <description>
+    Type: Maintenance
+    Duration: 3 hours
+
+    Affected Components: User export and import, User export and import, User export and import, User export and import
+    Sep 12, 11:00:00 GMT+0 - Completed - Maintenance was completed Sep 12 Sep 12, 08:00:01 GMT+0 - Identified - Maintenance is now in progress Sep 12, 08:00:00 GMT+0 - Identified - We will be performing updates to enhance import performance. The bulk import feature within the Kinde admin UI will be unavailable for approximately two hours while this takes place. Sep 12, 08:00:00 GMT+0 - Identified - Please be advised that the scheduled maintenance on our bulk import feature has been postponed to September 12th between 08:00 - 10:00 GMT (18:00 - 20:00 AEST), the importing feature will be unavailable during this window. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Maintenance</p>
+    <p><strong>Duration:</strong> 3 hours</p>
+    <p><strong>Affected Components:</strong> , , , </p>
+    <p><small>Sep <var data-var='date'> 12</var>, <var data-var='time'>11:00:00</var> GMT+0</small><br><strong>Completed</strong> -
+  Maintenance was completed Sep 12.</p>
+<p><small>Sep <var data-var='date'> 12</var>, <var data-var='time'>08:00:01</var> GMT+0</small><br><strong>Identified</strong> -
+  Maintenance is now in progress.</p>
+<p><small>Sep <var data-var='date'> 12</var>, <var data-var='time'>08:00:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We will be performing updates to enhance import performance. The bulk import feature within the Kinde admin UI will be unavailable for approximately two hours while this takes place..</p>
+<p><small>Sep <var data-var='date'> 12</var>, <var data-var='time'>08:00:00</var> GMT+0</small><br><strong>Identified</strong> -
+  Please be advised that the scheduled maintenance on our bulk import feature has been postponed to September 12th between 08:00 - 10:00 GMT (18:00 - 20:00 AEST), the importing feature will be unavailable during this window..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 12 Sep 2024 08:00:00 +0000</pubDate>
+  <link>https://status.kinde.com/maintenance/cm0vkee20002u13pjs4abl6je</link>
+  <guid>https://status.kinde.com/maintenance/cm0vkee20002u13pjs4abl6je</guid>
+</item>
+
+  </channel>
+  </rss>

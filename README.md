@@ -81,7 +81,7 @@ See `.claude/skills/downagain/SKILL.md`. In short: confirm the status API format
 ## Not yet built
 
 - The status-page history crawler for incidents older than what the APIs return.
-- Dev APIs without a Statuspage-compatible feed: Stripe, Postmark, Auth0, and Instatus pages (Stytch, Kinde).
+- Dev APIs without a readable feed: Stripe, Postmark, Auth0.
 - Azure's incident history: its RSS only lists open incidents, so older ones need the history crawler.
 - Alerts by email.
 - Share-card images.

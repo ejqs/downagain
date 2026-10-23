@@ -20,7 +20,7 @@ export const status = pgEnum("status", [
   "maintenance",
   "unknown",
 ]);
-export const sourceKind = pgEnum("source_kind", ["statuspage", "railway", "heroku", "gcp", "aws", "azure"]);
+export const sourceKind = pgEnum("source_kind", ["statuspage", "railway", "heroku", "gcp", "aws", "azure", "instatus"]);
 export const impact = pgEnum("impact", ["none", "minor", "major", "critical"]);
 
 export type Status = (typeof status.enumValues)[number];
