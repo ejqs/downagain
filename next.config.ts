@@ -1,11 +1,10 @@
 import type { NextConfig } from "next";
 
-const umamiHost = (process.env.UMAMI_HOST ?? "https://cloud.umami.is").replace(/\/$/, "");
 const isDev = process.env.NODE_ENV !== "production";
 
 // No nonces: every page is dynamic anyway, but nonces would mean a proxy on every
 // request for little gain on a read-only site with no logins. Analytics come from
-// our own origin through /stats, so 'self' covers them.
+// our own origin through /stats (src/app/stats), so 'self' covers them.
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
@@ -40,14 +39,6 @@ const nextConfig: NextConfig = {
         has: [{ type: "host", value: "downagain.dev" }],
         headers: [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" }],
       },
-    ];
-  },
-  // Serve Umami from our own domain so ad blockers that stop cloud.umami.is
-  // still let us count page views.
-  async rewrites() {
-    return [
-      { source: "/stats/script.js", destination: `${umamiHost}/script.js` },
-      { source: "/stats/api/send", destination: `${umamiHost}/api/send` },
     ];
   },
 };
