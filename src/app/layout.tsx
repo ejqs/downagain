@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
@@ -11,6 +12,7 @@ import { SITE, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/lib/site";
 // Every page shows the live banner, so nothing is prerendered at build time (the
 // build has no database). Data still comes from the tagged cache, not Postgres.
 export const dynamic = "force-dynamic";
+const UMAMI_WEBSITE_ID = "5f60967a-e8ec-4965-85ef-cbcf07e4c968";
 
 // Self-hosted at build time: no request to Google, and size-matched fallbacks so
 // text paints at once without shifting when the font arrives.
@@ -45,18 +47,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const snap = await safeSnapshot();
   return (
     <html lang="en" className={`${display.variable} ${mono.variable}`}>
-      <head>
-        {/* Umami's own snippet, verbatim. Production only, so local runs don't count. */}
-        {process.env.NODE_ENV === "production" ? (
-          <script defer src="https://cloud.umami.is/script.js" data-website-id="5f60967a-e8ec-4965-85ef-cbcf07e4c968"></script>
-        ) : null}
-      </head>
       <body>
         <JsonLd data={WEBSITE_LD} />
         <Banner snap={snap} />
         <Header />
         {children}
         <Footer snap={snap} />
+        {/* Same setup as roam.pub. Production only, so local runs don't count. */}
+        {process.env.NODE_ENV === "production" && (
+          <Script
+            src="https://cloud.umami.is/script.js"
+            data-website-id={UMAMI_WEBSITE_ID}
+            data-performance="true"
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );

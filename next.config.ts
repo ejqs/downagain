@@ -4,14 +4,14 @@ const isDev = process.env.NODE_ENV !== "production";
 
 // No nonces: every page is dynamic anyway, but nonces would mean a proxy on every
 // request for little gain on a read-only site with no logins. Umami Cloud is the
-// one third party: its script, and the events it sends back.
+// one third party: its script from cloud.umami.is posts events to gateway.umami.is.
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' https://cloud.umami.is${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self'",
   "img-src 'self' data: blob:",
-  "connect-src 'self' https://cloud.umami.is https://api-gateway.umami.dev https://gateway.umami.is",
+  "connect-src 'self' https://cloud.umami.is https://gateway.umami.is",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
