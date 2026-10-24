@@ -135,6 +135,43 @@ export function unionMinutes(intervals: [number, number][], from: number, to: nu
   return total / MIN;
 }
 
+/**
+ * How hard an incident hit the customers it reached, for uptime: down counts in full,
+ * degraded counts half. Can't-ship and papercuts don't stop a running app; SHIP grades those.
+ */
+export const UPTIME_DEPTH: Record<number, number> = { 1: 1, 2: 0.5 };
+
+/**
+ * Customer-minutes hit: each moment counts the worst incident running, weighted by how
+ * hard (UPTIME_DEPTH) and how many (scope), so overlapping posts about one outage count once.
+ * Runs to recovery when the updates say so, and at most MAX_SHOWN_DAYS: a region written
+ * off for months is history, as on the heatmap.
+ */
+export function hitMinutes(incidents: GradeInput[], from: Date, to: Date): number {
+  const f = from.getTime();
+  const t = to.getTime();
+  const spans: [number, number, number][] = [];
+  for (const i of incidents) {
+    const w = (UPTIME_DEPTH[effectiveTier(i)] ?? 0) * scopeWeight(i.scope);
+    if (!w) continue;
+    const s = i.startedAt.getTime();
+    const r = i.recoveredAt?.getTime();
+    const resolved = i.resolvedAt?.getTime();
+    const end = resolved != null && r != null && r > s && r < resolved ? r : (resolved ?? t);
+    const e = Math.min(end, s + MAX_SHOWN_DAYS * DAY, t);
+    if (e > Math.max(s, f)) spans.push([Math.max(s, f), e, w]);
+  }
+  const edges = [...new Set(spans.flatMap(([s, e]) => [s, e]))].sort((a, b) => a - b);
+  let total = 0;
+  for (let k = 0; k + 1 < edges.length; k++) {
+    const [a, b] = [edges[k], edges[k + 1]];
+    let w = 0;
+    for (const [s, e, x] of spans) if (s <= a && e >= b && x > w) w = x;
+    total += w * (b - a);
+  }
+  return total / MIN;
+}
+
 export interface AreaScore {
   points: number;
   grade: Grade;
@@ -146,8 +183,9 @@ export interface Score {
   points: number;
   grade: Grade;
   areas: Record<Area, AreaScore>;
-  /** Share of the window not covered by a Sev 1 incident the provider posted. */
+  /** Share of customer time in the window not hit, by the provider's own account (hitMinutes). */
   admittedUptime: number;
+  /** "Fully down": widespread Sev 1 time, unweighted. */
   sev1Minutes: number;
   incidentCount: number;
   sevCounts: [number, number, number, number]; // Sev 1..4
@@ -215,7 +253,7 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
     points: Math.round(points),
     grade: gradeFor(points),
     areas,
-    admittedUptime: windowMinutes > 0 ? 1 - sev1Minutes / windowMinutes : 1,
+    admittedUptime: windowMinutes > 0 ? 1 - hitMinutes(counted, from, to) / windowMinutes : 1,
     sev1Minutes,
     incidentCount: counted.length,
     sevCounts,
