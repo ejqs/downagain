@@ -190,7 +190,9 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
 
     const minutes = penaltyMinutes(i, from, to) * scopeWeight(i.scope);
     for (const [area, t] of Object.entries(areaTiersOf(i)) as [Area, number][]) {
-      if (!t || !areas[area]) continue; // e.g. a "dashboard" key graded before there were two areas
+      // A "dashboard" key graded before there were two areas, or a papercut stored before
+      // CLASSIFIER_VERSION 9: papercuts count overall only.
+      if (!t || t >= 4 || !areas[area]) continue;
       areas[area].points += TIER_WEIGHT[t] * minutes;
       areas[area].incidents++;
       areaIntervals[area].push([i.startedAt.getTime(), end]);

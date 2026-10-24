@@ -159,3 +159,11 @@ describe("scope", () => {
     expect(score([{ ...hour("local"), security: true }], from, to).points).toBe(624);
   });
 });
+
+describe("papercuts", () => {
+  it("count overall but not in an area, even when stored with an area tier", () => {
+    const s = score([inc({ startedAt: at("2026-10-01T00:00:00Z"), resolvedAt: at("2026-10-01T10:00:00Z"), tier: 4, areaTiers: { shipping: 4 }, surfaces: ["ship"] })], from, to);
+    expect(s.points).toBe(120);
+    expect(s.areas.shipping).toMatchObject({ points: 0, incidents: 0, downtimeMinutes: 0 });
+  });
+});

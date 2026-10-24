@@ -95,6 +95,13 @@ describe("classify", () => {
     expect(classify({ ...base, title: "x", impact: "critical", components: ["Edge Network"], updateText: "unauthorized access" }).tier).toBe(1);
   });
 
+  it("a security incident in one cloud region stays at Sev 2, as Claude's grade does", () => {
+    const c = classify({ title: "Security issue with EC2", impact: "minor", components: ["Amazon Elastic Compute Cloud"], worstComponentStatus: null, regions: ["us-east-1"], categorySlug: "cloud" });
+    expect(c.security).toBe(true);
+    expect(c.tier).toBe(2);
+    expect(c.areaTiers.production).toBe(2);
+  });
+
   it("data loss is always Sev 1", () => {
     const c = classify({ ...base, title: "Volume issue", components: ["Dashboard"], updateText: "Some data was lost" });
     expect(c.tier).toBe(1);

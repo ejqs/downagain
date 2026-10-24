@@ -60,6 +60,10 @@ describe("applyVerdict", () => {
     expect(applyVerdict(rules, verdict({ affected: [{ surface: "peripheral", tier: 4 }] }))).toMatchObject({ tier: 4, areaTiers: {} });
   });
 
+  it("keeps a minor ship papercut (slower builds) out of SHIP", () => {
+    expect(applyVerdict(rules, verdict({ affected: [{ surface: "ship", tier: 4 }] }))).toMatchObject({ tier: 4, areaTiers: {} });
+  });
+
   it("applies the security bump itself, with Sev 2 as the floor", () => {
     const g = applyVerdict(rules, verdict({ affected: [{ surface: "peripheral", tier: 4 }], security: true }));
     expect(g.tier).toBe(2);

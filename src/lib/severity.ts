@@ -19,7 +19,7 @@ import type { Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
 import { isLocation } from "@/lib/status";
 
-export const CLASSIFIER_VERSION = 8;
+export const CLASSIFIER_VERSION = 9;
 
 // manage: dashboard, console, auth, billing. peripheral: docs, status page, consumer apps.
 export type Surface = "serving" | "data" | "ship" | "manage" | "peripheral";
@@ -66,9 +66,10 @@ export const REGIONAL_FLOOR: Tier = 2;
 
 /** Which area grade an affected surface counts against, if any. A papercut counts only overall. */
 export function areaFor(surface: Surface, tier: number): Area | null {
+  if (tier >= 4) return null;
   if (surface === "serving" || surface === "data") return "production";
   if (surface === "ship") return "shipping";
-  if (surface === "manage" && tier <= 3) return "shipping";
+  if (surface === "manage") return "shipping";
   return null;
 }
 export const AREA_LABEL: Record<Area, string> = {
@@ -293,27 +294,24 @@ export function classify(input: ClassifyInput, overrides?: Map<string, Surface>)
     }
   }
 
+  const security = SECURITY_RE.test(text);
   const region = singleRegion(input.regions);
-  const held = holdToRegion({ tier, areaTiers }, input.regions);
-  const capped = held.tier !== tier;
+  // Held after the security bump, as Claude's grade is (finalGrade), so one region stays Sev 2 either way.
+  const bumped = security ? securityBump(tier) : tier;
+  const held = holdToRegion({ tier: bumped, areaTiers }, input.regions);
+  const capped = held.tier !== bumped;
+
+  const levelWord = level === "full" ? "a major outage" : level === "partial" ? "a partial outage" : "degraded performance";
+  let reason = `Sev ${capped ? held.tier : tier} ${fromTitle ? "from the incident title (no components listed)" : `because ${bySurface.get(worstSurface)} had ${levelWord}`}`;
+  if (region) reason += capped ? `, held to Sev ${REGIONAL_FLOOR} as only ${region} was hit` : ` in ${region}`;
+  if (!capped && bumped !== tier) reason += `, raised to Sev ${bumped} for security`;
   tier = held.tier;
   Object.assign(areaTiers, held.areaTiers);
 
-  const levelWord = level === "full" ? "a major outage" : level === "partial" ? "a partial outage" : "degraded performance";
-  let reason = fromTitle
-    ? `Sev ${tier} from the incident title (no components listed)`
-    : `Sev ${tier} because ${bySurface.get(worstSurface)} had ${levelWord}`;
-  if (region) reason += capped ? `, held to Sev ${REGIONAL_FLOOR} as only ${region} was hit` : ` in ${region}`;
-
-  const security = SECURITY_RE.test(text);
   if (DATA_LOSS_RE.test(text)) {
     tier = 1;
     areaTiers.production = 1;
     reason = "Sev 1 because the provider reported data loss or exposure";
-  } else if (security) {
-    const bumped = securityBump(tier);
-    if (bumped !== tier) reason += `, raised to Sev ${bumped} for security`;
-    tier = bumped;
   }
 
   return { tier, areaTiers, surfaces, security, lowConfidence, reason, classifierVersion: CLASSIFIER_VERSION, scope: region ? "regional" : scopeFrom(input) };
