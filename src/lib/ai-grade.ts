@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { areaFor, SECURITY_PENALTY, type Scope, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
-export const PROMPT_VERSION = 9;
+export const PROMPT_VERSION = 10;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 
 const SURFACES = ["serving", "data", "ship", "manage", "peripheral"] as const;
@@ -89,7 +89,7 @@ Scope is the blast radius: global (most customers or regions), regional (one reg
 
 Set not_counted to true only for scheduled maintenance that stayed inside its window with no unplanned impact, a false alarm, or an incident the provider says had no customer impact. Then affected may be empty.
 
-Set security to true when the incident is about a vulnerability, unauthorized access, leaked or exposed credentials, a compromise, or malicious traffic aimed at the provider. A passing mention of security does not count. Set data_loss to true only when the provider says customer data was lost, irrecoverably corrupted, could not be restored or recovered, or was exposed.
+Set security to true when the incident is about a vulnerability, unauthorized access, leaked or exposed credentials, a compromise, or malicious traffic aimed at the provider. A passing mention of security does not count. Set data_loss to true only when the provider says customer data was lost, irrecoverably corrupted, could not be restored or recovered, or was exposed. Secrets, credentials or tokens that may have been exposed, and advice to rotate them, are security, not data_loss.
 
 Give each surface the tier for its impact alone. Do not raise tiers for security or data loss yourself; the site does that from your flags.
 
