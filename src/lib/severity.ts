@@ -19,7 +19,7 @@ import type { Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
 import { isLocation } from "@/lib/status";
 
-export const CLASSIFIER_VERSION = 10;
+export const CLASSIFIER_VERSION = 11;
 
 // manage: dashboard, console, auth, billing. peripheral: docs, status page, consumer apps.
 export type Surface = "serving" | "data" | "ship" | "manage" | "peripheral";
@@ -57,7 +57,7 @@ export const SCOPE_BLURB: Record<Scope, string> = {
   regional: "One region, country or a few locations",
   subset: "One plan, or a small share of customers",
   single: "One model, endpoint or add-on among many",
-  local: "One data centre or point of presence",
+  local: "One data centre, point of presence or carrier network",
 };
 export function scopeWeight(scope: string | null | undefined): number {
   return SCOPE_WEIGHT[scope as Scope] ?? 1;
@@ -237,6 +237,8 @@ export interface Classification {
   reason: string;
   classifierVersion: number;
   scope?: Scope | null;
+  /** Every component is a third-party carrier network (Twilio's "CARRIER NETWORK - SMS, Europe"). */
+  carrier?: boolean;
 }
 
 export function classify(input: ClassifyInput, overrides?: Map<string, Surface>): Classification {
@@ -317,8 +319,16 @@ export function classify(input: ClassifyInput, overrides?: Map<string, Surface>)
     reason = "Sev 1 because the provider reported data loss or exposure";
   }
 
-  return { tier, areaTiers, surfaces, security, compromise, lowConfidence, reason, classifierVersion: CLASSIFIER_VERSION, scope: region ? "regional" : scopeFrom(input) };
+  // A carrier's own network (one operator, one country) is a sliver of the provider's traffic.
+  const carrier = input.components.length > 0 && input.components.every((c) => CARRIER_RE.test(c));
+  return {
+    tier, areaTiers, surfaces, security, compromise, lowConfidence, reason, classifierVersion: CLASSIFIER_VERSION,
+    scope: carrier ? "local" : region ? "regional" : scopeFrom(input),
+    ...(carrier ? { carrier } : {}),
+  };
 }
+
+const CARRIER_RE = /\bcarrier network\b/i;
 
 /** Max cities an incident can name and still count as regional; past that it's the network. */
 const MAX_REGIONAL_LOCATIONS = 10;

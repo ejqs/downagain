@@ -91,7 +91,7 @@ export default function About() {
 
         <h2 className="h2">Grades</h2>
         <p>
-          Each incident scores <strong>weight × scope × minutes</strong>, from start until the provider says it&apos;s monitoring a fix or resolved. Once it&apos;s resolved, Claude reads the whole thread, and if an earlier update says service was back to normal, minutes stop there. Minutes stop counting after 3 days for Sev 1, 1 day for the rest. When incidents overlap, each minute counts once, at the worst one running.
+          Each incident scores <strong>weight × scope × minutes</strong>, from start until the provider says it&apos;s monitoring a fix or resolved. Once it&apos;s resolved, Claude reads the whole thread, and if an earlier update says service was back to normal, minutes stop there. Minutes stop counting after 6 hours for anything short of global, 3 days for a global Sev 1, 1 day for the rest. A carrier network (one operator&apos;s SMS or calls) counts as local. When incidents overlap, each minute counts once, at the worst one running.
           Grades total the last 90 days, the same window for everyone.
         </p>
         <div className="tbl">

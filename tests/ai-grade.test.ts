@@ -49,6 +49,13 @@ describe("applyVerdict", () => {
     expect(applyVerdict(local, verdict({ scope: "global" })).scope).toBe("global");
   });
 
+  it("holds a carrier network incident to local, whatever Claude reads", () => {
+    const carrier = classify({ title: "SMS Delays to Multiple Networks in India", impact: "minor", components: ["CARRIER NETWORK - SMS, APAC"], worstComponentStatus: null });
+    expect(applyVerdict(carrier, verdict({ scope: "regional" })).scope).toBe("local");
+    expect(applyVerdict(carrier, verdict({ scope: "global" })).scope).toBe("local");
+    expect(applyVerdict(carrier, verdict({ scope: "single" })).scope).toBe("single");
+  });
+
   it("takes the worst surface for the overall tier and the worst per area", () => {
     const g = applyVerdict(rules, verdict({ scope: "global", affected: [{ surface: "ship", tier: 3 }, { surface: "data", tier: 1 }, { surface: "serving", tier: 2 }] }));
     expect(g.tier).toBe(1);

@@ -171,6 +171,14 @@ describe("scope", () => {
     expect(pts("local").areas.production.points).toBeCloseTo(24);
   });
 
+  it("stops a scoped incident costing points after 6 hours; a global one runs to 24", () => {
+    const day = (scope: string | null) => score([{ ...hour(scope), resolvedAt: new Date("2026-09-03T00:00:00Z") }], from, to).points;
+    expect(day("regional")).toBeCloseTo(4 * 0.3 * 360);
+    expect(day("local")).toBeCloseTo(4 * 0.1 * 360);
+    expect(day("global")).toBe(4 * 24 * 60);
+    expect(day(null)).toBe(4 * 24 * 60);
+  });
+
   it("never discounts the security penalty, and adds it only for a compromise", () => {
     expect(score([{ ...hour("local"), security: true, compromise: true }], from, to).points).toBe(624);
     expect(score([{ ...hour("local"), security: true }], from, to).points).toBe(24);
