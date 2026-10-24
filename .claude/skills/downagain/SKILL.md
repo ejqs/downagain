@@ -57,6 +57,10 @@ Prices are the one hand-curated dataset: `PRICES` and `WORKLOADS` in `src/lib/pr
 3. A new provider in a priced category (one with a `WORKLOADS` entry) needs a `PRICES` entry (the test enforces it). AI APIs are deliberately unpriced: models differ too much for a price-only comparison. With no like-for-like price, use `lines: []` and explain why in `note`.
 4. Don't blend price and grade into one score. "Best value" is the frontier: nobody else is cheaper-or-equal with a better-or-equal grade.
 
+## Outage map
+
+`/incidents` and provider pages plot where incidents hit (`src/components/OutageMap.tsx`). `src/lib/places.ts` turns cloud region codes, Azure names, CDN cities ("Accra, Ghana - (ACC)"), "iad1"-style codes and a short city list into airports; anything broader ("Europe") stays off the map and counts as "none named". A new region code or city goes in `CLOUD`, `AZURE` or `CITIES` there, with a case in `tests/places.test.ts`. The land dots and airport coordinates are generated files in `src/lib/geo/`; regenerate with `scripts/geo.ts` (instructions at its top) only if the grid or projection changes.
+
 ## Local development
 
 ```bash
