@@ -26,6 +26,7 @@ function row(p: { startedAt: string; resolvedAt?: string; sourceUpdatedAt?: stri
     areaTiers: { production: 2 },
     surfaces: ["serving"],
     security: false,
+    compromise: false,
     reason: null,
     overrideNote: null,
     gradedBy: "rules",

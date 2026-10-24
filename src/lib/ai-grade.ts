@@ -9,7 +9,7 @@
 // A paragraph that only covers a new category needn't bump: no stored incident is in it.
 import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
-import { areaFor, type Scope, securityBump, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
+import { areaFor, SECURITY_PENALTY, type Scope, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
 export const PROMPT_VERSION = 8;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
@@ -217,8 +217,11 @@ export function applyVerdict(rules: Classification, v: Verdict): Refined {
   // Claude reads the text; the rules can read which cities were listed. Unclear text doesn't erase that.
   const scope = v.scope === "unclear" && rules.scope ? rules.scope : v.scope;
   const base = { classifierVersion: rules.classifierVersion, gradedBy: "claude" as const, scope, summary: v.summary, recoveredAt: v.recovered_at };
-  if (v.not_counted && !v.security && !v.data_loss) {
-    return { ...base, tier: 0, areaTiers: {}, surfaces: [], security: false, lowConfidence: v.confidence === "low", reason: v.rationale };
+  // The rules read the text for an actual compromise; Claude confirms it was a security incident at all.
+  const compromise = rules.compromise && (v.security || v.data_loss);
+  // A "we're not affected" advisory or a blocked attack with no impact isn't counted; a breach always is.
+  if (v.not_counted && !compromise && !v.data_loss) {
+    return { ...base, tier: 0, areaTiers: {}, surfaces: [], security: v.security, compromise: false, lowConfidence: v.confidence === "low", reason: v.rationale };
   }
 
   const areaTiers: Partial<Record<Area, Tier>> = {};
@@ -230,7 +233,7 @@ export function applyVerdict(rules: Classification, v: Verdict): Refined {
     if (area) areaTiers[area] = Math.min(areaTiers[area] ?? 4, a.tier) as Tier;
     tier = Math.min(tier, a.tier) as Tier;
   }
-  // A security incident flagged as "no impact" still counts, from Sev 4 up.
+  // A breach or data loss flagged as "no impact" still counts, from Sev 4 up.
   if (surfaces.length === 0) {
     surfaces.push(...(rules.surfaces.length ? rules.surfaces : (["serving"] as Surface[])));
     for (const s of surfaces) {
@@ -244,12 +247,9 @@ export function applyVerdict(rules: Classification, v: Verdict): Refined {
     tier = 1;
     areaTiers.production = 1;
     reason += " Counted as Sev 1 for data loss or exposure.";
-  } else if (v.security) {
-    const bumped = securityBump(tier);
-    if (bumped !== tier) reason += ` Raised to Sev ${bumped} for security.`;
-    tier = bumped;
   }
-  return { ...base, tier, areaTiers, surfaces, security: v.security, lowConfidence: v.confidence === "low", reason };
+  if (compromise) reason += ` Plus ${SECURITY_PENALTY} points for a security compromise.`;
+  return { ...base, tier, areaTiers, surfaces, security: v.security || compromise, compromise, lowConfidence: v.confidence === "low", reason };
 }
 
 // $ per million tokens. Unknown models are priced high so the budget errs on the safe side.

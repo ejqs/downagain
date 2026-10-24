@@ -1,0 +1,1 @@
+ALTER TABLE "incidents" ADD COLUMN "compromise" boolean DEFAULT false NOT NULL;

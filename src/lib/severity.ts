@@ -2,7 +2,7 @@
 // people building on this provider?
 //
 //   Sev 1 · Lights out  prod serving or data down, or data loss         weight 10
-//   Sev 2 · Bleeding    prod degraded; floor for any security incident  weight 4
+//   Sev 2 · Bleeding    prod degraded, or nobody can deploy             weight 4
 //   Sev 3 · Can't ship  can't deploy, build or manage it (CI, CLI,       weight 1
 //                       dashboard, auth, billing down)
 //   Sev 4 · Papercut    docs, status page, a slow dashboard               weight 0.2
@@ -19,7 +19,7 @@ import type { Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
 import { isLocation } from "@/lib/status";
 
-export const CLASSIFIER_VERSION = 8;
+export const CLASSIFIER_VERSION = 9;
 
 // manage: dashboard, console, auth, billing. peripheral: docs, status page, consumer apps.
 export type Surface = "serving" | "data" | "ship" | "manage" | "peripheral";
@@ -42,6 +42,7 @@ export const TIER_BLURB: Record<number, string> = {
   4: "Docs, status page, slow dashboard",
 };
 export const TIER_WEIGHT: Record<number, number> = { 0: 0, 1: 10, 2: 4, 3: 1, 4: 0.2 };
+/** Added for a real compromise (breach, unauthorized access, exposed credentials), on top of the impact. */
 export const SECURITY_PENALTY = 600; // same as an hour of Sev 1
 
 // Blast radius. The tier says how bad it was for whoever was hit; scope says how
@@ -66,9 +67,10 @@ export const REGIONAL_FLOOR: Tier = 2;
 
 /** Which area grade an affected surface counts against, if any. A papercut counts only overall. */
 export function areaFor(surface: Surface, tier: number): Area | null {
+  if (tier >= 4) return null;
   if (surface === "serving" || surface === "data") return "production";
   if (surface === "ship") return "shipping";
-  if (surface === "manage" && tier <= 3) return "shipping";
+  if (surface === "manage") return "shipping";
   return null;
 }
 export const AREA_LABEL: Record<Area, string> = {
@@ -91,6 +93,9 @@ const SURFACE_RULES: [Surface, RegExp][] = [
 ];
 
 const SECURITY_RE = /\bsecurity\b|vulnerab|unauthori[sz]ed|credential|token leak|leaked|compromise|\bcve-\d|exposed|breach|malicious|supply.?chain/i;
+// A security incident where someone actually got in or secrets got out. DDoS, a
+// vulnerability patched in time or a "we're not affected" CVE notice is graded by impact alone.
+const COMPROMISE_RE = /unauthori[sz]ed (?:access|part(?:y|ies)|actors?|users?)|credentials? (?:(?:was|were|may have been|have been|had been) )?(?:leaked|exposed|compromised|stolen|accessed)|exposed (?:credentials|secrets|tokens|api keys|keys|environment variables)|(?:token|secret|credential|key) leak|leaked (?:credentials|tokens|secrets|keys)|\b(?:was|were|been) compromised\b|security (?:breach|compromise)|data breach|\bbreached\b|supply.?chain attack|rotate (?:your |any |all )?(?:exposed |affected |potentially exposed )?(?:credentials|secrets|tokens|api keys|keys)|customer data (?:was |were )?(?:exposed|accessed)/i;
 const DATA_LOSS_RE = /data loss|lost data|data (?:was|were|has been) lost|customer data (?:was |were )?(?:exposed|accessed)|data breach|irrecoverabl/i;
 const SUBSET_RE = /\bsome (?:[\w-]+ ){0,3}(?:users|customers|accounts|requests|zones|sites)\b|\bsubset of\b/i;
 const MAINTENANCE_RE = /scheduled maintenance|planned maintenance/i;
@@ -193,11 +198,6 @@ const MATRIX: Record<Surface, Record<Level, Tier>> = {
   peripheral: { minor: 4, partial: 4, full: 4 },
 };
 
-/** Security moves an incident up one tier, with Sev 2 as the floor. */
-export function securityBump(tier: Tier): Tier {
-  return Math.max(1, Math.min(tier - 1, 2)) as Tier;
-}
-
 export function singleRegion(regions: string[] | null | undefined): string | null {
   return regions?.length === 1 ? regions[0] : null;
 }
@@ -229,7 +229,10 @@ export interface Classification {
   tier: Tier;
   areaTiers: Partial<Record<Area, Tier>>;
   surfaces: Surface[];
+  /** Flagged security: shown on the incident, never changes the tier. */
   security: boolean;
+  /** A real compromise or exposure; adds SECURITY_PENALTY. */
+  compromise: boolean;
   lowConfidence: boolean;
   reason: string;
   classifierVersion: number;
@@ -248,6 +251,7 @@ export function classify(input: ClassifyInput, overrides?: Map<string, Surface>)
       areaTiers: {},
       surfaces: [],
       security: false,
+      compromise: false,
       lowConfidence: false,
       reason: "Scheduled maintenance, not counted",
       classifierVersion: CLASSIFIER_VERSION,
@@ -293,6 +297,9 @@ export function classify(input: ClassifyInput, overrides?: Map<string, Surface>)
     }
   }
 
+  // Security is graded by impact like anything else; only a real compromise adds points.
+  const compromise = COMPROMISE_RE.test(text);
+  const security = compromise || SECURITY_RE.test(text);
   const region = singleRegion(input.regions);
   const held = holdToRegion({ tier, areaTiers }, input.regions);
   const capped = held.tier !== tier;
@@ -300,23 +307,17 @@ export function classify(input: ClassifyInput, overrides?: Map<string, Surface>)
   Object.assign(areaTiers, held.areaTiers);
 
   const levelWord = level === "full" ? "a major outage" : level === "partial" ? "a partial outage" : "degraded performance";
-  let reason = fromTitle
-    ? `Sev ${tier} from the incident title (no components listed)`
-    : `Sev ${tier} because ${bySurface.get(worstSurface)} had ${levelWord}`;
+  let reason = `Sev ${tier} ${fromTitle ? "from the incident title (no components listed)" : `because ${bySurface.get(worstSurface)} had ${levelWord}`}`;
   if (region) reason += capped ? `, held to Sev ${REGIONAL_FLOOR} as only ${region} was hit` : ` in ${region}`;
+  if (compromise) reason += `, plus ${SECURITY_PENALTY} points for a security compromise`;
 
-  const security = SECURITY_RE.test(text);
   if (DATA_LOSS_RE.test(text)) {
     tier = 1;
     areaTiers.production = 1;
     reason = "Sev 1 because the provider reported data loss or exposure";
-  } else if (security) {
-    const bumped = securityBump(tier);
-    if (bumped !== tier) reason += `, raised to Sev ${bumped} for security`;
-    tier = bumped;
   }
 
-  return { tier, areaTiers, surfaces, security, lowConfidence, reason, classifierVersion: CLASSIFIER_VERSION, scope: region ? "regional" : scopeFrom(input) };
+  return { tier, areaTiers, surfaces, security, compromise, lowConfidence, reason, classifierVersion: CLASSIFIER_VERSION, scope: region ? "regional" : scopeFrom(input) };
 }
 
 /** Max cities an incident can name and still count as regional; past that it's the network. */

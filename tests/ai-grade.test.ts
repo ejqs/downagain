@@ -60,21 +60,31 @@ describe("applyVerdict", () => {
     expect(applyVerdict(rules, verdict({ affected: [{ surface: "peripheral", tier: 4 }] }))).toMatchObject({ tier: 4, areaTiers: {} });
   });
 
-  it("applies the security bump itself, with Sev 2 as the floor", () => {
-    const g = applyVerdict(rules, verdict({ affected: [{ surface: "peripheral", tier: 4 }], security: true }));
-    expect(g.tier).toBe(2);
-    expect(g.security).toBe(true);
-    expect(g.reason).toMatch(/Raised to Sev 2 for security/);
+  it("keeps a minor ship papercut (slower builds) out of SHIP", () => {
+    expect(applyVerdict(rules, verdict({ affected: [{ surface: "ship", tier: 4 }] }))).toMatchObject({ tier: 4, areaTiers: {} });
+  });
+
+  it("grades security by impact and adds the penalty only for a compromise the text names", () => {
+    const ddos = applyVerdict(rules, verdict({ affected: [{ surface: "serving", tier: 2 }], security: true }));
+    expect(ddos).toMatchObject({ tier: 2, security: true, compromise: false });
+    const breachRules = classify({ title: "Security incident", impact: "major", components: ["Edge Network"], worstComponentStatus: null, updateText: "Customers should rotate exposed credentials." });
+    const breach = applyVerdict(breachRules, verdict({ affected: [{ surface: "ship", tier: 3 }], security: true }));
+    expect(breach).toMatchObject({ tier: 3, security: true, compromise: true });
+    expect(breach.reason).toMatch(/600 points for a security compromise/);
+    // The words alone aren't enough: Claude has to call it a security incident.
+    expect(applyVerdict(breachRules, verdict({ security: false })).compromise).toBe(false);
   });
 
   it("makes data loss Sev 1", () => {
     expect(applyVerdict(rules, verdict({ data_loss: true })).tier).toBe(1);
   });
 
-  it("can mark an incident as not counted, unless it was a security incident", () => {
+  it("can mark an incident as not counted, a security advisory included, but never a breach", () => {
     expect(applyVerdict(rules, verdict({ not_counted: true, affected: [] })).tier).toBe(0);
-    const sec = applyVerdict(rules, verdict({ not_counted: true, affected: [], security: true }));
-    expect(sec.tier).toBe(2);
+    expect(applyVerdict(rules, verdict({ not_counted: true, affected: [], security: true })).tier).toBe(0);
+    const breachRules = classify({ title: "Unauthorized access to some accounts", impact: "none", components: ["Edge Network"], worstComponentStatus: null });
+    const sec = applyVerdict(breachRules, verdict({ not_counted: true, affected: [], security: true }));
+    expect(sec).toMatchObject({ tier: 4, compromise: true });
     expect(sec.surfaces).toEqual(["serving"]);
   });
 
