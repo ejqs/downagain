@@ -42,7 +42,7 @@ export default function About() {
 
         <h2 className="h2">Where the data comes from</h2>
         <ul>
-          <li>Official status page APIs: Atlassian Statuspage for most, Railway&apos;s and Heroku&apos;s own for those two.</li>
+          <li>Official status page APIs: Atlassian Statuspage and incident.io for most, Instatus for a few, and the providers&apos; own feeds for Railway, Heroku, AWS, Google Cloud and Azure.</li>
           <li>
             User-Agent <code className="mono">{USER_AGENT}</code>, conditional requests, backoff on errors. An unreachable status page means
             &quot;status unknown&quot;, never &quot;down&quot;.
@@ -126,7 +126,7 @@ export default function About() {
         </div>
         <p>
           Two area grades use the same scale. <strong>PROD</strong>: your users are hit. <strong>SHIP</strong>: you can&apos;t deploy, build or
-          manage, including dashboard, auth and billing outages. Papercuts count toward the overall grade only. <strong>Admitted uptime</strong> counts only widespread Sev 1 time the provider posted
+          manage, including dashboard, auth and billing outages. Papercuts and security penalties count toward the overall grade only, so it can sit below both. <strong>Admitted uptime</strong> counts only widespread Sev 1 time the provider posted
           itself, so it&apos;s a best case.
         </p>
         <p>
@@ -153,7 +153,7 @@ export default function About() {
         <p>
           We don&apos;t blend price and reliability into one score, because any weighting would be our opinion dressed up as data. Instead, a provider
           is <strong>best value</strong> when no other provider in its category costs the same or less with the same or better 90-day grade. Everyone
-          else gets told who beats them. AI APIs have no cost on purpose: models differ too much in capability for price alone to be fair.
+          else gets told who beats them. AI APIs, dev tools and dev APIs have no cost on purpose: plans differ too much in what you get for price alone to be fair.
         </p>
 
         <h2 className="h2">The obvious question</h2>
@@ -161,8 +161,7 @@ export default function About() {
 
         <h2 className="h2">Missing something?</h2>
         <p>
-          Suggest a provider or report a wrong grade on <a href="https://github.com/ejqs/downagain/issues">GitHub</a>. Made by{" "}
-          <a href="https://ejqs.net">@ejqs</a>. Useful? <a href="https://buymeacoffee.com/ejqs">Buy me a coffee</a>.
+          Suggest a provider or report a wrong grade on <a href="https://github.com/ejqs/downagain/issues">GitHub</a>.
         </p>
       </article>
     </main>
