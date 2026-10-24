@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
-import { brokenComponents, coveredDays, liveLevel, worstLevel, communication, dailyCells, valueBoard, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals, whereHit } from "@/lib/views";
+import { brokenComponents, coveredDays, liveLevel, worstLevel, communication, dailyCells, valueBoard, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals, trendKnown, whereHit } from "@/lib/views";
 
 const DAY = 86_400_000;
 const NOW = Date.parse("2026-10-22T12:00:00Z");
@@ -69,7 +69,20 @@ describe("downNow", () => {
     const d = downNow(s);
     expect(d.map((x) => x.provider.id)).toEqual([2, 1]);
     expect(d[1].title).toBe("Edge errors (+1 more)");
-    expect(d[1].sinceMs).toBe(ago(0, 2)); // earliest open incident
+    expect(d[1].sinceMs).toBe(ago(0, 1)); // the titled incident's own start
+  });
+
+  it("titles the oldest of the worst open incidents, with its own start", () => {
+    const d = downNow(
+      snap(
+        [prov(1)],
+        [
+          inc(1, { startedAt: ago(0, 9), resolvedAt: null, tier: 2, title: "South Africa" }),
+          inc(1, { startedAt: ago(2), resolvedAt: null, tier: 2, title: "India" }),
+        ],
+      ),
+    );
+    expect(d[0]).toEqual(expect.objectContaining({ title: "India (+1 more)", sinceMs: ago(2) }));
   });
 
   it("marks providers watching a fix as monitoring and lists them last", () => {
@@ -220,6 +233,8 @@ describe("summaries", () => {
     expect(daysSinceSev1(snap([], [inc(1, { startedAt: ago(10) }), inc(1, { startedAt: ago(3), tier: 2 })]))).toBe(9);
     expect(daysSinceSev1(snap([], [inc(1, { startedAt: ago(1), resolvedAt: null })]))).toBe(0);
     expect(daysSinceSev1(snap([], []))).toBeNull();
+    // A region left open for months stops holding the counter at zero after a week.
+    expect(daysSinceSev1(snap([], [inc(1, { startedAt: ago(200), resolvedAt: null }), inc(1, { startedAt: ago(10) })]))).toBe(9);
   });
 
   it("totals incidents, Sev 1 minutes and DNS blame", () => {
@@ -245,6 +260,24 @@ describe("summaries", () => {
   it("finds the most-broken components", () => {
     const list = [inc(1, { startedAt: ago(1), components: ["API", "Builds"] }), inc(1, { startedAt: ago(2), components: ["API"] })];
     expect(topComponents(list, 1)).toEqual([{ name: "API", count: 2 }]);
+  });
+
+  it("counts a component listed bare and under its group once", () => {
+    const list = [
+      inc(1, { startedAt: ago(1), components: ["Ashburn - (IAD)", "North America - Ashburn - (IAD)"] }),
+      inc(1, { startedAt: ago(2), components: ["North America - Ashburn - (IAD)"] }),
+      inc(1, { startedAt: ago(3), components: ["Services - Network"] }),
+    ];
+    expect(topComponents(list)).toEqual([
+      { name: "Ashburn - (IAD)", count: 2 },
+      { name: "Services - Network", count: 1 },
+    ]);
+  });
+
+  it("only compares trend halves when history covers the year", () => {
+    const trend = monthlyTrend([], NOW);
+    expect(trendKnown(prov(1, { historyFrom: ago(400), trackedFrom: ago(5) }), trend)).toBe(true);
+    expect(trendKnown(prov(1, { historyFrom: ago(57), trackedFrom: ago(5) }), trend)).toBe(false);
   });
 
   it("measures how a provider communicates", () => {

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ProviderRow, Snapshot } from "@/lib/data";
-import { communication, incidentsFor, isGraded, monthlyTrend, scoreFor, valueBoard, type ValueRow } from "@/lib/views";
+import { communication, incidentsFor, isGraded, monthlyTrend, scoreFor, trendKnown, valueBoard, type ValueRow } from "@/lib/views";
 import { WORKLOADS, isPriced } from "@/lib/pricing";
 import { priceText } from "@/components/Value";
 import { fmtDuration, fmtPct } from "@/lib/format";
@@ -17,7 +17,7 @@ interface Col {
   s90: Score;
   graded: boolean;
   s1y: Score;
-  trend: { count: number }[];
+  trend: { start: number; count: number }[];
   comms: ReturnType<typeof communication>;
   value: ValueRow | undefined;
 }
@@ -135,6 +135,7 @@ export function Comparison({ snap, slugs, heading }: { snap: Snapshot; slugs: st
                 hint={GLOSSARY.trend}
                 label="Last 6 months vs 6 before"
                 cells={cols.map((c) => {
+                  if (!trendKnown(c.p, c.trend)) return { text: "–", value: null };
                   const a = c.trend.slice(0, 6).reduce((n, t) => n + t.count, 0);
                   const b = c.trend.slice(6).reduce((n, t) => n + t.count, 0);
                   return { text: `${b > a ? "Worse" : b < a ? "Better" : "Flat"} (${a} → ${b})`, value: b - a };

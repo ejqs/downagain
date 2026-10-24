@@ -116,7 +116,7 @@ function areaTiersOf(i: GradeInput): Partial<Record<Area, number>> {
 }
 
 /** Union of [start, end) intervals in minutes, clipped to the window. */
-function unionMinutes(intervals: [number, number][], from: number, to: number): number {
+export function unionMinutes(intervals: [number, number][], from: number, to: number): number {
   const clipped = intervals
     .map(([s, e]) => [Math.max(s, from), Math.min(e, to)] as [number, number])
     .filter(([s, e]) => e > s)

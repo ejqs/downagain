@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { safeSnapshot } from "@/lib/data";
 import { LIVE_DAYS, dailyLoad, gradeInput, openIncidents, tierOf, whereHit } from "@/lib/views";
-import { WINDOW_DAYS, durationMinutes, shownEnd } from "@/lib/grading";
+import { WINDOW_DAYS, durationMinutes, shownEnd, unionMinutes } from "@/lib/grading";
 import { fmtDate, fmtDay, fmtDuration, fmtTime, plural } from "@/lib/format";
 import { TIER_BLURB, TIER_NAMES } from "@/lib/severity";
 import { SevPill } from "@/components/ui";
@@ -58,9 +58,14 @@ export default async function IncidentsPage({ searchParams }: Props) {
   const week = snap.providers
     .map((p) => ({
       p,
-      minutes: snap.incidents
-        .filter((i) => i.providerId === p.id && tierOf(i) > 0 && tierOf(i) <= 2 && shownEnd(gradeInput(i), now) > now - 7 * DAY)
-        .reduce((m, i) => m + Math.max(0, (shownEnd(gradeInput(i), now) - Math.max(i.startedAt, now - 7 * DAY)) / 60_000), 0),
+      // Overlapping incidents count once, so a week never holds more than 7 days.
+      minutes: unionMinutes(
+        snap.incidents
+          .filter((i) => i.providerId === p.id && tierOf(i) > 0 && tierOf(i) <= 2)
+          .map((i) => [i.startedAt, shownEnd(gradeInput(i), now)] as [number, number]),
+        now - 7 * DAY,
+        now,
+      ),
     }))
     .filter((x) => x.minutes > 0)
     .sort((a, b) => b.minutes - a.minutes)

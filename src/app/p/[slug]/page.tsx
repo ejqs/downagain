@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProviderHistory, safeSnapshot, type IncidentRow, type ProviderRow, type ReviewTrace } from "@/lib/data";
-import { brokenComponents, communication, coveredDays, dataFrom, isGraded, dailyCells, downNow, incidentsFor, liveIncidents, monthlyTrend, scoreFor, startHeatmap, tierOf, topComponents, valueBoard } from "@/lib/views";
+import { brokenComponents, communication, coveredDays, dataFrom, isGraded, dailyCells, downNow, incidentsFor, liveIncidents, monthlyTrend, scoreFor, startHeatmap, tierOf, topComponents, trendKnown, valueBoard } from "@/lib/views";
 import { WORKLOADS, checkedMs, fmtUsd, isStale } from "@/lib/pricing";
 import { durationMinutes, penaltyEnd, penaltyMinutes } from "@/lib/grading";
 import { fmtAgo, fmtDate, fmtDuration, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
@@ -207,6 +207,9 @@ export default async function ProviderPage({ params, searchParams }: Props) {
   const maxMonth = Math.max(1, ...trend.map((t) => t.count));
   const half = (a: number, b: number) => trend.slice(a, b).reduce((n, t) => n + t.count, 0);
   const [before, after] = [half(0, 6), half(6, 12)];
+  // Short feeds: months before our data starts read as unknown, not as zero.
+  const from = dataFrom(p);
+  const knownTrend = trendKnown(p, trend);
   const heat = startHeatmap(yearList);
   const maxHeat = Math.max(1, ...heat.flat());
   const comps = topComponents(yearList);
@@ -399,8 +402,14 @@ export default async function ProviderPage({ params, searchParams }: Props) {
                     </div>
                   ) : null}
                   <span className="body" style={{ fontSize: 15 }}>
-                    {is > was ? <strong>Worse. </strong> : is < was ? <strong>Better. </strong> : null}
-                    {is} in the last 6 months, {was} in the 6 before.
+                    {knownTrend ? (
+                      <>
+                        {is > was ? <strong>Worse. </strong> : is < was ? <strong>Better. </strong> : null}
+                        {is} in the last 6 months, {was} in the 6 before.
+                      </>
+                    ) : (
+                      <>{is} in the last 6 months.</>
+                    )}
                   </span>
                 </div>
               </details>
@@ -456,14 +465,20 @@ export default async function ProviderPage({ params, searchParams }: Props) {
         <div className="main stack">
           <h2 className="h2">Trend, last 12 months</h2>
           <p className="body">
-            {after > before ? <strong>Worse. </strong> : after < before ? <strong>Better. </strong> : null}
-            {after} in the last 6 months, {before} in the 6 before.
+            {knownTrend ? (
+              <>
+                {after > before ? <strong>Worse. </strong> : after < before ? <strong>Better. </strong> : null}
+                {after} in the last 6 months, {before} in the 6 before.
+              </>
+            ) : (
+              <>{after} in the last 6 months.</>
+            )}
           </p>
           <div className="box pad stack" style={{ ["--gap" as string]: "8px" }}>
             <div className="bars" role="img" aria-label={`Incidents per month: ${trend.map((t) => `${fmtMonthShort(t.start)} ${t.count}`).join(", ")}`}>
-              {trend.map((t) => (
+              {trend.map((t, k) => (
                 <div key={t.start}>
-                  <b>{t.count}</b>
+                  <b>{from != null && (trend[k + 1]?.start ?? now) <= from ? "–" : t.count}</b>
                   <span style={{ height: `${(t.count / maxMonth) * 100}%`, background: t.worst <= 2 ? "var(--down)" : t.worst <= 4 ? "var(--minor)" : "var(--ink)" }} />
                 </div>
               ))}

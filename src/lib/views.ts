@@ -199,7 +199,7 @@ export function downNow(snap: Snapshot): DownItem[] {
   const out: DownItem[] = [];
   for (const p of snap.providers) {
     const mine = incidentsFor(snap, p.id);
-    const open = liveIncidents(mine, snap.generatedAt).sort((a, b) => tierOf(a) - tierOf(b));
+    const open = liveIncidents(mine, snap.generatedAt).sort((a, b) => tierOf(a) - tierOf(b) || a.startedAt - b.startedAt);
     if (open.length) {
       const worst = open[0];
       if (tierOf(worst) > 3) continue;
@@ -207,7 +207,8 @@ export function downNow(snap: Snapshot): DownItem[] {
         provider: p,
         title: open.length > 1 ? `${worst.title} (+${open.length - 1} more)` : worst.title,
         tier: tierOf(worst),
-        sinceMs: Math.min(...open.map((i) => i.startedAt)),
+        // The worst incident's own start, so the time matches the title next to it.
+        sinceMs: worst.startedAt,
         status: p.status,
         monitoring: open.every(isMonitoring),
       });
@@ -234,7 +235,8 @@ export function daysSinceSev1(snap: Snapshot): number | null {
   let last: number | null = null;
   for (const i of snap.incidents) {
     if (tierOf(i) !== 1) continue;
-    const end = i.resolvedAt ?? snap.generatedAt;
+    // A region written off months ago stops counting after a week, as on the heatmap.
+    const end = shownEnd(gradeInput(i), snap.generatedAt);
     if (last === null || end > last) last = end;
   }
   return last === null ? null : Math.floor((snap.generatedAt - last) / DAY);
@@ -292,6 +294,12 @@ export function monthlyTrend(list: IncidentRow[], now: number, months = 12) {
   return out;
 }
 
+/** Whether we hold data for the whole trend window, so "last 6 months vs the 6 before" compares like with like. */
+export function trendKnown(p: Pick<ProviderRow, "historyFrom" | "trackedFrom">, trend: { start: number }[]): boolean {
+  const from = dataFrom(p);
+  return from == null || !trend.length || from <= trend[0].start;
+}
+
 /** Incident start times by UTC weekday (Mon first) and hour. */
 export function startHeatmap(list: IncidentRow[]): number[][] {
   const grid = Array.from({ length: 7 }, () => new Array<number>(24).fill(0));
@@ -330,8 +338,15 @@ export function brokenComponents(p: ProviderRow): BrokenComponents {
 }
 
 export function topComponents(list: IncidentRow[], n = 6) {
+  // Some pages list a component both bare and under its group ("North America - Ashburn - (IAD)"):
+  // count those as one.
+  const names = new Set(list.flatMap((i) => i.components));
+  const canon = (c: string) => {
+    const bare = c.slice(c.indexOf(" - ") + 3);
+    return c.includes(" - ") && names.has(bare) ? bare : c;
+  };
   const counts = new Map<string, number>();
-  for (const i of list) for (const c of i.components) counts.set(c, (counts.get(c) ?? 0) + 1);
+  for (const i of list) for (const c of new Set(i.components.map(canon))) counts.set(c, (counts.get(c) ?? 0) + 1);
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, n).map(([name, count]) => ({ name, count }));
 }
 
