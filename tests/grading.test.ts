@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gradeFor, hitMinutes, penaltyMinutes, score, type GradeInput } from "@/lib/grading";
+import { gradeFor, hitMinutes, onePenaltyPerBreach, penaltyMinutes, score, type GradeInput } from "@/lib/grading";
 
 const to = new Date("2026-10-22T00:00:00Z");
 const from = new Date(to.getTime() - 90 * 86_400_000);
@@ -192,5 +192,18 @@ describe("hitMinutes (admitted uptime)", () => {
   it("stops at recovery and after a week", () => {
     expect(hitMinutes([h({ startedAt: t0, resolvedAt: plus(600), recoveredAt: plus(60) })], from, to)).toBe(60);
     expect(hitMinutes([h({ startedAt: at("2026-09-01T00:00:00Z"), resolvedAt: null })], from, to)).toBe(7 * 1440);
+  });
+});
+
+describe("onePenaltyPerBreach", () => {
+  it("keeps the 600 on the first compromise and drops it on follow-ups within a week", () => {
+    const d = (n: number) => Date.parse("2026-10-21T07:00:00Z") + n * 86_400_000;
+    const rows = [
+      { id: 1, providerId: 1, startedAt: d(0), compromise: true },
+      { id: 2, providerId: 1, startedAt: d(3), compromise: true },
+      { id: 3, providerId: 2, startedAt: d(3), compromise: true },
+      { id: 4, providerId: 1, startedAt: d(20), compromise: true },
+    ];
+    expect(onePenaltyPerBreach(rows).map((r) => r.compromise)).toEqual([true, false, true, true]);
   });
 });
