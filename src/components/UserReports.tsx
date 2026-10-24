@@ -125,7 +125,7 @@ export function UserReports({ slug, siteKey }: { slug: string; siteKey: string }
           <Hint label="User reports">{GLOSSARY.userReports}</Hint>
         </span>
         <div className="row" style={{ ["--gap" as string]: "10px", flexWrap: "nowrap" }}>
-          <span className="mono" style={{ fontSize: 14, fontWeight: 700, whiteSpace: "nowrap" }}>
+          <span className="mono" style={{ fontSize: 16, fontWeight: 700, whiteSpace: "nowrap" }}>
             {counts == null ? "…" : total ? `${counts.lastHour} in the last hour` : "None in 24h"}
           </span>
           {counts && total ? (
@@ -138,7 +138,7 @@ export function UserReports({ slug, siteKey }: { slug: string; siteKey: string }
         </div>
       </div>
       <div className="stack" style={{ ["--gap" as string]: "6px", alignItems: "flex-start" }}>
-        <button type="button" className="btn" onClick={start} disabled={busy || phase === "done"} data-umami-event="user-report">
+        <button type="button" className="btn report" onClick={start} disabled={busy || phase === "done"} data-umami-event="user-report">
           {phase === "done" ? "Reported" : busy ? "Checking…" : "Down for me"}
         </button>
         <div ref={box} />
