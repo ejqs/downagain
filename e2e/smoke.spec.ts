@@ -154,3 +154,13 @@ test("the outage map pins open incidents and lists places", async ({ page }) => 
   // The sample Vercel incident is open "in iad1".
   await expect(map.locator(".map-places li.now", { hasText: "Virginia" })).toBeVisible();
 });
+
+test("picking a place narrows the incidents page", async ({ page }) => {
+  await page.goto("/incidents");
+  await page.locator(".map-places a", { hasText: "Virginia" }).click();
+  await expect(page).toHaveURL(/place=IAD/);
+  await expect(page.locator('[aria-label="Place"] .chip[aria-current="true"]')).toHaveText(/Virginia/);
+  // The open Vercel incident in iad1 is still listed; the map keeps every place.
+  await expect(page.locator('section[aria-label="Ongoing"]')).toContainText("Vercel");
+  expect(await page.locator("section.map svg a").count()).toBeGreaterThan(1);
+});

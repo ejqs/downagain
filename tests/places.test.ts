@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { incidentPlaces, outageMap, placesIn } from "@/lib/places";
+import { incidentPlaces, outageMap, placeBoard, placesIn } from "@/lib/places";
+import type { IncidentRow } from "@/lib/data";
 
 const keys = (name: string) => placesIn(name).map((p) => p.key);
 
@@ -45,5 +46,32 @@ describe("outageMap", () => {
     expect(m.unplaced).toBe(1);
     expect(m.points.map((p) => [p.key, p.incidents, p.now])).toEqual([["SIN", 2, true], ["IAD", 0, true]]);
     expect(m.points[0]).toMatchObject({ name: "Singapore", aka: ["ap-southeast-1"], providers: ["AWS", "Railway"] });
+  });
+});
+
+describe("placeBoard", () => {
+  const now = Date.parse("2026-10-24T12:00:00Z");
+  const H = 3_600_000;
+  const row = (o: Partial<IncidentRow>): IncidentRow =>
+    ({
+      id: 1, providerId: 1, title: "Errors", impact: "major", status: "resolved", startedAt: now - 10 * H, monitoringAt: null, resolvedAt: now - 8 * H,
+      url: null, components: [], regions: null, postmortem: false, origin: "live", tier: 2, tierOverride: null, areaTiers: null, surfaces: null,
+      security: false, reason: null, overrideNote: null, gradedBy: "rules", scope: null, summary: null, stale: false, ...o,
+    }) as IncidentRow;
+
+  it("ranks places by Sev 1–2 time, overlaps once, other tiers left out", () => {
+    const rows = placeBoard(
+      [
+        row({ id: 1, regions: ["us-east-1"] }),
+        row({ id: 2, providerId: 2, title: "Errors in iad1", startedAt: now - 9 * H, resolvedAt: now - 7 * H }),
+        row({ id: 3, regions: ["ap-southeast-1"], startedAt: now - 5 * H, resolvedAt: now - 4 * H }),
+        row({ id: 4, regions: ["eu-west-1"], tier: 3 }),
+      ],
+      now,
+      90,
+      (id) => (id === 1 ? "AWS" : "Vercel"),
+    );
+    expect(rows.map((r) => [r.key, r.minutes, r.incidents])).toEqual([["IAD", 180, 2], ["SIN", 60, 1]]);
+    expect(rows[0].providers).toEqual(["AWS", "Vercel"]);
   });
 });

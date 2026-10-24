@@ -7,6 +7,8 @@
 // not places: they stay off the map rather than pinned to a guess.
 import { AIRPORTS } from "@/lib/geo/airports";
 import type { IncidentRow } from "@/lib/data";
+import { shownEnd, unionMinutes } from "@/lib/grading";
+import { gradeInput, tierOf } from "@/lib/views";
 
 export interface Place {
   /** The airport the place resolves to; two names for one spot share it. */
@@ -225,4 +227,42 @@ export function outageMap(items: MapItem[]): OutageMap {
     placed,
     unplaced,
   };
+}
+
+/** The display name for an airport key, for a place picked by URL. */
+export function placeName(key: string): string {
+  return NAME_BY_CODE.get(key) ?? key;
+}
+
+export const isPlaceKey = (s: string | undefined): s is string => /^[A-Z]{3}$/.test(s ?? "");
+
+export interface PlaceTime {
+  key: string;
+  name: string;
+  /** Minutes with a Sev 1 or 2 open that names this place, any provider; overlaps count once. */
+  minutes: number;
+  incidents: number;
+  providers: string[];
+}
+
+/** Places ranked by Sev 1–2 time over the window, worst first. */
+export function placeBoard(list: IncidentRow[], now: number, days: number, nameOf: (providerId: number) => string): PlaceTime[] {
+  const from = now - days * 86_400_000;
+  const by = new Map<string, { name: string; spans: [number, number][]; providers: Set<string> }>();
+  for (const i of list) {
+    const t = tierOf(i);
+    if (t < 1 || t > 2) continue;
+    const span: [number, number] = [i.startedAt, shownEnd(gradeInput(i), now)];
+    if (span[1] <= from) continue;
+    for (const p of incidentPlaces(i)) {
+      const e = by.get(p.key) ?? { name: p.name, spans: [], providers: new Set<string>() };
+      e.spans.push(span);
+      e.providers.add(nameOf(i.providerId));
+      by.set(p.key, e);
+    }
+  }
+  return [...by.entries()]
+    .map(([key, e]) => ({ key, name: e.name, minutes: unionMinutes(e.spans, from, now), incidents: e.spans.length, providers: [...e.providers] }))
+    .filter((x) => x.minutes > 0)
+    .sort((a, b) => b.minutes - a.minutes || a.name.localeCompare(b.name));
 }

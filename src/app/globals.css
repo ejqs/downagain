@@ -318,6 +318,10 @@ details.area > summary:hover { background: var(--panel); }
 .map .pt { fill: var(--ink); stroke: var(--paper); stroke-width: 0.6; }
 .map .pt.now { fill: var(--down); fill-opacity: 1; stroke: var(--ink); stroke-width: 0.8; }
 .map-places { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
-.map-places li { display: inline-flex; align-items: baseline; gap: 6px; }
+.map-places li, .map-places a { display: inline-flex; align-items: baseline; gap: 6px; }
+.map-places a { text-decoration: none; min-height: 32px; align-items: center; }
+.map-places a[aria-current="true"] { background: var(--hazard); padding: 0 6px; }
+.map a circle { cursor: pointer; }
+.map .pt.on { stroke: var(--ink); stroke-width: 1.2; }
 .map-places .dot { width: 8px; height: 8px; background: var(--ink); align-self: center; }
 .map-places .now .dot { background: var(--down); outline: 1.5px solid var(--ink); }
