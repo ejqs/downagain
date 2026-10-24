@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { areaFor, SECURITY_PENALTY, type Scope, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
-export const PROMPT_VERSION = 8;
+export const PROMPT_VERSION = 9;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 
 const SURFACES = ["serving", "data", "ship", "manage", "peripheral"] as const;
@@ -66,7 +66,7 @@ Surfaces:
 - data: databases, storage, volumes, queues, caches, backups.
 - ship: builds, deploys, CI, CLI, provisioning, logs, domains and certificates, fine-tuning, batch jobs. For hosting providers a bare "API" usually means the control plane, so it is ship unless the text says customer apps were affected.
 - manage: dashboard, console, account login and auth, API keys, teams, billing and payments: what developers need to change config and keep their account in good standing.
-- peripheral: docs, support, status page, marketing site, invoice views, usage charts, and the provider's own apps (ChatGPT, claude.ai, Sora, Codex, Claude Code, Cowork, desktop and mobile apps and similar). An incident that names only those apps is peripheral even with no component listed; count the API only when the text says API or developer requests were hit.
+- peripheral: docs, support, status page, marketing site, invoice views, usage charts, sign-ups for new accounts, and the provider's own apps (ChatGPT, claude.ai, Sora, Codex, Claude Code, Cowork, desktop and mobile apps and similar). Paused or failing sign-ups block nobody who already builds on the provider, so they are peripheral even when the provider pauses them on purpose. An incident that names only those apps is peripheral even with no component listed; count the API only when the text says API or developer requests were hit.
 
 For dev tools (Git hosting, CI, package and container registries), git operations, CI runs, APIs, webhooks, and package or image downloads and publishing are ship; only what they host for the customer's own users (GitHub Pages) is serving. Issues, wikis and similar collaboration features are manage; pull requests are ship (no merge, no deploy).
 
@@ -80,11 +80,12 @@ Every product a customer builds on or routes their users' traffic through is ser
 
 Tier for each affected surface:
 - 1 Lights out: serving or data down or failing for most requests across most customers, or confirmed data loss.
-- 2 Bleeding: serving or data degraded (elevated errors or latency, some requests failing), or down only in one region, for one model, or for a minority of customers. Also ship completely down for everyone.
+- 2 Bleeding: serving or data degraded (elevated errors or latency, some requests failing, messages, calls or emails delivered late), or down only in one region, for one model, or for a minority of customers. Also ship completely down for everyone.
 - 3 Can't ship: ship broken or badly degraded, or manage broken in a way that blocks deploys, config changes or accounts.
 - 4 Papercut: a slow or partly broken dashboard that blocks nothing, any peripheral problem, or minor ship trouble such as slower builds or delayed logs.
+Serving and data are Tier 1 or 2, never 3 or 4: any real trouble for the customer's own users, even only delays, is Tier 2.
 
-Scope is the blast radius: global (most customers or regions), regional (one region or country, or a few locations), local (a single data centre, point of presence or cell), subset (one plan, or a small share of customers everywhere), single (one model, endpoint or add-on product among the many the provider offers, e.g. one hosted third-party model on an inference platform, while the rest work), unclear (the text doesn't say). Pick the narrowest scope the text supports; "some customers" in one region is regional. The site discounts narrower scopes itself, so the tier describes how bad it was for those who were hit: do not lower a tier because only one feature, region or a share of customers was affected; set the scope instead. The one exception: a full serving or data outage is Tier 1 only when it is global, or unclear but described as widespread; otherwise Tier 2.
+Scope is the blast radius: global (most customers or regions), regional (one region or country, or a few locations), local (a single data centre, point of presence or cell), subset (one plan, or a small share of customers everywhere), single (one model, endpoint or add-on product among the many the provider offers, e.g. one hosted third-party model on an inference platform, an agent platform at a cloud host, or Workflows at an edge provider, while the rest work), unclear (the text doesn't say what was hit). A product that is the provider's core offering (the CDN, DNS or Workers at an edge provider, running apps at a host, the databases at a database provider, the main models at an AI provider) is not single. When the text names one add-on product and says nothing about how many of its users were hit, the scope is single, not unclear. When the provider says only some hosts, machines or customers were down at any one time, as in rolling restarts or phased maintenance, the scope is subset even if it reached every region. Pick the narrowest scope the text supports; "some customers" in one region is regional. The site discounts narrower scopes itself, so the tier describes how bad it was for those who were hit: do not lower a tier because only one feature, region or a share of customers was affected; set the scope instead. The one exception: a full serving or data outage is Tier 1 only when it is global, or unclear but described as widespread; otherwise Tier 2.
 
 Set not_counted to true only for scheduled maintenance that stayed inside its window with no unplanned impact, a false alarm, or an incident the provider says had no customer impact. Then affected may be empty.
 
@@ -98,7 +99,7 @@ rationale: one plain, factual sentence of at most 25 words that a reader of the 
 
 summary: the whole incident in plain words, at most 50 words, for a developer skimming a long thread of updates: what broke, who was affected, for how long, and the cause and fix if the provider gave them. Use the provider's facts only; no speculation, no jokes, no tier numbers.
 
-recovered_at: providers often keep an incident open long after the fix, to monitor, chase a root cause, notify customers or write a report. Copy the bracketed timestamp of the first update that says the affected services are working normally again for all customers who were hit (for example "running at normal speed", "fully recovered", "operating normally"). Improving, partly restored, restored for some plans or regions, or a backlog still draining is not recovered. If a later update says the problem came back, use the first update after that which says it is normal again. Use an empty string when the text never says service is back to normal, or when that update is the resolution itself.`;
+recovered_at: providers often keep an incident open long after the fix, to monitor, chase a root cause, notify customers or write a report. Copy the bracketed timestamp of the first update that says the affected services are working normally again for all customers who were hit (for example "running at normal speed", "fully recovered", "operating normally", "we have observed a recovery", "error rates have returned to normal"). Improving, partly restored, restored for some plans or regions, or a backlog still draining is not recovered. If a later update says the problem came back, use the first update after that which says it is normal again. Use an empty string when the text never says service is back to normal, or when that update is the resolution itself.`;
 
 export interface ReviewInput {
   provider: string;
@@ -212,6 +213,18 @@ export interface Refined extends Classification {
   scope: Scope;
 }
 
+/**
+ * Hold Claude to the rubric where it drifts: Sev 3 means "can't ship", so a
+ * serving or data problem there is Sev 2 (late SMS read as Sev 3), and a full
+ * outage is Sev 1 only when it was global or unclear (a single model read as Sev 1).
+ */
+function rubricTier(surface: Surface, tier: 1 | 2 | 3 | 4, scope: Scope): 1 | 2 | 3 | 4 {
+  if (surface !== "serving" && surface !== "data") return tier;
+  if (tier === 3) return 2;
+  if (tier === 1 && scope !== "global" && scope !== "unclear") return 2;
+  return tier;
+}
+
 /** Turn Claude's verdict into our grade, with the same security and data-loss rules as severity.ts. */
 export function applyVerdict(rules: Classification, v: Verdict): Refined {
   // Claude reads the text; the rules can read which cities were listed. Unclear text doesn't erase that.
@@ -229,9 +242,10 @@ export function applyVerdict(rules: Classification, v: Verdict): Refined {
   let tier: Tier = 4;
   for (const a of v.affected) {
     if (!surfaces.includes(a.surface)) surfaces.push(a.surface);
-    const area = areaFor(a.surface, a.tier);
-    if (area) areaTiers[area] = Math.min(areaTiers[area] ?? 4, a.tier) as Tier;
-    tier = Math.min(tier, a.tier) as Tier;
+    const t = rubricTier(a.surface, a.tier, scope);
+    const area = areaFor(a.surface, t);
+    if (area) areaTiers[area] = Math.min(areaTiers[area] ?? 4, t) as Tier;
+    tier = Math.min(tier, t) as Tier;
   }
   // A breach or data loss flagged as "no impact" still counts, from Sev 4 up.
   if (surfaces.length === 0) {
