@@ -27,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absUrl("/compare"), changeFrequency: "daily", priority: 0.6 },
     { url: absUrl("/stack"), changeFrequency: "daily", priority: 0.5 },
     { url: absUrl("/about"), changeFrequency: "monthly", priority: 0.4 },
+    { url: absUrl("/about/changelog"), changeFrequency: "weekly", priority: 0.3 },
     // The first category's board is the home page.
     ...categories.slice(1).map((c) => ({ url: absUrl(`/c/${c.slug}`), lastModified: now, changeFrequency: "hourly" as const, priority: 0.8 })),
     ...providers.map((p) => ({

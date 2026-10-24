@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const PAGES = ["/", "/c/hosting", "/c/ai", "/incidents", "/compare", "/compare/railway-vs-vercel", "/about", "/p/vercel", "/p/railway", "/p/heroku", "/stack", "/stack?u=vercel&u=railway&u=heroku", "/?need=postgres,storage&region=sg", "/c/ai?need=llm"];
+const PAGES = ["/", "/c/hosting", "/c/ai", "/incidents", "/compare", "/compare/railway-vs-vercel", "/about", "/about/changelog", "/p/vercel", "/p/railway", "/p/heroku", "/stack", "/stack?u=vercel&u=railway&u=heroku", "/?need=postgres,storage&region=sg", "/c/ai?need=llm"];
 
 /** Collect uncaught errors and console errors from our own origin. */
 function watchErrors(page: Page) {
