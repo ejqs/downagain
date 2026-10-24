@@ -9,7 +9,7 @@
 // A paragraph that only covers a new category needn't bump: no stored incident is in it.
 import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
-import { areaFor, SECURITY_PENALTY, type Scope, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
+import { areaFor, scopeWeight, SECURITY_PENALTY, type Scope, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
 export const PROMPT_VERSION = 11;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
@@ -246,7 +246,8 @@ function rubricTier(surface: Surface, tier: 1 | 2 | 3 | 4, scope: Scope): 1 | 2 
 /** Turn Claude's verdict into our grade, with the same security and data-loss rules as severity.ts. */
 export function applyVerdict(rules: Classification, v: Verdict): Refined {
   // Claude reads the text; the rules can read which cities were listed. Unclear text doesn't erase that.
-  const scope = v.scope === "unclear" && rules.scope ? rules.scope : v.scope;
+  // A carrier network incident is local at most, however Claude reads "multiple networks".
+  const scope = rules.carrier && scopeWeight(v.scope) > scopeWeight("local") ? "local" : v.scope === "unclear" && rules.scope ? rules.scope : v.scope;
   const base = { classifierVersion: rules.classifierVersion, gradedBy: "claude" as const, scope, summary: v.summary, recoveredAt: v.recovered_at, follows: v.follows };
   // The rules read the text for an actual compromise; Claude confirms it was a security incident at all.
   const compromise = rules.compromise && (v.security || v.data_loss);

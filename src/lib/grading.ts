@@ -9,7 +9,10 @@ const DAY = 86_400_000;
 /** Sev 1 counts for up to 3 days; anything milder for 1, so a slow issue left open can't outweigh an outage. */
 export const MAX_PENALTY_MINUTES = 72 * 60;
 export const MAX_PENALTY_MINUTES_MILD = 24 * 60;
-export const penaltyCap = (tier: number) => (tier <= 1 ? MAX_PENALTY_MINUTES : MAX_PENALTY_MINUTES_MILD);
+/** One region, carrier, plan or add-on isn't a blackout: it stops costing points after 6 hours. */
+export const MAX_PENALTY_MINUTES_SCOPED = 6 * 60;
+export const penaltyCap = (tier: number, scope?: string | null) =>
+  scopeWeight(scope) < 1 ? MAX_PENALTY_MINUTES_SCOPED : tier <= 1 ? MAX_PENALTY_MINUTES : MAX_PENALTY_MINUTES_MILD;
 
 /** Longest an incident paints day-by-day views; matches "Happening now" (LIVE_DAYS). */
 export const MAX_SHOWN_DAYS = 7;
@@ -95,7 +98,7 @@ export function penaltyEnd(i: Pick<GradeInput, "startedAt" | "monitoringAt" | "r
 export function penaltySpan(i: GradeInput, from: Date, to: Date): [number, number] | null {
   const end = penaltyEnd(i) ?? to;
   const s = Math.max(i.startedAt.getTime(), from.getTime());
-  const e = Math.min(end.getTime(), to.getTime(), i.startedAt.getTime() + penaltyCap(effectiveTier(i)) * MIN);
+  const e = Math.min(end.getTime(), to.getTime(), i.startedAt.getTime() + penaltyCap(effectiveTier(i), i.scope) * MIN);
   return e > s ? [s, e] : null;
 }
 

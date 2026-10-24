@@ -15,6 +15,16 @@ export interface Change {
 export const CHANGELOG: Change[] = [
   {
     date: "2026-10-24",
+    title: "Local trouble isn't a blackout",
+    refs: [{ pr: 27 }],
+    items: [
+      "Incidents short of global (one region, carrier, plan or add-on) stop adding points after 6 hours. Global ones still run to 1 day, or 3 for Sev 1.",
+      "Third-party carrier networks (Twilio's \"CARRIER NETWORK\" components: one operator's SMS or calls in one country) count as local, x0.1.",
+      "Admitted uptime unchanged.",
+    ],
+  },
+  {
+    date: "2026-10-24",
     title: "Overlapping incidents count once",
     refs: [{ pr: 23 }],
     items: [

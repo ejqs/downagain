@@ -140,6 +140,13 @@ describe("scope from the rules", () => {
     expect(at(many)).toBeNull();
   });
 
+  it("counts a third-party carrier network as local", () => {
+    const c = classify({ title: "SMS Delivery Delays from Twilio to Claro Costa Rica", impact: "minor", components: ["CARRIER NETWORK - SMS, Latin America"], worstComponentStatus: null, categorySlug: "apis" });
+    expect(c).toMatchObject({ scope: "local", carrier: true });
+    // Twilio's own product alongside: not just the carrier.
+    expect(classify({ title: "x", impact: "minor", components: ["CARRIER NETWORK - SMS, Europe", "Programmable Messaging"], worstComponentStatus: null }).carrier).toBeUndefined();
+  });
+
   it("marks some users as a subset", () => {
     expect(classify({ title: "Incorrect geo location for some Cloudflare WARP users", impact: "minor", components: ["WARP"], worstComponentStatus: null }).scope).toBe("subset");
     expect(classify({ title: "Increased HTTP 502 Errors", impact: "major", components: ["CDN/Cache"], worstComponentStatus: null }).scope).toBeNull();
