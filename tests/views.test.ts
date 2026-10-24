@@ -310,7 +310,7 @@ describe("dailyLoad", () => {
   });
 
   it("adds the security penalty once, on the start day, and runs open incidents up to now", () => {
-    const days = dailyLoad([inc(1, { startedAt: ago(1, 0), resolvedAt: null, tier: 2, security: true })], 3, NOW);
+    const days = dailyLoad([inc(1, { startedAt: ago(1, 0), resolvedAt: null, tier: 2, security: true, compromise: true })], 3, NOW);
     expect(days[0].points).toBe(0);
     expect(days[1].points).toBe(4 * 12 * 60 + 600); // 12:00 to midnight
     expect(days[2].points).toBe(4 * 12 * 60); // midnight to now

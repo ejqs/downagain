@@ -62,6 +62,7 @@ export interface IncidentRow {
   areaTiers: Partial<Record<Area, number>> | null;
   surfaces: string[] | null;
   security: boolean;
+  compromise?: boolean;
   reason: string | null;
   overrideNote: string | null;
   gradedBy: string;
@@ -102,6 +103,7 @@ const incidentColumns = {
   areaTiers: incidents.areaTiers,
   surfaces: incidents.surfaces,
   security: incidents.security,
+  compromise: incidents.compromise,
   reason: incidents.reason,
   overrideNote: incidents.overrideNote,
   gradedBy: incidents.gradedBy,

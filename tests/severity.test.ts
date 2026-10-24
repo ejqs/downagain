@@ -87,12 +87,21 @@ describe("classify", () => {
     expect(c.areaTiers).toEqual({ shipping: 3, production: 1 });
   });
 
-  it("security bumps one tier with Sev 2 as the floor", () => {
+  it("grades security by impact; only a real compromise carries the penalty", () => {
     const c = classify({ ...base, title: "Security incident", components: ["Dashboard"] });
+    expect(c).toMatchObject({ security: true, compromise: false, tier: 4 });
+    expect(classify({ ...base, title: "CVE-2026-1234 in builders", components: ["Builds"] })).toMatchObject({ tier: 3, compromise: false });
+    expect(classify({ ...base, title: "Mitigating a DDoS attack", impact: "major", components: ["Edge Network"], updateText: "malicious traffic" })).toMatchObject({ tier: 1, security: true, compromise: false });
+    const breach = classify({ ...base, title: "x", impact: "minor", components: ["Builds"], updateText: "An unauthorized party accessed build logs. Please rotate your credentials." });
+    expect(breach).toMatchObject({ tier: 3, security: true, compromise: true });
+    expect(breach.reason).toMatch(/plus 600 points for a security compromise/);
+  });
+
+  it("a security incident in one cloud region stays at Sev 2, as Claude's grade does", () => {
+    const c = classify({ title: "Security issue with EC2", impact: "minor", components: ["Amazon Elastic Compute Cloud"], worstComponentStatus: null, regions: ["us-east-1"], categorySlug: "cloud" });
     expect(c.security).toBe(true);
     expect(c.tier).toBe(2);
-    expect(classify({ ...base, title: "CVE-2026-1234 in builders", components: ["Builds"] }).tier).toBe(2);
-    expect(classify({ ...base, title: "x", impact: "critical", components: ["Edge Network"], updateText: "unauthorized access" }).tier).toBe(1);
+    expect(c.areaTiers.production).toBe(2);
   });
 
   it("data loss is always Sev 1", () => {

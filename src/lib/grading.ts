@@ -43,6 +43,8 @@ export interface GradeInput {
   areaTiers: Partial<Record<Area, number>> | null;
   surfaces: string[] | null;
   security: boolean;
+  /** A real compromise or exposure: adds SECURITY_PENALTY. Plain security flags don't. */
+  compromise?: boolean;
   scope?: string | null;
 }
 
@@ -97,7 +99,7 @@ export function penaltyMinutes(i: GradeInput, from: Date, to: Date): number {
 export function incidentPoints(i: GradeInput, from: Date, to: Date): number {
   const tier = effectiveTier(i);
   let pts = TIER_WEIGHT[tier] * scopeWeight(i.scope) * penaltyMinutes(i, from, to);
-  if (i.security && i.startedAt >= from) pts += SECURITY_PENALTY;
+  if (i.compromise && i.startedAt >= from) pts += SECURITY_PENALTY;
   return pts;
 }
 
@@ -190,7 +192,9 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
 
     const minutes = penaltyMinutes(i, from, to) * scopeWeight(i.scope);
     for (const [area, t] of Object.entries(areaTiersOf(i)) as [Area, number][]) {
-      if (!t || !areas[area]) continue; // e.g. a "dashboard" key graded before there were two areas
+      // A "dashboard" key graded before there were two areas, or a papercut stored before
+      // CLASSIFIER_VERSION 9: papercuts count overall only.
+      if (!t || t >= 4 || !areas[area]) continue;
       areas[area].points += TIER_WEIGHT[t] * minutes;
       areas[area].incidents++;
       areaIntervals[area].push([i.startedAt.getTime(), end]);

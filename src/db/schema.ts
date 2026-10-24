@@ -109,6 +109,7 @@ export const incidents = pgTable(
     areaTiers: jsonb("area_tiers").$type<Partial<Record<"production" | "shipping" | "dashboard", number>>>(),
     surfaces: text("surfaces").array(), // ["serving", "ship"]
     security: boolean("security").notNull().default(false),
+    compromise: boolean("compromise").notNull().default(false), // a real breach or exposure: adds the security penalty
     lowConfidence: boolean("low_confidence").notNull().default(false),
     reason: text("reason"), // "Sev 1 because Edge Network had a major outage"
     tierOverride: integer("tier_override"),

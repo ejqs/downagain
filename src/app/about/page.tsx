@@ -77,7 +77,7 @@ export default function About() {
         </div>
         <p>
           Tiers follow impact, not component names: a billing outage that freezes accounts can&apos;t ship, a slow docs page is a papercut. Security
-          incidents move up one tier (Sev 2 at least) and add {SECURITY_PENALTY} penalty points. Confirmed data loss or exposure is always Sev 1.
+          incidents are graded by impact like any other; a breach or exposed credentials adds {SECURITY_PENALTY} penalty points. Confirmed data loss or exposure is always Sev 1.
           A cloud incident the provider confines to one region tops out at Sev 2.
           Every incident shows why it got its tier, and tiers can be corrected by hand.
         </p>

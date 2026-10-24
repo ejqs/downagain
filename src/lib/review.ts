@@ -87,6 +87,7 @@ function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | 
     areaTiers: c.areaTiers,
     surfaces: c.surfaces,
     security: c.security,
+    compromise: c.compromise,
     lowConfidence: c.lowConfidence,
     reason: c.reason,
     classifierVersion: c.classifierVersion,

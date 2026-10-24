@@ -19,6 +19,7 @@ export function gradeInput(i: IncidentRow): GradeInput {
     areaTiers: i.areaTiers,
     surfaces: i.surfaces,
     security: i.security,
+    compromise: i.compromise,
     scope: i.scope,
   };
 }
@@ -117,7 +118,7 @@ export function dailyLoad(list: IncidentRow[], days: number, now: number): DayLo
       if (t < cell.worst || (t === cell.worst && cell.top && long(i) > long(cell.top))) cell.top = i;
       cell.worst = Math.min(cell.worst, t);
       cell.points += TIER_WEIGHT[t] * penaltyMinutes(gradeInput(i), new Date(start), new Date(end));
-      if (i.security && i.startedAt >= start) cell.points += SECURITY_PENALTY;
+      if (i.compromise && i.startedAt >= start) cell.points += SECURITY_PENALTY;
     }
     cell.points = Math.round(cell.points);
     out.push(cell);
