@@ -281,6 +281,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             {dataFrom(p) ? `Since ${fmtMonth(dataFrom(p)!)}` : "New"} · {plural(history?.total ?? list.length, "incident")} · {new URL(p.statusPageUrl).host}
             {p.lastCheckedAt ? ` · checked ${fmtAgo(p.lastCheckedAt, now)}` : ""}
           </p>
+          {reportKey ? <UserReports slug={p.slug} siteKey={reportKey} /> : null}
           <div className="row" style={{ ["--gap" as string]: "8px", marginTop: 4 }}>
             <Link className="btn dark" href={compareHref([p.slug, ...rivals.slice(0, 2).map((x) => x.slug)])} data-umami-event="compare">
               Compare
@@ -288,7 +289,6 @@ export default async function ProviderPage({ params, searchParams }: Props) {
             <Link className="btn" href={stackHref([{ slug: p.slug, parts: [] }])} data-umami-event="stack-add">Add to stack</Link>
             <a className="btn" href={p.statusPageUrl} data-umami-event="status-page-outbound">Status page</a>
           </div>
-          {reportKey ? <UserReports slug={p.slug} siteKey={reportKey} /> : null}
         </div>
         <div className={`big-grade g-${!graded ? "none" : s90.grade === "A+" ? "Ap" : s90.grade}`}>
           <span className="eyebrow" style={{ letterSpacing: "0.1em" }}>Grade</span>

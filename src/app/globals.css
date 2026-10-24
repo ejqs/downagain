@@ -211,7 +211,7 @@ main.wrap { padding-bottom: 48px; }
 .bars span { width: 100%; background: var(--ink); }
 .bars-x { display: flex; gap: 4px; }
 .bars-x span { flex: 1; text-align: center; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
-.reports { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-top: 8px; padding: 14px 16px; background: var(--down-wash); border-left: 6px solid var(--down); }
+.reports { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin: 4px 0; padding: 14px 16px; background: var(--down-wash); border-left: 6px solid var(--down); }
 .btn.report { background: var(--down); justify-content: center; gap: 8px; }
 .btn.report:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
 .btn.report:disabled { background: var(--paper); opacity: 1; }
