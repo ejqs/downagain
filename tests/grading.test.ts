@@ -78,7 +78,7 @@ describe("score", () => {
 
   it("applies overrides and the security penalty", () => {
     const s = score(
-      [inc({ startedAt: at("2026-10-01T10:00:00Z"), resolvedAt: at("2026-10-01T10:10:00Z"), tier: 1, tierOverride: 4, security: true })],
+      [inc({ startedAt: at("2026-10-01T10:00:00Z"), resolvedAt: at("2026-10-01T10:10:00Z"), tier: 1, tierOverride: 4, security: true, compromise: true })],
       from,
       to,
     );
@@ -155,8 +155,9 @@ describe("scope", () => {
     expect(pts("local").areas.production.points).toBeCloseTo(24);
   });
 
-  it("never discounts the security penalty", () => {
-    expect(score([{ ...hour("local"), security: true }], from, to).points).toBe(624);
+  it("never discounts the security penalty, and adds it only for a compromise", () => {
+    expect(score([{ ...hour("local"), security: true, compromise: true }], from, to).points).toBe(624);
+    expect(score([{ ...hour("local"), security: true }], from, to).points).toBe(24);
   });
 });
 

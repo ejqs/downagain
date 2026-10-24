@@ -43,6 +43,8 @@ export interface GradeInput {
   areaTiers: Partial<Record<Area, number>> | null;
   surfaces: string[] | null;
   security: boolean;
+  /** A real compromise or exposure: adds SECURITY_PENALTY. Plain security flags don't. */
+  compromise?: boolean;
   scope?: string | null;
 }
 
@@ -97,7 +99,7 @@ export function penaltyMinutes(i: GradeInput, from: Date, to: Date): number {
 export function incidentPoints(i: GradeInput, from: Date, to: Date): number {
   const tier = effectiveTier(i);
   let pts = TIER_WEIGHT[tier] * scopeWeight(i.scope) * penaltyMinutes(i, from, to);
-  if (i.security && i.startedAt >= from) pts += SECURITY_PENALTY;
+  if (i.compromise && i.startedAt >= from) pts += SECURITY_PENALTY;
   return pts;
 }
 

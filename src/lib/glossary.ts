@@ -14,7 +14,7 @@ export const GLOSSARY = {
   sev1Downtime: "Total minutes of Sev 1 incidents, as posted.",
   mttr: "Median time to resolve. Half of incidents were fixed faster.",
   longest: "Longest Sev 1–2 incident, start to resolved.",
-  security: "Incidents the provider flagged as security. They count one tier higher.",
+  security: "Incidents about security. Graded by impact; a breach or exposed credentials adds 600 points.",
   trend: "Incident count, last 6 months against the 6 before.",
   postmortems: "Sev 1–2 incidents with a published write-up.",
   updateGap: "Median time between status page updates during an incident.",

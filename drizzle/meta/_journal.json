@@ -57,6 +57,13 @@
       "when": 1792783688912,
       "tag": "0007_user_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792845470315,
+      "tag": "0008_natural_cammi",
+      "breakpoints": true
     }
   ]
 }
