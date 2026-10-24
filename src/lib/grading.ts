@@ -46,6 +46,8 @@ export interface GradeInput {
   /** A real compromise or exposure: adds SECURITY_PENALTY. Plain security flags don't. */
   compromise?: boolean;
   scope?: string | null;
+  /** Overlaps only merge within one provider; a stack's providers each add their own. */
+  providerId?: number;
 }
 
 export const GRADES = [
@@ -89,11 +91,39 @@ export function penaltyEnd(i: Pick<GradeInput, "startedAt" | "monitoringAt" | "r
   return r;
 }
 
-export function penaltyMinutes(i: GradeInput, from: Date, to: Date): number {
+/** The stretch an incident is penalised for, in ms, clipped to the window; null if none of it is inside. */
+export function penaltySpan(i: GradeInput, from: Date, to: Date): [number, number] | null {
   const end = penaltyEnd(i) ?? to;
   const s = Math.max(i.startedAt.getTime(), from.getTime());
   const e = Math.min(end.getTime(), to.getTime(), i.startedAt.getTime() + penaltyCap(effectiveTier(i)) * MIN);
-  return Math.max(0, (e - s) / MIN);
+  return e > s ? [s, e] : null;
+}
+
+export function penaltyMinutes(i: GradeInput, from: Date, to: Date): number {
+  const span = penaltySpan(i, from, to);
+  return span ? (span[1] - span[0]) / MIN : 0;
+}
+
+/**
+ * Weighted minutes where each moment counts the heaviest span running then, not the
+ * sum: one outage posted three times, or a breach and its key notice, costs once.
+ * Spans are [start ms, end ms, weight, group]; groups (providers) add up, so a stack
+ * hit by two providers at once pays for both.
+ */
+export function peakMinutes(spans: [number, number, number, number?][]): number {
+  const groups = new Map<number | undefined, [number, number, number][]>();
+  for (const [s, e, w, g] of spans) if (e > s && w > 0) groups.set(g, [...(groups.get(g) ?? []), [s, e, w]]);
+  let total = 0;
+  for (const list of groups.values()) {
+    const edges = [...new Set(list.flatMap(([s, e]) => [s, e]))].sort((a, b) => a - b);
+    for (let k = 0; k + 1 < edges.length; k++) {
+      const [a, b] = [edges[k], edges[k + 1]];
+      let w = 0;
+      for (const [s, e, x] of list) if (s <= a && e >= b && x > w) w = x;
+      total += w * (b - a);
+    }
+  }
+  return total / MIN;
 }
 
 /** Follow-ups to a breach (key revocations, clarifications) posted within this many days are the same breach. */
@@ -171,7 +201,7 @@ export const UPTIME_DEPTH: Record<number, number> = { 1: 1, 2: 0.5 };
 export function hitMinutes(incidents: GradeInput[], from: Date, to: Date): number {
   const f = from.getTime();
   const t = to.getTime();
-  const spans: [number, number, number][] = [];
+  const spans: [number, number, number, number?][] = [];
   for (const i of incidents) {
     const w = (UPTIME_DEPTH[effectiveTier(i)] ?? 0) * scopeWeight(i.scope);
     if (!w) continue;
@@ -180,17 +210,9 @@ export function hitMinutes(incidents: GradeInput[], from: Date, to: Date): numbe
     const resolved = i.resolvedAt?.getTime();
     const end = resolved != null && r != null && r > s && r < resolved ? r : (resolved ?? t);
     const e = Math.min(end, s + MAX_SHOWN_DAYS * DAY, t);
-    if (e > Math.max(s, f)) spans.push([Math.max(s, f), e, w]);
+    if (e > Math.max(s, f)) spans.push([Math.max(s, f), e, w, i.providerId]);
   }
-  const edges = [...new Set(spans.flatMap(([s, e]) => [s, e]))].sort((a, b) => a - b);
-  let total = 0;
-  for (let k = 0; k + 1 < edges.length; k++) {
-    const [a, b] = [edges[k], edges[k + 1]];
-    let w = 0;
-    for (const [s, e, x] of spans) if (s <= a && e >= b && x > w) w = x;
-    total += w * (b - a);
-  }
-  return total / MIN;
+  return peakMinutes(spans);
 }
 
 export interface AreaScore {
@@ -236,9 +258,15 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
   let securityCount = 0;
   const resolveTimes: number[] = [];
 
+  // Severity-weighted penalty time, overall and per area; overlaps count once (peakMinutes).
+  const spans: [number, number, number, number?][] = [];
+  const areaSpans: Record<Area, [number, number, number, number?][]> = { production: [], shipping: [] };
+
   for (const i of counted) {
     const tier = effectiveTier(i);
-    points += incidentPoints(i, from, to);
+    const span = penaltySpan(i, from, to);
+    if (span) spans.push([...span, TIER_WEIGHT[tier] * scopeWeight(i.scope), i.providerId]);
+    if (i.compromise && i.startedAt >= from) points += SECURITY_PENALTY;
     sevCounts[tier - 1]++;
     if (i.security) securityCount++;
     const end = (i.resolvedAt ?? to).getTime();
@@ -249,12 +277,11 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
     if (tier <= 2 && i.startedAt >= from) longest = Math.max(longest, durationMinutes(i, to));
     if (i.resolvedAt) resolveTimes.push(durationMinutes(i));
 
-    const minutes = penaltyMinutes(i, from, to) * scopeWeight(i.scope);
     for (const [area, t] of Object.entries(areaTiersOf(i)) as [Area, number][]) {
       // A "dashboard" key graded before there were two areas, or a papercut stored before
       // CLASSIFIER_VERSION 9: papercuts count overall only.
       if (!t || t >= 4 || !areas[area]) continue;
-      areas[area].points += TIER_WEIGHT[t] * minutes;
+      if (span) areaSpans[area].push([...span, TIER_WEIGHT[t] * scopeWeight(i.scope), i.providerId]);
       areas[area].incidents++;
       areaIntervals[area].push([i.startedAt.getTime(), end]);
     }
@@ -262,7 +289,9 @@ export function score(incidents: GradeInput[], from: Date, to: Date): Score {
 
   const f = from.getTime();
   const t = to.getTime();
+  points += peakMinutes(spans);
   for (const a of Object.keys(areas) as Area[]) {
+    areas[a].points = peakMinutes(areaSpans[a]);
     areas[a].grade = gradeFor(areas[a].points);
     areas[a].downtimeMinutes = unionMinutes(areaIntervals[a], f, t);
   }

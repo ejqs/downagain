@@ -77,6 +77,21 @@ describe("score", () => {
     expect(s.incidentCount).toBe(2);
   });
 
+  it("counts overlapping minutes once, at the worst incident running, overall and per area", () => {
+    const a = inc({ startedAt: at("2026-10-01T10:00:00Z"), resolvedAt: at("2026-10-01T11:00:00Z") });
+    const b = inc({ startedAt: at("2026-10-01T10:30:00Z"), resolvedAt: at("2026-10-01T11:30:00Z"), tier: 2, areaTiers: { production: 2, shipping: 3 } });
+    const s = score([a, b], from, to);
+    // 60 min of Sev 1 (10) plus the 30 min of Sev 2 (4) after it ended; not 600 + 240.
+    expect(s.points).toBe(720);
+    expect(s.areas.production.points).toBe(720);
+    expect(s.areas.shipping.points).toBe(60);
+    expect(s.incidentCount).toBe(2);
+    // The same outage posted twice costs once.
+    expect(score([a, { ...a }], from, to).points).toBe(600);
+    // Different providers in one stack each pay their own.
+    expect(score([{ ...a, providerId: 1 }, { ...a, providerId: 2 }], from, to).points).toBe(1200);
+  });
+
   it("applies overrides and the security penalty", () => {
     const s = score(
       [inc({ startedAt: at("2026-10-01T10:00:00Z"), resolvedAt: at("2026-10-01T10:10:00Z"), tier: 1, tierOverride: 4, security: true, compromise: true })],
