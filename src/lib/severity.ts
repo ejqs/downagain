@@ -19,7 +19,7 @@ import type { Status } from "@/lib/types";
 import type { Impact } from "@/db/schema";
 import { isLocation } from "@/lib/status";
 
-export const CLASSIFIER_VERSION = 9;
+export const CLASSIFIER_VERSION = 10;
 
 // manage: dashboard, console, auth, billing. peripheral: docs, status page, consumer apps.
 export type Surface = "serving" | "data" | "ship" | "manage" | "peripheral";
@@ -95,7 +95,7 @@ const SURFACE_RULES: [Surface, RegExp][] = [
 const SECURITY_RE = /\bsecurity\b|vulnerab|unauthori[sz]ed|credential|token leak|leaked|compromise|\bcve-\d|exposed|breach|malicious|supply.?chain/i;
 // A security incident where someone actually got in or secrets got out. DDoS, a
 // vulnerability patched in time or a "we're not affected" CVE notice is graded by impact alone.
-const COMPROMISE_RE = /unauthori[sz]ed (?:access|part(?:y|ies)|actors?|users?)|credentials? (?:(?:was|were|may have been|have been|had been) )?(?:leaked|exposed|compromised|stolen|accessed)|exposed (?:credentials|secrets|tokens|api keys|keys|environment variables)|(?:token|secret|credential|key) leak|leaked (?:credentials|tokens|secrets|keys)|\b(?:was|were|been) compromised\b|security (?:breach|compromise)|data breach|\bbreached\b|supply.?chain attack|rotate (?:your |any |all )?(?:exposed |affected |potentially exposed )?(?:credentials|secrets|tokens|api keys|keys)|customer data (?:was |were )?(?:exposed|accessed)/i;
+const COMPROMISE_RE = /unauthori[sz]ed (?:access|part(?:y|ies)|actors?|users?)|credentials? (?:(?:was|were|may have been|have been|had been) )?(?:leaked|exposed|compromised|stolen|accessed)|exposed (?:credentials|secrets|tokens|api keys|keys|environment variables)|(?:token|secret|credential|key) leak|leaked (?:credentials|tokens|secrets|keys)|\b(?:was|were|been) compromised\b|security (?:breach|compromise)|data breach|\bbreached\b|supply.?chain attack|rotate (?:your |any |all )?(?:exposed |affected |potentially exposed )?(?:credentials|secrets|tokens|api keys|keys)|customer data (?:was |were )?(?:exposed|accessed)|\battackers?\b|\bcompromised (?:use|accounts?|tokens?|credentials?|keys?|workspaces?)|(?:rotat|revok|invalidat|reset)(?:e|es|ed|ing) (?:all |any |your )?(?:\w+ ){0,3}(?:credentials|tokens|secrets|api keys|environment variables)\b|security disclosure/i;
 const DATA_LOSS_RE = /data loss|lost data|data (?:was|were|has been) lost|customer data (?:was |were )?(?:exposed|accessed)|data breach|irrecoverabl/i;
 const SUBSET_RE = /\bsome (?:[\w-]+ ){0,3}(?:users|customers|accounts|requests|zones|sites)\b|\bsubset of\b/i;
 const MAINTENANCE_RE = /scheduled maintenance|planned maintenance/i;
