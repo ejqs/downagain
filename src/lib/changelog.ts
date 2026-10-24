@@ -15,6 +15,15 @@ export interface Change {
 export const CHANGELOG: Change[] = [
   {
     date: "2026-10-24",
+    title: "Overlapping incidents count once",
+    refs: [{ pr: 23 }],
+    items: [
+      "Points, overall and for PROD and SHIP, count each minute once, at the worst incident running then. Was the sum, so an outage posted twice cost double.",
+      "Per provider: a stack hit by two providers at once pays for both. The security penalty is unchanged.",
+    ],
+  },
+  {
+    date: "2026-10-24",
     title: "Incident timelines",
     refs: [{ pr: 22 }],
     items: [
