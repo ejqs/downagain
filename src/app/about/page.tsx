@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { GRADES } from "@/lib/grading";
 import { SCOPE_BLURB, SCOPE_WEIGHT, SECURITY_PENALTY, TIER_BLURB, TIER_NAMES, TIER_WEIGHT, type Scope } from "@/lib/severity";
 import { USER_AGENT } from "@/lib/fetcher";
@@ -133,6 +134,9 @@ export default function About() {
         <p>
           Some feeds only list open incidents or the last few dozen, so history starts when we started polling. Under 14 days of data gets no grade
           and sits at the bottom. Under 90 days shows how many days the grade covers. Incidents left open for months paint the strips for a week, then stop.
+        </p>
+        <p>
+          Every change to this method, dated: <Link href="/about/changelog">Grading changelog</Link>.
         </p>
 
         <h2 className="h2" id="cost">Cost and bang for buck</h2>

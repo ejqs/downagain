@@ -36,7 +36,8 @@ Railway's API (`api.railwaystatus.com/status`) only lists open incidents, and st
 1. Edit `src/lib/severity.ts` and bump `CLASSIFIER_VERSION`.
 2. Update `tests/severity.test.ts` and the About page if tier meanings changed.
 3. If the change affects how Claude should judge incidents, update `SYSTEM_PROMPT` in `src/lib/ai-grade.ts` to match and bump `PROMPT_VERSION` (every incident is then read again, which costs budget).
-4. Deploy. The next polls regrade stored incidents 500 at a time and keep Claude's verdicts where the incident hasn't changed. Manual overrides are kept.
+4. Add an entry to `src/lib/changelog.ts` (public at /about/changelog), newest first, in the same PR.
+5. Deploy. The next polls regrade stored incidents 500 at a time and keep Claude's verdicts where the incident hasn't changed. Manual overrides are kept.
 
 ## Claude grading
 
