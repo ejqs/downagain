@@ -49,7 +49,7 @@ describe("applyVerdict", () => {
   });
 
   it("takes the worst surface for the overall tier and the worst per area", () => {
-    const g = applyVerdict(rules, verdict({ affected: [{ surface: "ship", tier: 3 }, { surface: "data", tier: 1 }, { surface: "serving", tier: 2 }] }));
+    const g = applyVerdict(rules, verdict({ scope: "global", affected: [{ surface: "ship", tier: 3 }, { surface: "data", tier: 1 }, { surface: "serving", tier: 2 }] }));
     expect(g.tier).toBe(1);
     expect(g.areaTiers).toEqual({ shipping: 3, production: 1 });
   });
@@ -73,6 +73,16 @@ describe("applyVerdict", () => {
     expect(breach.reason).toMatch(/600 points for a security compromise/);
     // The words alone aren't enough: Claude has to call it a security incident.
     expect(applyVerdict(breachRules, verdict({ security: false })).compromise).toBe(false);
+  });
+
+  it("holds serving and data to the rubric: no Sev 3, and Sev 1 only when global or unclear", () => {
+    // Late SMS to one carrier read as Sev 3.
+    expect(applyVerdict(rules, verdict({ scope: "local", affected: [{ surface: "serving", tier: 3 }] }))).toMatchObject({ tier: 2, areaTiers: { production: 2 } });
+    // One model on a cloud host read as Sev 1.
+    expect(applyVerdict(rules, verdict({ scope: "single", affected: [{ surface: "serving", tier: 1 }] }))).toMatchObject({ tier: 2, areaTiers: { production: 2 } });
+    expect(applyVerdict(rules, verdict({ scope: "unclear", affected: [{ surface: "data", tier: 1 }] })).tier).toBe(1);
+    // Ship and manage keep Sev 3.
+    expect(applyVerdict(rules, verdict({ scope: "single", affected: [{ surface: "ship", tier: 3 }] })).tier).toBe(3);
   });
 
   it("makes data loss Sev 1", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gradeFor, penaltyMinutes, score, type GradeInput } from "@/lib/grading";
+import { gradeFor, hitMinutes, onePenaltyPerBreach, penaltyMinutes, score, type GradeInput } from "@/lib/grading";
 
 const to = new Date("2026-10-22T00:00:00Z");
 const from = new Date(to.getTime() - 90 * 86_400_000);
@@ -56,9 +56,10 @@ describe("score", () => {
     expect(s.areas.shipping.grade).toBe("A+");
   });
 
-  it("a Sev 1 in one region doesn't cost provider-wide uptime", () => {
+  it("a Sev 1 in one region costs uptime in part and isn't fully down", () => {
     const s = score([inc({ startedAt: at("2026-10-01T10:00:00Z"), resolvedAt: at("2026-10-01T12:00:00Z"), scope: "regional" })], from, to);
-    expect(s.admittedUptime).toBe(1);
+    expect(s.admittedUptime).toBeCloseTo(1 - (120 * 0.3) / (90 * 1440), 8);
+    expect(s.sev1Minutes).toBe(0);
     expect(s.sevCounts[0]).toBe(1);
     expect(s.points).toBe(360);
   });
@@ -166,5 +167,43 @@ describe("papercuts", () => {
     const s = score([inc({ startedAt: at("2026-10-01T00:00:00Z"), resolvedAt: at("2026-10-01T10:00:00Z"), tier: 4, areaTiers: { shipping: 4 }, surfaces: ["ship"] })], from, to);
     expect(s.points).toBe(120);
     expect(s.areas.shipping).toMatchObject({ points: 0, incidents: 0, downtimeMinutes: 0 });
+  });
+});
+
+describe("hitMinutes (admitted uptime)", () => {
+  const h = (p: Partial<GradeInput> & { startedAt: Date }) => inc(p);
+  const t0 = at("2026-10-01T10:00:00Z");
+  const plus = (m: number) => new Date(t0.getTime() + m * 60_000);
+
+  it("weights by how hard and how many", () => {
+    expect(hitMinutes([h({ startedAt: t0, resolvedAt: plus(60) })], from, to)).toBe(60);
+    expect(hitMinutes([h({ startedAt: t0, resolvedAt: plus(60), tier: 2 })], from, to)).toBe(30);
+    expect(hitMinutes([h({ startedAt: t0, resolvedAt: plus(60), tier: 2, scope: "regional" })], from, to)).toBeCloseTo(9);
+    expect(hitMinutes([h({ startedAt: t0, resolvedAt: plus(60), tier: 3 })], from, to)).toBe(0);
+    expect(hitMinutes([h({ startedAt: t0, resolvedAt: plus(60), tier: 0 })], from, to)).toBe(0);
+  });
+
+  it("counts the worst incident at each moment, not the sum", () => {
+    const list = [h({ startedAt: t0, resolvedAt: plus(60), tier: 2 }), h({ startedAt: plus(30), resolvedAt: plus(90) })];
+    // 30m degraded alone, then 60m with a Sev 1 running.
+    expect(hitMinutes(list, from, to)).toBe(30 * 0.5 + 60);
+  });
+
+  it("stops at recovery and after a week", () => {
+    expect(hitMinutes([h({ startedAt: t0, resolvedAt: plus(600), recoveredAt: plus(60) })], from, to)).toBe(60);
+    expect(hitMinutes([h({ startedAt: at("2026-09-01T00:00:00Z"), resolvedAt: null })], from, to)).toBe(7 * 1440);
+  });
+});
+
+describe("onePenaltyPerBreach", () => {
+  it("keeps the 600 on the first compromise and drops it on follow-ups within a week", () => {
+    const d = (n: number) => Date.parse("2026-10-21T07:00:00Z") + n * 86_400_000;
+    const rows = [
+      { id: 1, providerId: 1, startedAt: d(0), compromise: true },
+      { id: 2, providerId: 1, startedAt: d(3), compromise: true },
+      { id: 3, providerId: 2, startedAt: d(3), compromise: true },
+      { id: 4, providerId: 1, startedAt: d(20), compromise: true },
+    ];
+    expect(onePenaltyPerBreach(rows).map((r) => r.compromise)).toEqual([true, false, true, true]);
   });
 });

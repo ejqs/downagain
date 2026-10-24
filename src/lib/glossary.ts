@@ -2,7 +2,7 @@ import { AREA_BLURB, TIER_BLURB } from "@/lib/severity";
 
 /** One-line answers behind the "?" next to a metric. Method details stay on /about. */
 export const GLOSSARY = {
-  uptime: "Time not covered by a widespread Sev 1 the provider posted itself. A best case.",
+  uptime: "Customer time not hit, by the provider's own account. Regional and partial incidents count in part.",
   grade: "Severity weight × minutes, summed over the window. Fewer points, better grade.",
   production: AREA_BLURB.production,
   shipping: AREA_BLURB.shipping,
@@ -11,7 +11,7 @@ export const GLOSSARY = {
   sev2: TIER_BLURB[2],
   sev3: TIER_BLURB[3],
   sev4: TIER_BLURB[4],
-  sev1Downtime: "Total minutes of Sev 1 incidents, as posted.",
+  sev1Downtime: "Most customers down, by the provider's own account.",
   mttr: "Median time to resolve. Half of incidents were fixed faster.",
   longest: "Longest Sev 1–2 incident, start to resolved.",
   security: "Incidents about security. Graded by impact; a breach or exposed credentials adds 600 points.",

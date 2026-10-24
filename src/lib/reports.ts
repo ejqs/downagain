@@ -5,6 +5,7 @@ import { createHmac } from "node:crypto";
 import { and, eq, gte, sql } from "drizzle-orm";
 import type { DB } from "@/db";
 import { providers, userReports } from "@/db/schema";
+import { SITE } from "@/lib/site";
 
 const HOUR = 3_600_000;
 export const SLOT_MS = 30 * 60_000; // one report per visitor and provider per 30 minutes
@@ -18,9 +19,13 @@ export interface ReportCounts {
   hours: number[];
 }
 
-/** Both keys set, or the feature stays hidden and the POST refuses. */
+// The downagain.dev widget's site key. Public by design (it ships in the page);
+// TURNSTILE_SITE_KEY overrides it, e.g. with Cloudflare's test keys locally.
+export const SITE_KEY = "0x4AAAAAAFj8gDfM99pCcbRY";
+
+/** Needs the secret, or the feature stays hidden and the POST refuses. */
 export function turnstileKeys() {
-  const siteKey = process.env.TURNSTILE_SITE_KEY;
+  const siteKey = process.env.TURNSTILE_SITE_KEY || SITE_KEY;
   const secret = process.env.TURNSTILE_SECRET_KEY;
   return siteKey && secret ? { siteKey, secret } : null;
 }
@@ -41,18 +46,25 @@ export function reporterId(ip: string, now: number, secret: string) {
   return createHmac("sha256", secret).update(`${day}|${ip}`).digest("base64url").slice(0, 22);
 }
 
-type Siteverify = { success: boolean; action?: string; cdata?: string; "error-codes"?: string[] };
+type Siteverify = { success: boolean; action?: string; cdata?: string; hostname?: string; "error-codes"?: string[] };
 
-/** Asks Cloudflare whether the token is real, unused and minted for this provider's report button. */
-export async function verifyTurnstile(token: string, slug: string, ip: string | null, secret: string, fetchImpl: typeof fetch = fetch) {
+// Cloudflare's dummy secrets (1x…, 2x…, 3x… followed by zeros) answer without action, cdata or a real hostname.
+const isTestSecret = (secret: string) => /^[123]x0{20,}AA$/.test(secret);
+
+/**
+ * Asks Cloudflare whether the token is real, unused (tokens are single-use and
+ * expire after 5 minutes) and minted on our domain for this provider's button.
+ */
+export async function verifyTurnstile(token: string, slug: string, ip: string | null, secret: string, fetchImpl: typeof fetch = fetch, host = new URL(SITE).hostname) {
   const form = new URLSearchParams({ secret, response: token });
   if (ip) form.set("remoteip", ip);
   try {
     const res = await fetchImpl(SITEVERIFY, { method: "POST", body: form, signal: AbortSignal.timeout(8000) });
     if (!res.ok) return false;
     const r = (await res.json()) as Siteverify;
-    // Cloudflare's test keys answer without action or cdata; real tokens carry both.
-    return r.success === true && (!r.action || r.action === ACTION) && (!r.cdata || r.cdata === slug);
+    if (r.success !== true) return false;
+    if (isTestSecret(secret)) return true;
+    return r.action === ACTION && r.cdata === slug && r.hostname === host;
   } catch {
     return false;
   }

@@ -13,7 +13,7 @@ const { GET, POST } = await import("@/app/api/reports/[slug]/route");
 const siteverify = vi.fn(async (_url: string, init: RequestInit) => {
   const form = new URLSearchParams(init.body as URLSearchParams);
   const ok = form.get("response")?.startsWith("good");
-  return Response.json({ success: ok, action: "report", cdata: form.get("response")?.split(":")[1] ?? "" });
+  return Response.json({ success: ok, action: "report", cdata: form.get("response")?.split(":")[1] ?? "", hostname: "downagain.dev" });
 });
 
 const ctx = (slug: string) => ({ params: Promise.resolve({ slug }) });
@@ -121,6 +121,23 @@ describe("helpers", () => {
     expect(reporterId("1.1.1.1", day, "s")).toBe(reporterId("1.1.1.1", day + 20 * 3_600_000, "s"));
     expect(reporterId("1.1.1.1", day, "s")).not.toBe(reporterId("1.1.1.1", day + 24 * 3_600_000, "s"));
     expect(reporterId("1.1.1.1", day, "s")).not.toBe(reporterId("1.1.1.2", day, "s"));
+  });
+
+  it("with a real secret, requires the action, provider and our hostname", async () => {
+    const answer = (body: object) => (async () => Response.json({ success: true, ...body })) as unknown as typeof fetch;
+    const good = { action: "report", cdata: "vercel", hostname: "downagain.dev" };
+    expect(await verifyTurnstile("t", "vercel", null, "0xreal", answer(good))).toBe(true);
+    expect(await verifyTurnstile("t", "vercel", null, "0xreal", answer({ ...good, hostname: "evil.example" }))).toBe(false);
+    expect(await verifyTurnstile("t", "vercel", null, "0xreal", answer({ ...good, action: "" }))).toBe(false);
+    expect(await verifyTurnstile("t", "vercel", null, "0xreal", answer({ ...good, cdata: "railway" }))).toBe(false);
+    // Cloudflare's dummy secret answers with none of them.
+    expect(await verifyTurnstile("t", "vercel", null, "1x0000000000000000000000000000000AA", answer({ hostname: "example.com" }))).toBe(true);
+  });
+
+  it("uses the downagain.dev site key unless overridden", async () => {
+    const { turnstileKeys, SITE_KEY } = await import("@/lib/reports");
+    delete process.env.TURNSTILE_SITE_KEY;
+    expect(turnstileKeys()?.siteKey).toBe(SITE_KEY);
   });
 
   it("fails closed when siteverify errors or times out", async () => {
