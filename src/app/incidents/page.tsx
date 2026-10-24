@@ -11,7 +11,7 @@ import { Unavailable } from "@/components/Unavailable";
 import { Heatmap, dayKey } from "@/components/Heatmap";
 import { ProviderSelect } from "@/components/ProviderSelect";
 import { OutageMap, PlaceBoard } from "@/components/OutageMap";
-import { incidentPlaces, isPlaceKey, outageMap, placeBoard, placeName, placesIn } from "@/lib/places";
+import { incidentAreas, incidentPlaces, isPlaceKey, outageMap, placeBoard, placeName, placesIn } from "@/lib/places";
 import { choicesFor } from "@/lib/needs";
 
 export const dynamic = "force-dynamic";
@@ -59,8 +59,8 @@ export default async function IncidentsPage({ searchParams }: Props) {
   const ongoingAnywhere = openIncidents(snap.incidents).filter(keepAnywhere);
   const openIds = new Set(ongoingAnywhere.map((i) => i.id));
   const where = outageMap([
-    ...ongoingAnywhere.map((i) => ({ places: incidentPlaces(i), provider: nameOf(i.providerId), now: true })),
-    ...snap.incidents.filter((i) => keepAnywhere(i) && inView(i) && !openIds.has(i.id)).map((i) => ({ places: incidentPlaces(i), provider: nameOf(i.providerId), now: false })),
+    ...ongoingAnywhere.map((i) => ({ places: incidentPlaces(i), areas: incidentAreas(i), provider: nameOf(i.providerId), now: true })),
+    ...snap.incidents.filter((i) => keepAnywhere(i) && inView(i) && !openIds.has(i.id)).map((i) => ({ places: incidentPlaces(i), areas: incidentAreas(i), provider: nameOf(i.providerId), now: false })),
     // A status page that's red with no incident open: its broken components may name places.
     ...downNow(snap)
       .filter((d) => (cat === "all" || d.provider.category === cat) && (!only || d.provider.id === only.id))

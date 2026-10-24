@@ -1,5 +1,5 @@
 import { OutageMap, PlaceBoard } from "@/components/OutageMap";
-import { incidentPlaces, outageMap, placeBoard, placesIn } from "@/lib/places";
+import { incidentAreas, incidentPlaces, outageMap, placeBoard, placesIn } from "@/lib/places";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -260,7 +260,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
   const comps = topComponents(yearList);
   const openIds = new Set(open.map((i) => i.id));
   const where = outageMap([
-    ...yearList.map((i) => ({ places: incidentPlaces(i), provider: p.name, now: openIds.has(i.id) })),
+    ...yearList.map((i) => ({ places: incidentPlaces(i), areas: incidentAreas(i), provider: p.name, now: openIds.has(i.id) })),
     ...(down ? brokenComponents(p).items.map((c) => ({ places: placesIn(c.name), provider: p.name, now: true, incident: false })) : []),
   ]);
   const placeTimes = placeBoard(yearList, now, 365, () => p.name);
@@ -591,7 +591,10 @@ export default async function ProviderPage({ params, searchParams }: Props) {
               comps.map((c) => (
                 <div key={c.name} className="stack" style={{ ["--gap" as string]: "4px" }}>
                   <div className="row" style={{ justifyContent: "space-between", fontSize: 15 }}>
-                    <span style={{ fontWeight: 700, overflowWrap: "anywhere" }}>{c.name}</span>
+                    <span style={{ overflowWrap: "anywhere" }}>
+                      {c.name.includes(" - ") ? <span className="eyebrow muted" style={{ display: "block" }}>{c.name.slice(0, c.name.indexOf(" - "))}</span> : null}
+                      <span style={{ fontWeight: 700 }}>{c.name.includes(" - ") ? c.name.slice(c.name.indexOf(" - ") + 3) : c.name}</span>
+                    </span>
                     <span className="mono">{plural(c.count, "incident")}</span>
                   </div>
                   <div className="meter"><div style={{ width: `${(c.count / comps[0].count) * 100}%` }} /></div>
@@ -604,7 +607,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
         </div>
       </section>
 
-      {where.points.length ? (
+      {where.points.length || where.areas.length ? (
         <section className="stack">
           <h2 className="h2">Where it breaks</h2>
           <div className="split">

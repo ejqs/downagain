@@ -3,9 +3,11 @@
 // a CDN city with its airport code ("Accra, Ghana - (ACC)"), a region code with a
 // city ("iad1 - Washington, D.C., USA") or a city in brackets ("Asia Southeast
 // (Singapore)"). Each resolves to an airport, whose coordinates come from the
-// generated table in geo/airports.ts. Broad areas ("Europe", "North America") are
-// not places: they stay off the map rather than pinned to a guess.
+// generated table in geo/airports.ts. A country with no city ("to Claro Brazil",
+// carrier incidents) pins to a point inside it, from geo/countries.ts. Broad areas
+// ("Europe", "APAC") are not places: they stay off the map and are only counted.
 import { AIRPORTS } from "@/lib/geo/airports";
+import { COUNTRIES } from "@/lib/geo/countries";
 import type { IncidentRow } from "@/lib/data";
 import { shownEnd, unionMinutes } from "@/lib/grading";
 import { gradeInput, tierOf } from "@/lib/views";
@@ -97,7 +99,7 @@ const CITIES: [RegExp, string, string][] = [
   [/bahrain/i, "Bahrain", "BAH"], [/doha/i, "Doha", "DOH"], [/ashburn|virginia/i, "Virginia", "IAD"], [/washington,? d\.?c/i, "Washington, D.C.", "IAD"],
   [/ohio|columbus/i, "Ohio", "CMH"], [/oregon|portland/i, "Oregon", "PDX"], [/san francisco|silicon valley|california/i, "California", "SFO"],
   [/san jose/i, "San Jose", "SJC"], [/los angeles/i, "Los Angeles", "LAX"], [/seattle/i, "Seattle", "SEA"], [/chicago/i, "Chicago", "ORD"],
-  [/dallas/i, "Dallas", "DFW"], [/atlanta/i, "Atlanta", "ATL"], [/miami/i, "Miami", "MIA"], [/new york|new jersey|secaucus|newark/i, "New York", "EWR"],
+  [/dallas/i, "Dallas", "DFW"], [/atlanta/i, "Atlanta", "ATL"], [/miami/i, "Miami", "MIA"], [/new york|\bnyc\b|new jersey|secaucus|newark/i, "New York", "EWR"],
   [/\biowa\b/i, "Iowa", "DSM"], [/denver/i, "Denver", "DEN"], [/salt lake/i, "Salt Lake City", "SLC"],
   [/las vegas/i, "Las Vegas", "LAS"],
 ].map(([re, label, code]) => [new RegExp(`\\b(?:${(re as RegExp).source})\\b`, "i"), label as string, code as string]);
@@ -106,7 +108,8 @@ const CITIES: [RegExp, string, string][] = [
 const CODE_ALIAS: Record<string, string> = { NYC: "EWR", SGP: "SIN", LON: "LHR", TOR: "YYZ", WAS: "IAD", CHI: "ORD", TYO: "NRT", PAR: "CDG" };
 
 const AWS_GCP_RE = /\b(?:(?:us|eu|ap|sa|ca|me|af|il|mx)(?:-gov)?-[a-z]+-\d|[a-z]+-[a-z]+\d{1,2})\b/gi;
-const BRACKET_CODE_RE = /\(([A-Z]{3})\)\s*$/;
+// "Accra, Ghana - (ACC)". Needs the " - ": "Digital Asset Management (DAM)" is not Damascus.
+const BRACKET_CODE_RE = /\s-\s*\(([A-Z]{3})\)\s*$/;
 // "iad1 - Washington, D.C., USA", or the code alone ("NYC1"). Not "GPT4 errors".
 const LEAD_CODE_RE = /^([a-z]{3})\d{1,2}(?:\s+-\s+([^,]+).*)?$/i;
 // Vercel-style titles: "Elevated errors in iad1".
@@ -126,6 +129,73 @@ function at(code: string, label: string): Place | null {
   const c = CODE_ALIAS[code.toUpperCase()] ?? code.toUpperCase();
   const ll = airport(c);
   return ll ? { key: c, name: NAME_BY_CODE.get(c) ?? label, label, lat: ll[0], lon: ll[1] } : null;
+}
+
+// Other names pages use for a country, as Natural Earth spells it in geo/countries.ts.
+// "UK" and "USA" match only in capitals; "US" not at all ("contact us").
+const COUNTRY_ALIAS: Record<string, string> = {
+  "united states of america": "United States", usa: "United States", "u.s.": "United States", uk: "United Kingdom",
+  "great britain": "United Kingdom", "northern ireland": "United Kingdom", england: "United Kingdom", scotland: "United Kingdom",
+  wales: "United Kingdom", holland: "Netherlands", "the netherlands": "Netherlands", "czech republic": "Czechia", türkiye: "Turkey",
+  turkiye: "Turkey", "ivory coast": "Côte d'Ivoire", "cote d'ivoire": "Côte d'Ivoire", "republic of korea": "South Korea", korea: "South Korea",
+  "russian federation": "Russia", "viet nam": "Vietnam", "democratic republic of the congo": "DR Congo", "republic of the congo": "Congo",
+  swaziland: "Eswatini", "cape verde": "Cabo Verde", burma: "Myanmar", "east timor": "Timor-Leste", uae: "United Arab Emirates",
+  "hong kong sar": "Hong Kong", macau: "Macao", "trinidad & tobago": "Trinidad and Tobago", "bosnia & herzegovina": "Bosnia and Herzegovina",
+  "antigua & barbuda": "Antigua and Barbuda", "saint kitts & nevis": "Saint Kitts and Nevis", "st. lucia": "Saint Lucia", "st lucia": "Saint Lucia",
+};
+const CASED_ALIAS = new Set(["uk", "usa", "uae"]);
+
+let countries: Map<string, { name: string; lat: number; lon: number }> | null = null;
+let countryRegex: RegExp | null = null;
+const CASED_RE = /(?<![\w-])(?:UK|USA|UAE)(?![\w-])/g;
+function countryTable() {
+  if (!countries) {
+    countries = new Map();
+    for (const e of COUNTRIES.split(";")) {
+      const [name, ll] = e.split("|");
+      const [lat, lon] = ll.split(",").map(Number);
+      countries.set(name.toLowerCase(), { name, lat, lon });
+    }
+  }
+  return countries;
+}
+const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, "\\s+");
+function countryRe(): RegExp {
+  if (!countryRegex) {
+    // Longest first, so "Papua New Guinea" wins over "Guinea" and "South Sudan" over "Sudan".
+    const names = [...countryTable().keys(), ...Object.keys(COUNTRY_ALIAS).filter((a) => !CASED_ALIAS.has(a))].sort((a, b) => b.length - a.length);
+    // "New Mexico" is a state.
+    countryRegex = new RegExp(`(?<![\\w-])(?<!New\\s)(?:${names.map(esc).join("|")})(?![\\w-])`, "gi");
+  }
+  return countryRegex;
+}
+/** Countries are keyed by name ("costa-rica"), so they never collide with an airport code. */
+const countryKey = (name: string) => name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]+/g, "-").replace(/^-|-$/g, "");
+function country(text: string): Place | null {
+  const t = text.replace(/\s+/g, " ").toLowerCase();
+  const c = countryTable().get(COUNTRY_ALIAS[t]?.toLowerCase() ?? t);
+  return c ? { key: countryKey(c.name), name: c.name, label: text.trim(), lat: c.lat, lon: c.lon } : null;
+}
+let countryByKey: Map<string, string> | null = null;
+function countryName(key: string): string | undefined {
+  countryByKey ??= new Map([...countryTable().values()].map((c) => [countryKey(c.name), c.name]));
+  return countryByKey.get(key);
+}
+
+// Broad areas: counted under the map, never pinned. Longest first.
+const AREAS: [RegExp, string][] = (
+  [
+    ["latin america|latam", "Latin America"], ["south america", "South America"], ["central america", "Central America"],
+    ["north america|\\bnoram\\b", "North America"], ["middle east (?:&|and) africa|\\bmea\\b", "Middle East & Africa"],
+    ["\\bemea\\b", "EMEA"], ["middle east", "Middle East"], ["asia[- ]pacific|\\bapac\\b|\\bapj\\b", "Asia Pacific"],
+    ["europe|\\beu\\b(?!-)", "Europe"], ["africa", "Africa"], ["oceania", "Oceania"], ["caribbean", "Caribbean"], ["\\basia\\b", "Asia"],
+  ] as [string, string][]
+).map(([re, name]) => [new RegExp(re, "i"), name]);
+
+/** The broad area a name falls in ("CARRIER NETWORK - SMS, APAC" → "Asia Pacific"), if any. */
+export function areaIn(name: string): string | null {
+  for (const [re, area] of AREAS) if (re.test(name)) return area;
+  return null;
 }
 
 const memo = new Map<string, Place[]>();
@@ -152,11 +222,12 @@ export function placesIn(name: string): Place[] {
     // "North America - Ashburn - (IAD)" or "Accra, Ghana - (ACC)": the city is the last part before the code.
     const br = BRACKET_CODE_RE.exec(name);
     const lead = LEAD_CODE_RE.exec(name);
-    if (br) add(at(br[1], name.replace(BRACKET_CODE_RE, "").replace(/\s*-\s*$/, "").split(" - ").pop()!.split(",")[0].trim()));
+    if (br) add(at(br[1], name.replace(BRACKET_CODE_RE, "").split(" - ").pop()!.split(",")[0].trim()));
     else if (lead) add(at(lead[1], lead[2]?.trim() || name.trim()));
     else for (const m of name.matchAll(IN_CODE_RE)) add(at(m[1], m[0].slice(3)));
   }
   if (!out.length) for (const [re, label, code] of CITIES) if (re.test(name)) add(at(code, label));
+  if (!out.length) for (const m of [...name.matchAll(countryRe()), ...name.matchAll(CASED_RE)].sort((a, b) => a.index - b.index)) add(country(m[0]));
 
   if (memo.size > 20_000) memo.clear();
   memo.set(name, out);
@@ -169,6 +240,12 @@ export function incidentPlaces(i: Pick<IncidentRow, "regions" | "components" | "
   const out = new Map<string, Place>();
   for (const n of names) for (const p of placesIn(n)) if (!out.has(p.key)) out.set(p.key, p);
   return [...out.values()];
+}
+
+/** Broad areas an incident names, for one that names no place. */
+export function incidentAreas(i: Pick<IncidentRow, "regions" | "components" | "title">): string[] {
+  const names = i.regions?.length ? i.regions : [...i.components, i.title];
+  return [...new Set(names.map(areaIn).filter((a): a is string => !!a))];
 }
 
 export interface MapPoint extends Omit<Place, "label"> {
@@ -185,6 +262,8 @@ export interface OutageMap {
   /** Incidents with at least one place, and without any. */
   placed: number;
   unplaced: number;
+  /** Unplaced incidents by the broad area they name, busiest first. */
+  areas: { name: string; incidents: number }[];
 }
 
 export interface MapItem {
@@ -193,6 +272,8 @@ export interface MapItem {
   now: boolean;
   /** False for a broken component: a place, but not an incident to count. */
   incident?: boolean;
+  /** Broad areas named, used only when no place is. */
+  areas?: string[];
 }
 
 /** Folds incidents (and broken components) into one point per place, busiest first. */
@@ -200,10 +281,14 @@ export function outageMap(items: MapItem[]): OutageMap {
   const points = new Map<string, Omit<MapPoint, "aka"> & { labels: Map<string, number> }>();
   let placed = 0;
   let unplaced = 0;
+  const areas = new Map<string, number>();
   for (const it of items) {
     const counts = it.incident !== false;
     if (!it.places.length) {
-      if (counts) unplaced++;
+      if (counts) {
+        unplaced++;
+        for (const a of it.areas ?? []) areas.set(a, (areas.get(a) ?? 0) + 1);
+      }
       continue;
     }
     if (counts) placed++;
@@ -226,15 +311,17 @@ export function outageMap(items: MapItem[]): OutageMap {
       .sort((a, b) => Number(b.now) - Number(a.now) || b.incidents - a.incidents || a.name.localeCompare(b.name)),
     placed,
     unplaced,
+    areas: [...areas.entries()].map(([name, incidents]) => ({ name, incidents })).sort((a, b) => b.incidents - a.incidents || a.name.localeCompare(b.name)),
   };
 }
 
 /** The display name for an airport key, for a place picked by URL. */
 export function placeName(key: string): string {
-  return NAME_BY_CODE.get(key) ?? key;
+  return NAME_BY_CODE.get(key) ?? countryName(key) ?? key;
 }
 
-export const isPlaceKey = (s: string | undefined): s is string => /^[A-Z]{3}$/.test(s ?? "");
+/** An airport code ("IAD") or a country ("costa-rica"). */
+export const isPlaceKey = (s: string | undefined): s is string => /^(?:[A-Z]{3}|[a-z]+(?:-[a-z]+)*)$/.test(s ?? "") && (/^[A-Z]/.test(s!) || !!countryName(s!));
 
 export interface PlaceTime {
   key: string;

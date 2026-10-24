@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { incidentPlaces, outageMap, placeBoard, placesIn } from "@/lib/places";
+import { areaIn, incidentAreas, incidentPlaces, isPlaceKey, outageMap, placeBoard, placeName, placesIn } from "@/lib/places";
 import type { IncidentRow } from "@/lib/data";
 
 const keys = (name: string) => placesIn(name).map((p) => p.key);
@@ -22,6 +22,34 @@ describe("placesIn", () => {
     expect(keys("Degraded performance in Frankfurt and Paris")).toEqual(["FRA", "CDG"]);
   });
 
+  it("pins countries a carrier incident names", () => {
+    expect(keys("SMS Delivery Delays from Twilio to Claro Costa Rica")).toEqual(["costa-rica"]);
+    expect(keys("SMS Delivery Delays and Failures from Twilio Short Codes to Multiple Networks in India")).toEqual(["india"]);
+    expect(keys("Silent Network Authentication (SNA) Missing Redirects on Vodafone in United Kingdom")).toEqual(["united-kingdom"]);
+    expect(keys("MMS Delivery Delays from Twilio to C-Spire United States")).toEqual(["united-states"]);
+    expect(keys("SMS to Papua New Guinea and Guinea-Bissau")).toEqual(["papua-new-guinea", "guinea-bissau"]);
+    expect(keys("Voice issues in the UK and Türkiye")).toEqual(["united-kingdom", "turkey"]);
+    expect(placesIn("Delays to Telcel Mexico")[0]).toMatchObject({ name: "Mexico" });
+    // A city wins over its country; states and look-alikes are not countries.
+    expect(keys("London, United Kingdom")).toEqual(["LHR"]);
+    for (const n of ["Outage in New Mexico", "New Jersey (EWR) errors", "contact us", "Plugins", "Indiana"]) expect(keys(n).filter((k) => /[a-z]/.test(k))).toEqual([]);
+    expect(isPlaceKey("costa-rica")).toBe(true);
+    expect(isPlaceKey("not-a-country")).toBe(false);
+    expect(placeName("united-states")).toBe("United States");
+  });
+
+  it("does not read a product acronym in brackets as an airport", () => {
+    expect(keys("Digital Asset Management (DAM)")).toEqual([]);
+  });
+
+  it("names the broad area of an unplaced incident", () => {
+    expect(areaIn("CARRIER NETWORK - SMS, APAC")).toBe("Asia Pacific");
+    expect(areaIn("CARRIER NETWORK - SMS, Middle East & Africa")).toBe("Middle East & Africa");
+    expect(areaIn("CARRIER NETWORK - SMS, Latin America")).toBe("Latin America");
+    expect(areaIn("Builds")).toBe(null);
+    expect(incidentAreas({ regions: null, components: ["CARRIER NETWORK - SMS, Europe", "CARRIER NETWORK - Voice, Europe"], title: "Delays" })).toEqual(["Europe"]);
+  });
+
   it("leaves broad areas and products off the map", () => {
     for (const n of ["Elevated errors in Europe", "Builds", "API", "GPT4 errors", "North America", "Phoenix LiveView"]) expect(keys(n)).toEqual([]);
   });
@@ -39,11 +67,12 @@ describe("outageMap", () => {
     const m = outageMap([
       { places: sin, provider: "AWS", now: false },
       { places: placesIn("Singapore"), provider: "Railway", now: true },
-      { places: [], provider: "OpenAI", now: false },
+      { places: [], provider: "OpenAI", now: false, areas: ["Europe"] },
       { places: placesIn("us-east-1"), provider: "AWS", now: true, incident: false },
     ]);
     expect(m.placed).toBe(2);
     expect(m.unplaced).toBe(1);
+    expect(m.areas).toEqual([{ name: "Europe", incidents: 1 }]);
     expect(m.points.map((p) => [p.key, p.incidents, p.now])).toEqual([["SIN", 2, true], ["IAD", 0, true]]);
     expect(m.points[0]).toMatchObject({ name: "Singapore", aka: ["ap-southeast-1"], providers: ["AWS", "Railway"] });
   });
