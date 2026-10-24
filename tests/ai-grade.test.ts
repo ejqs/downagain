@@ -15,6 +15,7 @@ const verdict = (v: Partial<Verdict> = {}): Verdict => ({
   rationale: "Requests failed in iad1 for 30 minutes.",
   summary: "Edge requests in iad1 returned errors for 30 minutes after a bad config push, fixed by a rollback.",
   recovered_at: null,
+  follows: null,
   ...v,
 });
 
@@ -113,6 +114,9 @@ describe("parseVerdict", () => {
     expect(parseVerdict({ ...verdict(), recovered_at: "soon" })?.recovered_at).toBeNull();
     const { recovered_at: _, ...older } = verdict();
     expect(parseVerdict(older)?.recovered_at).toBeNull();
+    expect(parseVerdict({ ...verdict(), follows: "151" })?.follows).toBe(151);
+    expect(parseVerdict({ ...verdict(), follows: "" })?.follows).toBeNull();
+    expect(parseVerdict({ ...verdict(), follows: "the outage" })?.follows).toBeNull();
   });
   it.each([
     ["unknown surface", { affected: [{ surface: "vibes", tier: 2 }] }],
@@ -144,6 +148,14 @@ describe("renderIncident and inputHash", () => {
     const text = renderIncident(incident);
     expect(inputHash(text, "claude-haiku-5-5")).not.toBe(inputHash(text, "claude-sonnet-5-5"));
     expect(inputHash(renderIncident({ ...incident, status: "monitoring" }), "claude-haiku-5-5")).not.toBe(inputHash(text, "claude-haiku-5-5"));
+  });
+
+  it("lists earlier incidents after the incident only when there are some", () => {
+    const text = renderIncident(incident);
+    expect(text).not.toContain("<earlier>");
+    const withEarlier = renderIncident({ ...incident, earlier: [{ id: 151, title: "Railway Platform Outage", startedAt: new Date("2026-09-30T07:24:00Z") }] });
+    expect(withEarlier.startsWith(text)).toBe(true);
+    expect(withEarlier).toContain("<earlier>\n151 [2026-09-30T07:24:00.000Z] Railway Platform Outage\n</earlier>");
   });
 
   it("keeps the first and latest updates of a very long incident", () => {

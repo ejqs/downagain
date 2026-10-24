@@ -99,6 +99,9 @@ export function penaltyMinutes(i: GradeInput, from: Date, to: Date): number {
 /** Follow-ups to a breach (key revocations, clarifications) posted within this many days are the same breach. */
 export const BREACH_FOLLOW_UP_DAYS = 7;
 
+/** How far back an incident can continue an earlier one: what Claude is shown, and the timelines' reach. */
+export const FOLLOW_UP_DAYS = 14;
+
 /**
  * One breach, one security penalty: a provider's compromise incidents that start within
  * BREACH_FOLLOW_UP_DAYS of an earlier one keep their SECURITY pill but lose the 600 points.

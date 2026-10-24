@@ -12,16 +12,19 @@ import { testDb } from "./helpers/db";
 let database: DB;
 let close: () => Promise<void>;
 let calls = 0;
+const prompts: string[] = [];
 let mode: "ok" | "down" | "refuse" = "ok";
 
 // Stands in for the SDK client: only messages.create is used.
 const client = {
   messages: {
-    create: async () => {
+    create: async (req: { messages: { content: string }[] }) => {
       calls++;
+      const prompt = req.messages[0].content;
+      prompts.push(prompt);
       if (mode === "down") throw new Anthropic.APIConnectionError({ message: "connection reset" });
       if (mode === "refuse") return { stop_reason: "refusal", stop_details: { category: "general_harms" }, content: [], usage: { input_tokens: 800, output_tokens: 5 } };
-      const verdict = { affected: [{ surface: "serving", tier: 2 }], not_counted: false, scope: "regional", security: false, data_loss: false, confidence: "high", rationale: "Errors in one region.", summary: "Edge errors in iad1 for an hour, fixed by a rollback." };
+      const verdict = { affected: [{ surface: "serving", tier: 2 }], not_counted: false, scope: "regional", security: false, data_loss: false, confidence: "high", rationale: "Errors in one region.", summary: "Edge errors in iad1 for an hour, fixed by a rollback.", follows: prompt.match(/<earlier>\n(\d+) /)?.[1] ?? "" };
       return { stop_reason: "end_turn", content: [{ type: "text", text: JSON.stringify(verdict) }], usage: { input_tokens: 1000, output_tokens: 200 } };
     },
   },
@@ -64,6 +67,7 @@ beforeAll(async () => {
 afterAll(() => close());
 beforeEach(async () => {
   calls = 0;
+  prompts.length = 0;
   mode = "ok";
   await database.delete(incidentReviews);
   await database.delete(incidentUpdates);
@@ -108,6 +112,18 @@ describe("reviewPending", () => {
     // A manual override still wins over Claude.
     await database.update(incidents).set({ tierOverride: 4 }).where(eq(incidents.id, id));
     expect((await get(id)).tierOverride).toBe(4);
+  });
+
+  it("shows Claude the provider's incidents from the two weeks before and stores the one it continues", async () => {
+    const old = await addIncident("old", new Date("2026-10-01T10:00:00Z"));
+    const first = await addIncident("first", new Date("2026-10-18T10:00:00Z"));
+    const next = await addIncident("next", new Date("2026-10-20T10:00:00Z"));
+    await reviewPending(database, { client, settings, now: NOW });
+    const shown = prompts.find((t) => t.includes("2026-10-20T10:00:00.000Z") && t.includes("<earlier>"));
+    expect(shown).toContain(`<earlier>\n${first} [2026-10-18T10:00:00.000Z] Elevated errors\n</earlier>`);
+    expect(shown).not.toContain(`${old} [`);
+    expect(await get(next)).toMatchObject({ follows: first });
+    expect(await get(first)).toMatchObject({ follows: null });
   });
 
   it("caps calls per run and stops at the monthly budget, keeping the rules grade", async () => {

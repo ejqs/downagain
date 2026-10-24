@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { areaFor, SECURITY_PENALTY, type Scope, type Area, type Classification, type Surface, type Tier } from "@/lib/severity";
 
-export const PROMPT_VERSION = 10;
+export const PROMPT_VERSION = 11;
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 
 const SURFACES = ["serving", "data", "ship", "manage", "peripheral"] as const;
@@ -28,12 +28,14 @@ export interface Verdict {
   summary: string;
   /** When the updates first say service was back to normal, or null. */
   recovered_at: Date | null;
+  /** The id of an earlier incident (from the list Claude was shown) that this one continues, or null. */
+  follows: number | null;
 }
 
 const VERDICT_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["affected", "not_counted", "scope", "security", "data_loss", "confidence", "rationale", "summary", "recovered_at"],
+  required: ["affected", "not_counted", "scope", "security", "data_loss", "confidence", "rationale", "summary", "recovered_at", "follows"],
   properties: {
     affected: {
       type: "array",
@@ -56,6 +58,7 @@ const VERDICT_SCHEMA = {
     rationale: { type: "string" },
     summary: { type: "string" },
     recovered_at: { type: "string", description: "Timestamp copied from the first update that says service is back to normal, or an empty string" },
+    follows: { type: "string", description: "The id of the earlier incident this one continues, or an empty string" },
   },
 } as const;
 
@@ -99,7 +102,9 @@ rationale: one plain, factual sentence of at most 25 words that a reader of the 
 
 summary: the whole incident in plain words, at most 50 words, for a developer skimming a long thread of updates: what broke, who was affected, for how long, and the cause and fix if the provider gave them. Use the provider's facts only; no speculation, no jokes, no tier numbers.
 
-recovered_at: providers often keep an incident open long after the fix, to monitor, chase a root cause, notify customers or write a report. Copy the bracketed timestamp of the first update that says the affected services are working normally again for all customers who were hit (for example "running at normal speed", "fully recovered", "operating normally", "we have observed a recovery", "error rates have returned to normal"). Improving, partly restored, restored for some plans or regions, or a backlog still draining is not recovered. If a later update says the problem came back, use the first update after that which says it is normal again. Use an empty string when the text never says service is back to normal, or when that update is the resolution itself.`;
+recovered_at: providers often keep an incident open long after the fix, to monitor, chase a root cause, notify customers or write a report. Copy the bracketed timestamp of the first update that says the affected services are working normally again for all customers who were hit (for example "running at normal speed", "fully recovered", "operating normally", "we have observed a recovery", "error rates have returned to normal"). Improving, partly restored, restored for some plans or regions, or a backlog still draining is not recovered. If a later update says the problem came back, use the first update after that which says it is normal again. Use an empty string when the text never says service is back to normal, or when that update is the resolution itself.
+
+follows: after the incident you may get a list of the provider's incidents from the two weeks before it. Give the id of the one this incident continues: the same outage posted again or reopened, a follow-up, clarification or aftermath of it (credential rotations after a breach, a backlog or side effect of the same cause), or a part of it now posted on its own. Only when the text or an unmistakable match of title, component and timing ties them; the same component failing again for its own reason is a new incident. If it continues several, give the earliest. Use an empty string otherwise, or when there is no list.`;
 
 export interface ReviewInput {
   provider: string;
@@ -114,6 +119,8 @@ export interface ReviewInput {
   /** Cloud regions the provider named; left out of the prompt when empty so other incidents keep their hashes. */
   regions?: string[] | null;
   updates: { status: string; body: string; postedAt: Date }[];
+  /** The provider's incidents from the days before, for `follows`; left out when empty so other incidents keep their hashes. */
+  earlier?: { id: number; title: string; startedAt: Date }[];
 }
 
 // Long incidents can post dozens of updates. Keep the first and the latest ones
@@ -157,6 +164,9 @@ export function renderIncident(i: ReviewInput): string {
     `Updates:`,
     kept.length ? kept.join("\n") : "(none posted)",
     `</incident>`,
+    ...(i.earlier?.length
+      ? [`<earlier>`, ...i.earlier.map((e) => `${e.id} [${e.startedAt.toISOString()}] ${clip(e.title, 200)}`), `</earlier>`]
+      : []),
   ].join("\n");
 }
 
@@ -170,6 +180,12 @@ function parseTime(v: unknown): Date | null {
   if (typeof v !== "string" || !v.trim()) return null;
   const d = new Date(v.trim());
   return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/** An incident id Claude gave back, or null for empty, missing (older verdicts) or garbled. */
+function parseId(v: unknown): number | null {
+  const n = typeof v === "string" ? Number(v.trim().replace(/^#/, "")) : typeof v === "number" ? v : NaN;
+  return Number.isSafeInteger(n) && n > 0 ? n : null;
 }
 
 export function parseVerdict(v: unknown): Verdict | null {
@@ -198,6 +214,7 @@ export function parseVerdict(v: unknown): Verdict | null {
     rationale: o.rationale.trim().slice(0, 300),
     summary: typeof o.summary === "string" ? o.summary.trim().slice(0, 600) : "",
     recovered_at: parseTime(o.recovered_at),
+    follows: parseId(o.follows),
   };
 }
 
@@ -209,6 +226,7 @@ export function isLongText(updates: { body: string }[]): boolean {
 export interface Refined extends Classification {
   summary: string;
   recoveredAt: Date | null;
+  follows: number | null;
   gradedBy: "claude";
   scope: Scope;
 }
@@ -229,7 +247,7 @@ function rubricTier(surface: Surface, tier: 1 | 2 | 3 | 4, scope: Scope): 1 | 2 
 export function applyVerdict(rules: Classification, v: Verdict): Refined {
   // Claude reads the text; the rules can read which cities were listed. Unclear text doesn't erase that.
   const scope = v.scope === "unclear" && rules.scope ? rules.scope : v.scope;
-  const base = { classifierVersion: rules.classifierVersion, gradedBy: "claude" as const, scope, summary: v.summary, recoveredAt: v.recovered_at };
+  const base = { classifierVersion: rules.classifierVersion, gradedBy: "claude" as const, scope, summary: v.summary, recoveredAt: v.recovered_at, follows: v.follows };
   // The rules read the text for an actual compromise; Claude confirms it was a security incident at all.
   const compromise = rules.compromise && (v.security || v.data_loss);
   // A "we're not affected" advisory or a blocked attack with no impact isn't counted; a breach always is.

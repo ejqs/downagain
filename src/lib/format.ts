@@ -28,6 +28,16 @@ const monthShort = new Intl.DateTimeFormat("en-US", { month: "short", timeZone: 
 export const fmtDate = (ms: number) => dateFmt.format(ms);
 export const fmtDay = (ms: number) => dayFmt.format(ms);
 export const fmtTime = (ms: number) => `${timeFmt.format(ms)} UTC`;
+const shortFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+/** "Oct 21–24, 2026", "Oct 30 – Nov 2, 2026", "Dec 30, 2025 – Jan 2, 2026"; one day reads as fmtDate. */
+export function fmtRange(from: number, to: number): string {
+  const [a, b] = [new Date(from), new Date(to)];
+  const year = (d: Date) => d.getUTCFullYear();
+  if (year(a) !== year(b)) return `${dateFmt.format(a)} – ${dateFmt.format(b)}`;
+  if (a.getUTCMonth() !== b.getUTCMonth()) return `${shortFmt.format(a)} – ${dateFmt.format(b)}`;
+  if (a.getUTCDate() !== b.getUTCDate()) return `${shortFmt.format(a)}–${b.getUTCDate()}, ${year(b)}`;
+  return dateFmt.format(a);
+}
 export const fmtMonth = (ms: number) => monthFmt.format(ms);
 export const fmtMonthShort = (ms: number) => monthShort.format(ms);
 

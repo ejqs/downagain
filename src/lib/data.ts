@@ -68,6 +68,8 @@ export interface IncidentRow {
   gradedBy: string;
   scope: string | null;
   summary: string | null;
+  /** Claude's read: the earlier incident this one continues (see timelines.ts). */
+  follows?: number | null;
   /** Left open by the provider with no update for a week; resolvedAt is then its last update. */
   stale: boolean;
 }
@@ -109,6 +111,7 @@ const incidentColumns = {
   gradedBy: incidents.gradedBy,
   scope: incidents.scope,
   summary: incidents.summary,
+  follows: incidents.follows,
   sourceUpdatedAt: incidents.sourceUpdatedAt,
   lastUpdateAt: sql<Date | string | null>`(select max(${incidentUpdates.postedAt}) from ${incidentUpdates} where ${incidentUpdates.incidentId} = ${incidents.id})`,
 };

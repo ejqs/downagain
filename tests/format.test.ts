@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fmtAgo, fmtDuration, fmtPct, httpUrl, plural } from "@/lib/format";
+import { fmtAgo, fmtDuration, fmtPct, fmtRange, httpUrl, plural } from "@/lib/format";
 import { impactFromStatus, isProblem, worstStatus } from "@/lib/status";
 import { makeGetter, USER_AGENT } from "@/lib/fetcher";
 
@@ -11,6 +11,14 @@ describe("format", () => {
     [47 * 60 + 59, "47h 59m"],
     [49 * 60, "2d 1h"],
   ])("fmtDuration(%s) = %s", (m, s) => expect(fmtDuration(m)).toBe(s));
+
+  it("fmtRange", () => {
+    const d = (iso: string) => Date.parse(iso);
+    expect(fmtRange(d("2026-10-21T07:00Z"), d("2026-10-24T13:00Z"))).toBe("Oct 21–24, 2026");
+    expect(fmtRange(d("2026-10-30T07:00Z"), d("2026-11-02T13:00Z"))).toBe("Oct 30 – Nov 2, 2026");
+    expect(fmtRange(d("2025-12-30T07:00Z"), d("2026-01-02T13:00Z"))).toBe("Dec 30, 2025 – Jan 2, 2026");
+    expect(fmtRange(d("2026-10-21T07:00Z"), d("2026-10-21T13:00Z"))).toBe("Oct 21, 2026");
+  });
 
   it("never rounds a real outage up to 100%", () => {
     expect(fmtPct(1)).toBe("100.00%");

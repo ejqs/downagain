@@ -32,6 +32,7 @@ function row(p: { startedAt: string; resolvedAt?: string; sourceUpdatedAt?: stri
     gradedBy: "rules",
     scope: null,
     summary: null,
+    follows: null,
     sourceUpdatedAt: p.sourceUpdatedAt ? new Date(p.sourceUpdatedAt) : null,
     lastUpdateAt: p.lastUpdateAt ?? null,
   } as Parameters<typeof toIncidentRow>[0];

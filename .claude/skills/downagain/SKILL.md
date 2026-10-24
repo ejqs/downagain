@@ -44,6 +44,10 @@ Railway's API (`api.railwaystatus.com/status`) only lists open incidents, and st
 - Budget: `AI_MONTHLY_BUDGET_USD` (default 5), at most 15 calls per poll. Spend is summed from `incident_reviews.cost_micros`.
 - To see where Claude disagreed with the rules: `select incident_id, rules_tier, tier, verdict->>'rationale' from incident_reviews where rules_tier <> tier;`
 
+## Timelines
+
+Provider pages fold related incidents into one timeline (`src/lib/timelines.ts`), display only: grades still count each incident. Links come from Claude's `follows` (it sees the provider's titles from the 14 days before, `FOLLOW_UP_DAYS`), security incidents within 7 days of a compromise, or a near-identical title reposted while the first was open on the same component and region. Component overlap alone is too loose (Twilio and Anthropic run look-alike incidents side by side); check a rule change against real history before shipping.
+
 ## Grades
 
 `src/lib/grading.ts` holds the weights, window and cut-offs. Change cut-offs only after looking at the real spread of points, so the board isn't all A's or all F's.
