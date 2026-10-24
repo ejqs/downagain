@@ -96,6 +96,24 @@ export function penaltyMinutes(i: GradeInput, from: Date, to: Date): number {
   return Math.max(0, (e - s) / MIN);
 }
 
+/** Follow-ups to a breach (key revocations, clarifications) posted within this many days are the same breach. */
+export const BREACH_FOLLOW_UP_DAYS = 7;
+
+/**
+ * One breach, one security penalty: a provider's compromise incidents that start within
+ * BREACH_FOLLOW_UP_DAYS of an earlier one keep their SECURITY pill but lose the 600 points.
+ */
+export function onePenaltyPerBreach<T extends { providerId: number; startedAt: number; compromise?: boolean }>(rows: T[]): T[] {
+  const last = new Map<number, number>();
+  const firsts = new Set<T>();
+  for (const r of [...rows].filter((r) => r.compromise).sort((a, b) => a.startedAt - b.startedAt)) {
+    const prev = last.get(r.providerId);
+    if (prev == null || r.startedAt - prev > BREACH_FOLLOW_UP_DAYS * DAY) firsts.add(r);
+    last.set(r.providerId, r.startedAt);
+  }
+  return rows.map((r) => (r.compromise && !firsts.has(r) ? { ...r, compromise: false } : r));
+}
+
 export function incidentPoints(i: GradeInput, from: Date, to: Date): number {
   const tier = effectiveTier(i);
   let pts = TIER_WEIGHT[tier] * scopeWeight(i.scope) * penaltyMinutes(i, from, to);

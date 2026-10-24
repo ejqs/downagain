@@ -8,7 +8,7 @@ import { categories, incidentReviews, incidentUpdates, incidents, providerStatus
 import type { Status } from "@/lib/types";
 import type { Area } from "@/lib/severity";
 import { httpUrl } from "@/lib/format";
-import { staleEnd } from "@/lib/grading";
+import { onePenaltyPerBreach, staleEnd } from "@/lib/grading";
 import { dropBareTwins } from "@/lib/status";
 
 const SAFETY_NET_SECONDS = 600;
@@ -189,7 +189,7 @@ async function readSnapshot(): Promise<Snapshot> {
       lastCheckedAt: ms(s.lastCheckedAt),
       components: s.components ?? [],
     })),
-    incidents: incs.map(toIncidentRow),
+    incidents: onePenaltyPerBreach(incs.map((r) => toIncidentRow(r))),
   };
 }
 
@@ -265,7 +265,7 @@ async function readProviderHistory(slug: string): Promise<ProviderHistory | null
   return {
     total: all.length,
     reviews,
-    older: all.filter((i) => i.startedAt.getTime() < cutoff).map(toIncidentRow),
+    older: onePenaltyPerBreach(all.filter((i) => i.startedAt.getTime() < cutoff).map((r) => toIncidentRow(r))),
     updates,
   };
 }
