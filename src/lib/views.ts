@@ -21,6 +21,7 @@ export function gradeInput(i: IncidentRow): GradeInput {
     security: i.security,
     compromise: i.compromise,
     scope: i.scope,
+    providerId: i.providerId,
   };
 }
 
