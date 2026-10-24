@@ -36,7 +36,7 @@ export function OutageMap({ map, label, hrefFor, selected = null }: Props) {
         <span className="mono" style={{ fontSize: 13 }}>
           {now ? `${now} down now · ` : ""}
           {plural(map.points.length, "place")}
-          {map.unplaced ? ` · ${map.unplaced} with none named` : ""}
+          {map.unplaced ? ` · ${map.unplaced} not pinned` : ""}
         </span>
       </div>
       <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} aria-label={`${plural(map.points.length, "place")} with incidents`}>
@@ -83,6 +83,11 @@ export function OutageMap({ map, label, hrefFor, selected = null }: Props) {
       ) : (
         <span className="body">No places named.</span>
       )}
+      {map.areas.length ? (
+        <p className="mono muted map-areas" style={{ fontSize: 13 }}>
+          Region only: {map.areas.map((a) => `${a.name} ${a.incidents}`).join(" · ")}
+        </p>
+      ) : null}
     </section>
   );
 }

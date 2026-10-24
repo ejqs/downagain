@@ -63,7 +63,7 @@ Prices are the one hand-curated dataset: `PRICES` and `WORKLOADS` in `src/lib/pr
 
 ## Outage map
 
-`/incidents` and provider pages plot where incidents hit (`src/components/OutageMap.tsx`). `src/lib/places.ts` turns cloud region codes, Azure names, CDN cities ("Accra, Ghana - (ACC)"), "iad1"-style codes and a short city list into airports; anything broader ("Europe") stays off the map and counts as "none named". A new region code or city goes in `CLOUD`, `AZURE` or `CITIES` there, with a case in `tests/places.test.ts`. The land dots and airport coordinates are generated files in `src/lib/geo/`; regenerate with `scripts/geo.ts` (instructions at its top) only if the grid or projection changes.
+`/incidents` and provider pages plot where incidents hit (`src/components/OutageMap.tsx`). `src/lib/places.ts` turns cloud region codes, Azure names, CDN cities ("Accra, Ghana - (ACC)"), "iad1"-style codes and a short city list into airports. With no city, a country name ("to Claro Costa Rica", Twilio's carrier incidents) pins to a point inside the country (`src/lib/geo/countries.ts`, keys like `costa-rica`). Anything broader ("Europe", "APAC") stays off the map and is counted under it as "Region only". A new region code or city goes in `CLOUD`, `AZURE` or `CITIES` there, another spelling of a country in `COUNTRY_ALIAS`, with a case in `tests/places.test.ts`. The land dots and airport coordinates are generated files in `src/lib/geo/`; regenerate with `scripts/geo.ts` and `scripts/countries.ts` (instructions at their tops) only if the grid or projection changes.
 
 ## Local development
 
