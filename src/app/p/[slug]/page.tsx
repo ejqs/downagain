@@ -7,7 +7,8 @@ import { getProviderHistory, safeSnapshot, type IncidentRow, type ProviderRow, t
 import { brokenComponents, communication, coveredDays, dataFrom, isGraded, dailyCells, downNow, incidentsFor, liveIncidents, monthlyTrend, scoreFor, startHeatmap, tierOf, topComponents, trendKnown, valueBoard } from "@/lib/views";
 import { WORKLOADS, checkedMs, fmtUsd, isStale } from "@/lib/pricing";
 import { durationMinutes, penaltyEnd, penaltyMinutes } from "@/lib/grading";
-import { fmtAgo, fmtDate, fmtDuration, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
+import { withTimelines, type HistoryEntry, type Timeline } from "@/lib/timelines";
+import { fmtAgo, fmtDate, fmtDay, fmtDuration, fmtRange, fmtMonth, fmtMonthShort, fmtPct, fmtTime, plural } from "@/lib/format";
 import { AREA_BLURB, AREA_LABEL, AREA_SHORT, AREAS, TIER_NAMES, TIER_BLURB, TIER_WEIGHT, scopeWeight } from "@/lib/severity";
 import { STATUS_LABEL, isProblem } from "@/lib/status";
 import { gradeInput, whereHit } from "@/lib/views";
@@ -143,13 +144,15 @@ function BrokenList({ p }: { p: ProviderRow }) {
   );
 }
 
-function IncidentItem({ i, updates, review }: { i: IncidentRow; updates?: { status: string; body: string; postedAt: number }[]; review?: ReviewTrace }) {
+type Updates = Record<number, { status: string; body: string; postedAt: number }[]>;
+
+function IncidentItem({ i, updates, review, stamp }: { i: IncidentRow; updates?: Updates[number]; review?: ReviewTrace; stamp?: boolean }) {
   const tier = tierOf(i);
   const mins = durationMinutes(gradeInput(i));
   return (
     <div className="list-row" style={{ alignItems: "baseline", ["--gap" as string]: "6px 20px" }}>
       <div className="row" style={{ flex: "0 1 260px", ["--gap" as string]: "6px 12px" }}>
-        <span className="mono" style={{ fontSize: 14 }}>{fmtDate(i.startedAt)}</span>
+        <span className="mono" style={{ fontSize: 14 }}>{stamp ? `${fmtDay(i.startedAt)} ${fmtTime(i.startedAt)}` : fmtDate(i.startedAt)}</span>
         <span className="mono" style={{ fontSize: 14, fontWeight: 700 }}>{i.resolvedAt ? fmtDuration(mins) : "ongoing"}</span>
         <SevPill tier={tier} security={i.security} />
       </div>
@@ -180,6 +183,46 @@ function IncidentItem({ i, updates, review }: { i: IncidentRow; updates?: { stat
         {i.postmortem && i.url ? <a href={i.url} style={{ fontSize: 14, fontWeight: 700 }}>Postmortem</a> : null}
         {i.url ? <a href={i.url} style={{ fontSize: 14 }} data-umami-event="status-page-outbound">Source</a> : null}
       </div>
+    </div>
+  );
+}
+
+/** Related incidents as one entry: the worst one's title, then each post oldest first. */
+function TimelineItem({ t, updates, reviews }: { t: Timeline; updates?: Updates; reviews?: Record<number, ReviewTrace> }) {
+  return (
+    <div className="timeline">
+      <div className="list-row" style={{ alignItems: "baseline", ["--gap" as string]: "6px 20px" }}>
+        <div className="row" style={{ flex: "0 1 260px", ["--gap" as string]: "6px 12px" }}>
+          <span className="mono" style={{ fontSize: 14 }}>{fmtRange(t.startedAt, t.resolvedAt ?? t.members[t.members.length - 1].startedAt)}</span>
+          <span className="mono" style={{ fontSize: 14, fontWeight: 700 }}>{t.resolvedAt ? fmtDuration((t.resolvedAt - t.startedAt) / 60_000) : "ongoing"}</span>
+          <SevPill tier={t.tier} security={t.security} />
+        </div>
+        <div className="stack" style={{ flex: "1 1 320px", minWidth: 0, ["--gap" as string]: "3px" }}>
+          <span style={{ fontSize: 18, fontWeight: 800 }}>{t.lead.title}</span>
+          <span className="mono muted" style={{ fontSize: 12 }}>{plural(t.members.length, "incident")}</span>
+        </div>
+      </div>
+      <ol className="tl" aria-label={`${t.lead.title}, ${plural(t.members.length, "incident")}`}>
+        {t.members.map((i) => (
+          <li key={i.id}>
+            <IncidentItem i={i} updates={updates?.[i.id]} review={reviews?.[i.id]} stamp />
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+function HistoryList({ entries, updates, reviews }: { entries: HistoryEntry[]; updates?: Updates; reviews?: Record<number, ReviewTrace> }) {
+  return (
+    <div className="box">
+      {entries.map((e) =>
+        e.kind === "timeline" ? (
+          <TimelineItem key={`t${e.timeline.lead.id}`} t={e.timeline} updates={updates} reviews={reviews} />
+        ) : (
+          <IncidentItem key={e.incident.id} i={e.incident} updates={updates?.[e.incident.id]} review={reviews?.[e.incident.id]} />
+        ),
+      )}
     </div>
   );
 }
@@ -229,7 +272,8 @@ export default async function ProviderPage({ params, searchParams }: Props) {
     .map((x) => ({ x, s: scoreFor(snap, x.id) }))
     .sort((a, b) => a.s.points - b.s.points);
   const rivals = peers.map((x) => x.x).filter((x) => x.slug !== p.slug);
-  const shown = all ? list : list.slice(0, 20);
+  const entries = withTimelines(list, now);
+  const shown = all ? entries : entries.slice(0, 20);
   const value = valueBoard(snap, p.category);
   const cost = value.find((v) => v.provider.id === p.id);
   const work = WORKLOADS[p.category];
@@ -588,25 +632,17 @@ export default async function ProviderPage({ params, searchParams }: Props) {
       <section className="stack">
         <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
           <h2 className="h2">Incident history</h2>
-          {!all && list.length > shown.length ? <Link href={`/p/${p.slug}?all=1`} style={{ fontWeight: 700, padding: "10px 0" }}>Show all {list.length}</Link> : null}
+          {!all && entries.length > shown.length ? <Link href={`/p/${p.slug}?all=1`} style={{ fontWeight: 700, padding: "10px 0" }}>Show all {list.length}</Link> : null}
         </div>
         {shown.length ? (
-          <div className="box">
-            {shown.map((i) => (
-              <IncidentItem key={i.id} i={i} updates={history?.updates[i.id]} review={history?.reviews[i.id]} />
-            ))}
-          </div>
+          <HistoryList entries={shown} updates={history?.updates} reviews={history?.reviews} />
         ) : (
           <div className="empty">No incidents.</div>
         )}
         {all && history?.older.length ? (
           <>
             <h3 style={{ fontSize: 20 }}>Older than a year</h3>
-            <div className="box">
-              {history.older.map((i) => (
-                <IncidentItem key={i.id} i={i} />
-              ))}
-            </div>
+            <HistoryList entries={withTimelines(history.older, now)} />
           </>
         ) : null}
       </section>

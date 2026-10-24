@@ -118,6 +118,7 @@ export const incidents = pgTable(
     gradedBy: text("graded_by").notNull().default("rules"), // "rules" | "claude"
     scope: text("scope"), // Claude's read: global | regional | subset | unclear
     summary: text("summary"), // Claude's plain recap, only for long provider text
+    follows: integer("follows"), // Claude's read: the earlier incident of this provider this one follows up on
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }), // last Claude review; pending while updatedAt is newer
     reviewedHash: text("reviewed_hash"), // input hash of that review, see incident_reviews
     reviewedPrompt: integer("reviewed_prompt"), // PROMPT_VERSION of that review; older ones are read again

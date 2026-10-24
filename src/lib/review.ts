@@ -7,7 +7,7 @@ import { and, asc, desc, eq, gte, inArray, isNull, lt, or, sql } from "drizzle-o
 import type { DB } from "@/db";
 import { categories, componentSurfaces, incidentReviews, incidentUpdates, incidents, providers } from "@/db/schema";
 import { DEFAULT_MODEL, PROMPT_VERSION, applyVerdict, isLongText, askClaude, costMicros, inputHash, parseVerdict, renderIncident } from "@/lib/ai-grade";
-import { MAX_PENALTY_MINUTES, MAX_PENALTY_MINUTES_MILD, WINDOW_DAYS } from "@/lib/grading";
+import { FOLLOW_UP_DAYS, MAX_PENALTY_MINUTES, MAX_PENALTY_MINUTES_MILD, WINDOW_DAYS } from "@/lib/grading";
 import { TIER_WEIGHT, classify, holdToRegion, singleRegion, type Classification, type Surface } from "@/lib/severity";
 
 export interface ReviewSettings {
@@ -66,6 +66,23 @@ async function loadUpdates(database: DB, incidentId: number) {
     .where(eq(incidentUpdates.incidentId, incidentId));
 }
 
+/** The provider's incidents that started in the FOLLOW_UP_DAYS before this one, oldest first, for `follows`. */
+async function loadEarlier(database: DB, i: typeof incidents.$inferSelect) {
+  return database
+    .select({ id: incidents.id, title: incidents.title, startedAt: incidents.startedAt })
+    .from(incidents)
+    .where(
+      and(
+        eq(incidents.providerId, i.providerId),
+        gte(incidents.startedAt, new Date(i.startedAt.getTime() - FOLLOW_UP_DAYS * 86_400_000)),
+        lt(incidents.startedAt, i.startedAt),
+      ),
+    )
+    .orderBy(desc(incidents.startedAt), desc(incidents.id))
+    .limit(15)
+    .then((rows) => rows.reverse());
+}
+
 function rulesFor(r: Row, updates: { body: string }[], overrides: Map<number, Map<string, Surface>>): Classification {
   return classify(
     {
@@ -81,7 +98,7 @@ function rulesFor(r: Row, updates: { body: string }[], overrides: Map<number, Ma
   );
 }
 
-function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | null; summary?: string | null; recoveredAt?: Date | null }, longText = false) {
+function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | null; summary?: string | null; recoveredAt?: Date | null; follows?: number | null }, longText = false) {
   return {
     tier: c.tier,
     areaTiers: c.areaTiers,
@@ -95,13 +112,14 @@ function gradeColumns(c: Classification & { gradedBy?: string; scope?: string | 
     scope: c.scope ?? null,
     summary: longText && c.summary ? c.summary : null,
     recoveredAt: c.recoveredAt ?? null,
+    follows: c.follows ?? null,
   };
 }
 
 /** The grade to store: Claude's verdict for this exact version if we have a good one, else the rules. */
 export function finalGrade(rules: Classification, verdict: unknown, regions?: string[] | null) {
   const v = verdict == null ? null : parseVerdict(verdict);
-  if (!v) return { ...rules, gradedBy: "rules" as const, scope: rules.scope ?? null, summary: null, recoveredAt: null };
+  if (!v) return { ...rules, gradedBy: "rules" as const, scope: rules.scope ?? null, summary: null, recoveredAt: null, follows: null };
   const refined = applyVerdict(rules, v);
   // The rules already hold single-region incidents; Claude's grade gets the same treatment.
   if (v.data_loss) return refined;
@@ -186,6 +204,7 @@ export async function reviewPending(
         worstComponentStatus: r.i.worstComponentStatus,
         regions: r.i.regions,
         updates,
+        earlier: await loadEarlier(database, r.i),
       });
       const hash = inputHash(rendered, settings.model);
       const rules = rulesFor(r, updates, overrides);
