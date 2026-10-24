@@ -95,6 +95,10 @@ describe("classify", () => {
     const breach = classify({ ...base, title: "x", impact: "minor", components: ["Builds"], updateText: "An unauthorized party accessed build logs. Please rotate your credentials." });
     expect(breach).toMatchObject({ tier: 3, security: true, compromise: true });
     expect(breach.reason).toMatch(/plus 600 points for a security compromise/);
+    // Railway, Oct 21 2026: no "breach" word, but an attacker and every token revoked.
+    const railway = "We strongly recommend that you revoke all environment variables stored in Railway. We are rotating all Railway bucket credentials. We have invalidated all Railway API tokens. Preliminary forensics on the intent of the attacker.";
+    expect(classify({ ...base, title: "Railway Platform Outage", impact: "major", components: ["Builds"], updateText: railway }).compromise).toBe(true);
+    expect(classify({ ...base, title: "Elevated errors", impact: "major", components: ["Builds"], updateText: "We are rotating TLS certificates on the edge." }).compromise).toBe(false);
   });
 
   it("a security incident in one cloud region stays at Sev 2, as Claude's grade does", () => {
