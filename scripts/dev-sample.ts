@@ -39,12 +39,12 @@ const COMPONENTS: Record<string, string[]> = {
   ai: ["Chat Completions", "Messages API", "Embeddings", "Fine-tuning", "Console", "Batch", "Realtime", "Login"],
 };
 const TITLES: Record<string, string[]> = {
-  "Edge Network": ["Elevated 5xx on edge requests", "Increased latency in us-east"],
+  "Edge Network": ["Elevated 5xx on edge requests", "Increased latency in us-east", "Elevated errors in fra1", "Requests failing in Singapore"],
   Builds: ["Builds slow to start", "Builds failing for some projects"],
   Deployments: ["New deployments stuck on initializing", "Deploys delayed"],
   Dashboard: ["Dashboard not loading for some users", "Analytics charts delayed"],
   API: ["API returning errors", "Elevated API error rates"],
-  Postgres: ["Database connectivity issues", "Degraded database performance"],
+  Postgres: ["Database connectivity issues", "Degraded database performance", "Database connectivity issues in Tokyo"],
   "Serverless Functions": ["Function invocations timing out"],
   Logs: ["Log streaming delayed"],
   Billing: ["Invoices not generating"],
@@ -58,6 +58,9 @@ const TITLES: Record<string, string[]> = {
   Realtime: ["Realtime sessions dropping"],
   Login: ["Login failures"],
 };
+
+// Cloud incidents name a region most of the time, so the map has something to show.
+const REGIONS = ["us-east-1", "us-west-2", "eu-west-1", "eu-central-1", "ap-southeast-1", "ap-northeast-1", "us-central1", "europe-west4", "East US", "West Europe", "sa-east-1"];
 
 const now = Date.now();
 let total = 0;
@@ -88,6 +91,7 @@ for (const { p, cat } of rows) {
         resolvedAt: new Date(end),
         url: p.statusPageUrl,
         components: [comp],
+        regions: cat === "cloud" && rand() < 0.7 ? [pick(REGIONS)] : null,
         postmortem: rand() < 0.2,
         origin: "sample",
         tier: c.tier,
@@ -119,6 +123,7 @@ for (const { p, cat } of rows) {
 // Two things going wrong right now, so the banner shows.
 for (const [slug, comp, title, impact, mins] of [
   ["vercel", "Edge Network", "Elevated 5xx on edge requests in iad1", "major", 42],
+  ["aws", "Amazon EC2", "Increased API error rates in ap-southeast-1", "minor", 75],
   ["openai", "Chat Completions", "Increased error rates on chat completions", "minor", 48],
 ] as const) {
   const r = rows.find((x) => x.p.slug === slug);

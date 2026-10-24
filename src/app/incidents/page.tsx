@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { safeSnapshot } from "@/lib/data";
-import { LIVE_DAYS, dailyLoad, gradeInput, openIncidents, tierOf, whereHit } from "@/lib/views";
+import { LIVE_DAYS, brokenComponents, dailyLoad, downNow, gradeInput, openIncidents, tierOf, whereHit } from "@/lib/views";
 import { WINDOW_DAYS, durationMinutes, shownEnd, unionMinutes } from "@/lib/grading";
 import { fmtDate, fmtDay, fmtDuration, fmtTime, plural } from "@/lib/format";
 import { TIER_BLURB, TIER_NAMES } from "@/lib/severity";
@@ -10,6 +10,8 @@ import { pageMeta } from "@/lib/site";
 import { Unavailable } from "@/components/Unavailable";
 import { Heatmap, dayKey } from "@/components/Heatmap";
 import { ProviderSelect } from "@/components/ProviderSelect";
+import { OutageMap } from "@/components/OutageMap";
+import { incidentPlaces, outageMap, placesIn } from "@/lib/places";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({
@@ -47,6 +49,18 @@ export default async function IncidentsPage({ searchParams }: Props) {
   const past = snap.incidents.filter((i) =>
     keep(i) && (day === null ? i.resolvedAt && i.startedAt >= now - days * DAY : i.startedAt < day + DAY && (i.resolvedAt ?? now) >= day),
   );
+
+  const openIds = new Set(ongoing.map((i) => i.id));
+  const nameOf = (id: number) => byId.get(id)?.name ?? "";
+  const where = outageMap([
+    ...ongoing.map((i) => ({ places: incidentPlaces(i), provider: nameOf(i.providerId), now: true })),
+    ...past.filter((i) => !openIds.has(i.id)).map((i) => ({ places: incidentPlaces(i), provider: nameOf(i.providerId), now: false })),
+    // A status page that's red with no incident open: its broken components may name places.
+    ...downNow(snap)
+      .filter((d) => (cat === "all" || d.provider.category === cat) && (!only || d.provider.id === only.id))
+      .filter((d) => !ongoing.some((i) => i.providerId === d.provider.id))
+      .flatMap((d) => brokenComponents(d.provider).items.map((c) => ({ places: placesIn(c.name), provider: d.provider.name, now: true, incident: false }))),
+  ]);
 
   const groups = new Map<number, typeof past>();
   for (const i of past) {
@@ -144,6 +158,7 @@ export default async function IncidentsPage({ searchParams }: Props) {
 
       <section className="split">
         <div className="main stack" style={{ ["--gap" as string]: "24px" }}>
+          <OutageMap map={where} label={day === null ? `Where, last ${days} days` : `Where, ${fmtDate(day).replace(/, \d{4}$/, "")}`} />
           <Heatmap days={heat} selected={day} now={now} hrefFor={(d) => href({ day: d })} nameOf={(id) => byId.get(id)?.name ?? ""} />
           {groups.size === 0 ? <div className="empty">{day === null ? `Nothing in the last ${days} days.` : "Clean day."}</div> : null}
           {[...groups.entries()].map(([day, items]) => (

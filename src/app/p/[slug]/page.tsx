@@ -1,3 +1,5 @@
+import { OutageMap } from "@/components/OutageMap";
+import { incidentPlaces, outageMap, placesIn } from "@/lib/places";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -213,6 +215,11 @@ export default async function ProviderPage({ params, searchParams }: Props) {
   const heat = startHeatmap(yearList);
   const maxHeat = Math.max(1, ...heat.flat());
   const comps = topComponents(yearList);
+  const openIds = new Set(open.map((i) => i.id));
+  const where = outageMap([
+    ...yearList.map((i) => ({ places: incidentPlaces(i), provider: p.name, now: openIds.has(i.id) })),
+    ...(down ? brokenComponents(p).items.map((c) => ({ places: placesIn(c.name), provider: p.name, now: true, incident: false })) : []),
+  ]);
   const comms = communication(yearList, history?.updates ?? {});
   const totalSev = s.sevCounts.reduce((a, b) => a + b, 0);
   const peers = snap.providers
@@ -550,6 +557,13 @@ export default async function ProviderPage({ params, searchParams }: Props) {
           </div>
         </div>
       </section>
+
+      {where.points.length ? (
+        <section className="stack">
+          <h2 className="h2">Where it breaks</h2>
+          <OutageMap map={where} label="Last 12 months" />
+        </section>
+      ) : null}
 
       <section className="stack">
         <h2 className="h2">Communication</h2>

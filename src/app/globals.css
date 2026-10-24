@@ -311,3 +311,13 @@ details.area > summary::after { content: "+"; position: absolute; top: 14px; rig
 details.area[open] > summary::after { content: "−"; }
 details.area > summary:hover { background: var(--panel); }
 .area-more { padding: 4px 16px 18px; --gap: 16px; }
+
+/* Outage map: dotted land, one dot per place */
+.map svg { display: block; width: 100%; height: auto; }
+.map .land { fill: none; stroke: var(--none); stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: 0 2.5; }
+.map .pt { fill: var(--ink); stroke: var(--paper); stroke-width: 0.6; }
+.map .pt.now { fill: var(--down); fill-opacity: 1; stroke: var(--ink); stroke-width: 0.8; }
+.map-places { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.map-places li { display: inline-flex; align-items: baseline; gap: 6px; }
+.map-places .dot { width: 8px; height: 8px; background: var(--ink); align-self: center; }
+.map-places .now .dot { background: var(--down); outline: 1.5px solid var(--ink); }

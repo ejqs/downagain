@@ -146,3 +146,11 @@ test("a user report needs a Turnstile token and shows up in the count", async ({
   await expect(row).toContainText(/\d+ in the last hour/);
   await expect(row.getByRole("button", { name: "Down for me" })).toBeEnabled();
 });
+
+test("the outage map pins open incidents and lists places", async ({ page }) => {
+  await page.goto("/incidents");
+  const map = page.locator("section.map").first();
+  await expect(map.locator("svg circle.now").first()).toBeAttached();
+  // The sample Vercel incident is open "in iad1".
+  await expect(map.locator(".map-places li.now", { hasText: "Virginia" })).toBeVisible();
+});

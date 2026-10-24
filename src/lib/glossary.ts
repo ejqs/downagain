@@ -20,6 +20,7 @@ export const GLOSSARY = {
   updateGap: "Median time between status page updates during an incident.",
   updatesPer: "Status page updates per incident, on average.",
   sinceLast: "Time since the last counted incident was resolved.",
+  map: "Places named on the status page: cloud regions, cities, data centres. Incidents that name none stay off the map.",
   heatmap: "One square per UTC day, coloured by the worst incident that day. Ongoing incidents count today.",
   cost: "One reference workload a month, priced from the provider's own pricing page. ~ is an estimate.",
   bestValue: "Nobody else here costs the same or less with the same or better grade.",
