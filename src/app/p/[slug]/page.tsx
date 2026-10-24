@@ -333,7 +333,7 @@ export default async function ProviderPage({ params, searchParams }: Props) {
         <div className="stats">
           <Stat label="Admitted uptime" value={fmtPct(s.admittedUptime, 3)} note={`Grade ${s.grade}`} hint={GLOSSARY.uptime} />
           <Stat label="Incidents" value={String(s.incidentCount)} note={`${s.sevCounts[0]} Sev 1`} hint={GLOSSARY.incidents} />
-          <Stat label="Sev 1 downtime" value={fmtDuration(s.sev1Minutes)} hint={GLOSSARY.sev1Downtime} />
+          <Stat label="Fully down" value={fmtDuration(s.sev1Minutes)} hint={GLOSSARY.sev1Downtime} />
           <Stat label="Median fix" value={s.medianResolveMinutes != null ? fmtDuration(s.medianResolveMinutes) : "–"} hint={GLOSSARY.mttr} />
           <Stat label="Longest" value={s.longestMinutes ? fmtDuration(s.longestMinutes) : "–"} hint={GLOSSARY.longest} />
           <Stat

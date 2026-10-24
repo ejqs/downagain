@@ -126,8 +126,9 @@ export default function About() {
         </div>
         <p>
           Two area grades use the same scale. <strong>PROD</strong>: your users are hit. <strong>SHIP</strong>: you can&apos;t deploy, build or
-          manage, including dashboard, auth and billing outages. Papercuts and security penalties count toward the overall grade only, so it can sit below both. <strong>Admitted uptime</strong> counts only widespread Sev 1 time the provider posted
-          itself, so it&apos;s a best case.
+          manage, including dashboard, auth and billing outages. Papercuts and security penalties count toward the overall grade only, so it can sit below both. <strong>Admitted uptime</strong> is customer time not hit: minutes × how hard (down 1, degraded 0.5) × the scope weight
+          above, counting the worst incident at each moment and at most a week of any one. A failover nobody noticed costs nothing. Only what the
+          provider posted counts, so it&apos;s a best case. <strong>Fully down</strong> is widespread Sev 1 time, unweighted.
         </p>
         <p>
           Some feeds only list open incidents or the last few dozen, so history starts when we started polling. Under 14 days of data gets no grade
