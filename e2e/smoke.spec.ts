@@ -164,3 +164,15 @@ test("picking a place narrows the incidents page", async ({ page }) => {
   await expect(page.locator('section[aria-label="Ongoing"]')).toContainText("Vercel");
   expect(await page.locator("section.map svg a").count()).toBeGreaterThan(1);
 });
+
+test("the incidents page sums up who broke and pages back", async ({ page }) => {
+  await page.goto("/incidents?cat=hosting");
+  const who = page.locator("section.who");
+  await expect(who).toContainText(/Who, last 14 days/i);
+  await expect(who.locator(".who-row").first()).toBeVisible();
+  await page.getByRole("link", { name: "Older" }).click();
+  await expect(page).toHaveURL(/[?&]page=2/);
+  await expect(page.locator("section.who .eyebrow")).not.toContainText(/last 14 days/i);
+  await page.getByRole("link", { name: "Newer" }).click();
+  await expect(page).not.toHaveURL(/page=/);
+});
