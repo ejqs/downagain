@@ -149,7 +149,8 @@ export function whereHit(i: Pick<IncidentRow, "regions" | "components">, n = 3):
 
 export const LIVE_DAYS = MAX_SHOWN_DAYS;
 export function liveIncidents(list: IncidentRow[], now: number): IncidentRow[] {
-  return openIncidents(list).filter((i) => i.startedAt >= now - LIVE_DAYS * 86_400_000);
+  // A provider's notice (Railway's "Notice") stays open with nothing broken: listed, never "down".
+  return openIncidents(list).filter((i) => i.startedAt >= now - LIVE_DAYS * 86_400_000 && i.status !== "notice");
 }
 
 export interface DownItem {

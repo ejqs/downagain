@@ -73,6 +73,26 @@ describe("railway adapter", () => {
     expect(i.impact).toBe("major");
     expect(i.components).toEqual(["API — backboard.railway.com"]);
   });
+
+  it("reads a post with every component marked operational as a notice", async () => {
+    const station = { component: { id: "c1", name: "Support & Community — station.railway.com" }, impact: "OPERATIONAL" };
+    const post = (over: object) => ({ id: "n1", title: "Clarification", status: "TRIAGE", createdAt: "2026-10-24T13:57:07Z", worstImpact: null, components: [station], ...over });
+    const read = (incidents: object[]) =>
+      readProvider(
+        { slug: "railway", sourceKind: "railway", sourceUrl: "https://api.railwaystatus.com/status", statusPageUrl: "https://status.railway.com" },
+        async () => ({ notModified: false, body: { components: [{ id: "c1", name: "Support", status: "OPERATIONAL" }], incidents } }),
+      );
+    const notice = await read([post({})]);
+    expect(notice.incidents![0].status).toBe("notice");
+    // Nothing broken: the page stays green.
+    expect(notice.status).toBe("operational");
+    // An impact on any component, or none given, is an incident.
+    const hit = await read([post({ components: [{ ...station, impact: "PARTIAL_OUTAGE" }] }), post({ id: "n2", components: [{ component: station.component }] }), post({ id: "n3", components: [] })]);
+    expect(hit.incidents!.map((i) => i.status)).toEqual(["triage", "triage", "triage"]);
+    // Resolved, it reads as resolved like any other.
+    const done = await read([post({ status: "RESOLVED", resolvedAt: "2026-10-25T08:00:00Z" })]);
+    expect(done.incidents![0].status).toBe("resolved");
+  });
 });
 
 describe("dropBareTwins", () => {
