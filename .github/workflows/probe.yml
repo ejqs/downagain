@@ -1,0 +1,11 @@
+name: probe
+on: push
+jobs:
+  probe:
+    if: github.ref == 'refs/heads/claude/project-thread-4et7kn'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "=== railway api"; curl -sS -D - https://api.railwaystatus.com/status | head -c 20000 | jq -c '.incidents // ., .maintenances' 2>/dev/null || curl -sS https://api.railwaystatus.com/status | head -c 20000
+          echo; echo "=== railway non-operational components"; curl -sS https://api.railwaystatus.com/status | jq -c '[.. | objects | select(.status? and (.status|type=="string") and .status!="OPERATIONAL" and .name?) | {name,status,type}]'
+          echo; echo "=== downagain status.json"; curl -sS -A "Mozilla/5.0" https://downagain.dev/api/status.json | jq -c '{generatedAt, down, railway: [.providers[]|select(.slug=="railway")]}'
