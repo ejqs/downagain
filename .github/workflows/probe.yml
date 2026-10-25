@@ -7,9 +7,8 @@ jobs:
     steps:
       - run: |
           UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
-          echo "=== status.railway.com"; curl -sS -A "$UA" -o rw.html -w "%{http_code}\n" https://status.railway.com/ ; python3 -c "
-          import re,html;t=open('rw.html').read();t=re.sub(r'<script.*?</script>|<style.*?</style>','',t,flags=re.S);t=html.unescape(re.sub(r'<[^>]+>',' ',t));print(re.sub(r'\s+',' ',t)[:4000])"
-          echo; echo "=== downagain /p/railway"; curl -sS -A "$UA" -o p.html -w "%{http_code}\n" https://downagain.dev/p/railway; python3 -c "
-          import re,html;t=open('p.html').read();t=re.sub(r'<script.*?</script>|<style.*?</style>','',t,flags=re.S);t=html.unescape(re.sub(r'<[^>]+>',' ',t));t=re.sub(r'\s+',' ',t)
-          for k in ['Clarification','station.railway','backboard']:
-            for m in re.finditer(k,t): print('...',t[max(0,m.start()-300):m.start()+500]); print()"
+          curl -sS -A "$UA" -o rw.html https://status.railway.com/
+          wc -c rw.html
+          grep -o -i '.\{200\}partial.\{200\}' rw.html | head -8
+          echo ===; grep -o -i '.\{300\}backboard.\{300\}' rw.html | head -4
+          echo ===; grep -o -i 'all systems[^<]\{0,80\}\|operational[^<]\{0,40\}\|degraded[^<]\{0,40\}\|outage[^<]\{0,40\}' rw.html | sort | uniq -c | head -20
