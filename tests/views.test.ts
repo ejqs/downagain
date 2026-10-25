@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
-import { brokenComponents, coveredDays, liveLevel, worstLevel, communication, dailyCells, valueBoard, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals, trendKnown, whereHit } from "@/lib/views";
+import { brokenComponents, coveredDays, foldByProvider, foldStats, windowBoard, liveLevel, worstLevel, communication, dailyCells, valueBoard, dailyLoad, heatLevel, daysSinceSev1, downNow, leaderboard, monthlyTrend, openIncidents, startHeatmap, topComponents, totals, trendKnown, whereHit } from "@/lib/views";
 
 const DAY = 86_400_000;
 const NOW = Date.parse("2026-10-22T12:00:00Z");
@@ -386,5 +386,49 @@ describe("whereHit", () => {
   it("names the regions when the provider gave them, else the components", () => {
     expect(whereHit({ regions: ["me-south-1"], components: ["AWS Resource Groups", "Amazon S3"] })).toBe("me-south-1");
     expect(whereHit({ regions: null, components: ["API", "Builds", "Docs", "Logs"] })).toBe("API, Builds, Docs +1");
+  });
+});
+
+describe("foldByProvider", () => {
+  it("keeps each provider where it first appears", () => {
+    const a1 = inc(1, { startedAt: ago(0, 1) });
+    const b1 = inc(2, { startedAt: ago(0, 2) });
+    const a2 = inc(1, { startedAt: ago(0, 3) });
+    expect(foldByProvider([a1, b1, a2])).toEqual([[a1, a2], [b1]]);
+  });
+});
+
+describe("foldStats", () => {
+  it("takes the worst tier, merges overlapping time and counts carrier-only incidents", () => {
+    const s = foldStats(
+      [
+        inc(1, { startedAt: ago(1), resolvedAt: ago(1) + 2 * 3_600_000, tier: 2, components: ["CARRIER NETWORK - SMS, Europe"] }),
+        inc(1, { startedAt: ago(1) + 3_600_000, resolvedAt: ago(1) + 3 * 3_600_000, tier: 3, components: ["CARRIER NETWORK - SMS, Europe", "Messaging API"] }),
+      ],
+      NOW,
+    );
+    expect(s).toEqual({ tier: 2, security: false, minutes: 180, carrier: 1 });
+  });
+});
+
+describe("windowBoard", () => {
+  it("ranks by Sev 1-2 time inside the window and lists who was clean", () => {
+    const ps = [prov(1, { historyFrom: ago(200) }), prov(2), prov(3)];
+    const list = [
+      inc(1, { startedAt: ago(2), resolvedAt: ago(2) + 3_600_000, tier: 2 }),
+      inc(1, { startedAt: ago(3), resolvedAt: ago(3) + 3_600_000, tier: 4, areaTiers: {} }),
+      inc(2, { startedAt: ago(1), resolvedAt: ago(1) + 5 * 3_600_000, tier: 1 }),
+      // Counted, but carrier time isn't Sev 1-2 time.
+      inc(2, { startedAt: ago(4), resolvedAt: ago(4) + 9 * 3_600_000, tier: 2, components: ["CARRIER NETWORK - SMS, APAC"] }),
+      // Before the window: provider 3 stays clean.
+      inc(3, { startedAt: ago(20), resolvedAt: ago(20) + 3_600_000, tier: 1 }),
+    ];
+    const { rows, clean } = windowBoard(snap(ps, list), ps, list, NOW - 14 * DAY, NOW);
+    expect(rows.map((r) => [r.provider.id, r.incidents, r.majorMinutes])).toEqual([
+      [2, 2, 300],
+      [1, 2, 60],
+    ]);
+    expect(rows[1].grade).not.toBeNull();
+    expect(clean.map((p) => p.id)).toEqual([3]);
   });
 });

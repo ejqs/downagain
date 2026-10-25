@@ -1,6 +1,6 @@
 // Pure functions that turn the cached snapshot into what each page shows.
-import { durationMinutes, effectiveTier, gradeFor, gradeRank, incidentPoints, MAX_SHOWN_DAYS, penaltyMinutes, score, shownEnd, windowBounds, type GradeInput, type Score } from "@/lib/grading";
-import { AREAS, SECURITY_PENALTY, TIER_WEIGHT, scopeWeight, type Area } from "@/lib/severity";
+import { durationMinutes, effectiveTier, gradeFor, gradeRank, incidentPoints, MAX_SHOWN_DAYS, penaltyMinutes, score, shownEnd, unionMinutes, windowBounds, type Grade, type GradeInput, type Score } from "@/lib/grading";
+import { AREAS, SECURITY_PENALTY, TIER_WEIGHT, carrierOnly, scopeWeight, type Area } from "@/lib/severity";
 import { PRICES, monthlyUsd, valueFrontier, type Price } from "@/lib/pricing";
 import type { IncidentRow, ProviderRow, Snapshot } from "@/lib/data";
 import { isLocation, isProblem, statusRank } from "@/lib/status";
@@ -431,4 +431,60 @@ function focusPoints(snap: Snapshot, i: IncidentRow, from: Date, to: Date): numb
   if (!areas || areas.length === AREAS.length) return incidentPoints(gradeInput(i), from, to);
   const minutes = penaltyMinutes(gradeInput(i), from, to) * scopeWeight(i.scope);
   return areas.reduce((t, a) => t + (TIER_WEIGHT[i.areaTiers?.[a] ?? 0] ?? 0) * minutes, 0);
+}
+
+/** One provider's incidents in a list, in the order each provider first appears. */
+export function foldByProvider(list: IncidentRow[]): IncidentRow[][] {
+  const groups = new Map<number, IncidentRow[]>();
+  for (const i of list) {
+    const g = groups.get(i.providerId);
+    if (g) g.push(i);
+    else groups.set(i.providerId, [i]);
+  }
+  return [...groups.values()];
+}
+
+/** What a folded run of incidents adds up to: worst tier, merged time, how many were carrier-only. */
+export function foldStats(list: IncidentRow[], now: number) {
+  return {
+    tier: Math.min(...list.map(tierOf)),
+    security: list.some((i) => i.security),
+    minutes: unionMinutes(list.map((i) => [i.startedAt, shownEnd(gradeInput(i), now)] as [number, number]), -Infinity, Infinity),
+    carrier: list.filter((i) => carrierOnly(i.components)).length,
+  };
+}
+
+export interface WindowRow {
+  provider: ProviderRow;
+  /** 90-day grade, null while there's too little data. */
+  grade: Grade | null;
+  incidents: number;
+  carrier: number;
+  /** Sev 1-2 time inside the window, overlaps counted once, carrier networks left out. */
+  majorMinutes: number;
+}
+
+/** Who had incidents between from and to, most Sev 1-2 time first, and who had none. */
+export function windowBoard(snap: Snapshot, providers: ProviderRow[], list: IncidentRow[], from: number, to: number): { rows: WindowRow[]; clean: ProviderRow[] } {
+  const hit = list.filter((i) => tierOf(i) > 0 && i.startedAt < to && (i.resolvedAt ?? snap.generatedAt) >= from);
+  const rows: WindowRow[] = [];
+  const clean: ProviderRow[] = [];
+  for (const p of providers) {
+    const mine = hit.filter((i) => i.providerId === p.id);
+    if (!mine.length) {
+      clean.push(p);
+      continue;
+    }
+    // A carrier network is one operator in one country, local in the grades too, so it isn't Sev 1-2 time here.
+    const major = mine.filter((i) => tierOf(i) <= 2 && !carrierOnly(i.components)).map((i) => [i.startedAt, shownEnd(gradeInput(i), snap.generatedAt)] as [number, number]);
+    rows.push({
+      provider: p,
+      grade: isGraded(p, snap.generatedAt) ? scoreFor(snap, p.id).grade : null,
+      incidents: mine.length,
+      carrier: mine.filter((i) => carrierOnly(i.components)).length,
+      majorMinutes: unionMinutes(major, from, to),
+    });
+  }
+  rows.sort((a, b) => b.majorMinutes - a.majorMinutes || b.incidents - a.incidents || a.provider.name.localeCompare(b.provider.name));
+  return { rows, clean };
 }

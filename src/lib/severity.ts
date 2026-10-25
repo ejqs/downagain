@@ -320,7 +320,7 @@ export function classify(input: ClassifyInput, overrides?: Map<string, Surface>)
   }
 
   // A carrier's own network (one operator, one country) is a sliver of the provider's traffic.
-  const carrier = input.components.length > 0 && input.components.every((c) => CARRIER_RE.test(c));
+  const carrier = carrierOnly(input.components);
   return {
     tier, areaTiers, surfaces, security, compromise, lowConfidence, reason, classifierVersion: CLASSIFIER_VERSION,
     scope: carrier ? "local" : region ? "regional" : scopeFrom(input),
@@ -329,6 +329,11 @@ export function classify(input: ClassifyInput, overrides?: Map<string, Surface>)
 }
 
 const CARRIER_RE = /\bcarrier network\b/i;
+
+/** Every component is a third-party carrier network (Twilio's "CARRIER NETWORK - SMS, Europe"). */
+export function carrierOnly(components: string[]): boolean {
+  return components.length > 0 && components.every((c) => CARRIER_RE.test(c));
+}
 
 /** Max cities an incident can name and still count as regional; past that it's the network. */
 const MAX_REGIONAL_LOCATIONS = 10;
