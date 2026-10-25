@@ -116,6 +116,15 @@ describe("downNow", () => {
     expect(downNow(snap([p], []))).toEqual([expect.objectContaining({ title: "Problems reported on API, Builds", tier: 2, sinceMs: ago(0, 1) })]);
   });
 
+  it("never lists a provider for an open notice", () => {
+    const s = snap([prov(1), prov(2, { status: "partial_outage", components: [{ name: "API", status: "partial_outage" }] })], [
+      inc(1, { startedAt: ago(0, 16), resolvedAt: null, tier: 2, status: "notice", title: "Clarification: key revocations are precautionary" }),
+      // A red component left behind isn't news while the provider says it's only a notice.
+      inc(2, { startedAt: ago(1), resolvedAt: null, tier: 4, status: "notice" }),
+    ]);
+    expect(downNow(s)).toEqual([]);
+  });
+
   it("ignores maintenance, unknown, not-counted and resolved incidents", () => {
     const s = snap(
       [prov(1, { status: "maintenance" }), prov(2, { status: "unknown" }), prov(3)],

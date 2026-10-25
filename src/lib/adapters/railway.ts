@@ -57,6 +57,17 @@ function flatten(list: RwComponent[] = [], group?: string): NormalizedComponent[
   );
 }
 
+/**
+ * Railway posts notices (a clarification, a note that the support site is down) as
+ * incidents with every component marked operational, and labels them "Notice" on
+ * the page. They are often left open for days. Missing impacts don't count as operational.
+ */
+export function isRwNotice(i: RwIncident): boolean {
+  const comps = i.components ?? [];
+  const quiet = (s: string | null | undefined) => mapRwStatus(s) === "operational";
+  return !i.resolvedAt && comps.length > 0 && comps.every((c) => quiet(c.impact)) && (!i.worstImpact || quiet(i.worstImpact));
+}
+
 export function normalizeRwIncident(i: RwIncident, pageUrl: string): NormalizedIncident {
   const updates = (i.updates ?? [])
     .map((u) => ({ externalId: u.id, status: u.status.toLowerCase(), body: u.message ?? "", postedAt: new Date(u.createdAt) }))
@@ -67,7 +78,7 @@ export function normalizeRwIncident(i: RwIncident, pageUrl: string): NormalizedI
     externalId: i.id,
     title: i.title,
     impact: impactFromStatus(worst),
-    status: i.status.toLowerCase(),
+    status: isRwNotice(i) ? "notice" : i.status.toLowerCase(),
     startedAt: new Date(i.createdAt),
     // An incident can be flipped to monitoring without an update saying so.
     monitoringAt: updates.find((u) => u.status === "monitoring")?.postedAt ?? (/^monitoring$/i.test(i.status) && i.updatedAt ? new Date(i.updatedAt) : null),
@@ -90,7 +101,8 @@ export async function fetchRailway(base: string, pageUrl: string, get: Getter): 
   const components = flatten(body.components);
   const incidents = (body.incidents ?? []).map((i) => normalizeRwIncident(i, pageUrl));
   // An incident the team is monitoring keeps its worst impact on record, but the fix is in.
-  const active = incidents.filter((i) => !i.resolvedAt && i.status !== "monitoring").map((i) => i.worstComponentStatus ?? "degraded");
+  // A notice says nothing is broken.
+  const active = incidents.filter((i) => !i.resolvedAt && i.status !== "monitoring" && i.status !== "notice").map((i) => i.worstComponentStatus ?? "degraded");
   const inMaintenance = (body.maintenances ?? []).some((m) => /IN_PROGRESS|ACTIVE/i.test(m.status ?? ""));
   return {
     // Railway has no overall field, so we derive it.
