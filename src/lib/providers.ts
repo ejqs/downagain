@@ -126,6 +126,20 @@ export const PROVIDERS: ProviderSeed[] = [
     sourceKind: "statuspage",
     sourceUrl: "https://www.cloudflarestatus.com",
   },
+  {
+    slug: "northflank",
+    name: "Northflank",
+    category: "hosting",
+    kind: "PaaS",
+    homepageUrl: "https://northflank.com",
+    statusPageUrl: "https://status.northflank.com",
+    sourceKind: "instatus",
+    sourceUrl: "https://status.northflank.com",
+    verified: "2026-10-31",
+    // "Northflank App" is the dashboard, not a customer's app. Services and jobs are
+    // customer workloads; addons are their managed databases.
+    surfaces: { "Northflank App": "manage", Services: "serving", Jobs: "serving", Addons: "data", "Logs and Metrics": "ship" },
+  },
 
   // AI APIs
   {

@@ -192,6 +192,20 @@ describe("instatus adapter", () => {
     expect(pm.resolvedAt?.toISOString()).toBe("2026-08-25T09:46:00.000Z");
   });
 
+  it("reads Northflank's open security incident and its history", async () => {
+    const snap = await read("status.northflank.com");
+    expect(snap.status).toBe("major_outage");
+    expect(snap.components?.some((c) => c.name === "Northflank Platform")).toBe(false);
+    expect(snap.components?.find((c) => c.name === "Services")?.group).toBe("Northflank Platform");
+    const sec = snap.incidents!.find((x) => x.externalId === "cmvv0rn5a092f14rutwccodpp")!;
+    expect(sec.title).toBe("Security incident");
+    expect(sec.impact).toBe("critical");
+    expect(sec.resolvedAt).toBeNull();
+    expect(sec.startedAt.toISOString()).toBe("2026-10-30T13:40:03.000Z");
+    expect(sec.components).toContain("Services");
+    expect(snap.incidents!.length).toBeGreaterThanOrEqual(20);
+  });
+
   it("rolls an update past New Year into the next year", async () => {
     const { parseIsDescription } = await import("@/lib/adapters/instatus");
     const d = parseIsDescription(
