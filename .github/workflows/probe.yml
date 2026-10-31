@@ -1,0 +1,12 @@
+name: probe
+on: push
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for p in / /api/v2/summary.json /summary.json /index.json /feed.rss /history.rss; do
+            echo "===== $p"
+            curl -sS -L -m 30 -A "downagain.dev status reader" -D - -o body "https://status.northflank.com$p" | grep -iE '^(HTTP|content-type|server|location|x-powered)'
+            head -c 15000 body; echo
+          done
