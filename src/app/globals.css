@@ -87,7 +87,7 @@ p { margin: 0; }
 .nav { display: flex; flex-wrap: wrap; gap: 2px; font-weight: 600; font-size: 15px; }
 .nav a { padding: 12px 8px; text-decoration: none; border-bottom: 3px solid transparent; margin-bottom: -3px; }
 .nav a[aria-current="page"] { border-bottom-color: var(--ink); font-weight: 800; }
-@media (max-width: 420px) { .nav a { padding: 12px 5px; font-size: 13.5px; } }
+@media (max-width: 420px) { .nav { flex: 1 1 100%; gap: 0; } .nav a { flex: 1 0 33%; text-align: center; padding: 10px 4px; font-size: 14px; } }
 
 main.wrap { padding-bottom: 48px; }
 .section { margin-top: 40px; }
@@ -177,6 +177,13 @@ details.fold[open] .fold-n::after { content: " −"; }
 .who-name .muted { font-size: 13px; }
 .who .meter { height: 6px; }
 .who .meter > span { display: block; height: 6px; background: var(--down); }
+.sec-grid { display: grid; grid-template-columns: minmax(0, 1fr) repeat(4, auto); column-gap: 10px; }
+.sec-head, .sec-row { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; }
+.sec-head > span { font: 700 10px var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); text-align: right; }
+.sec-row { padding: 8px 0; border-top: 1px solid var(--rule); color: inherit; text-decoration: none; }
+.sec-row:hover { background: var(--panel); }
+.sec-row > .mono { font-size: 15px; text-align: right; }
+.sec-row > .mono.hot { font-weight: 800; background: var(--ink); color: var(--paper); padding: 0 5px; justify-self: end; }
 .who-more summary { cursor: pointer; font-size: 14px; font-weight: 700; padding: 6px 0; min-height: 32px; }
 
 /* Leaderboard rows */
@@ -231,6 +238,9 @@ details.fold[open] .fold-n::after { content: " −"; }
 .pill.ok { background: var(--up-wash); }
 .pill.monitoring { background: var(--up-wash); }
 .pill.unknown { background: var(--rule); }
+.pill.kind-breach { background: var(--ink); color: var(--paper); }
+.pill.kind-attack, .pill.kind-patch, .pill.kind-other { background: var(--paper); color: var(--ink); border: 1px solid var(--ink); }
+.pill.kind-other { border-style: dashed; }
 .pill.value { background: var(--hazard); color: var(--ink); border: 1px solid var(--ink); }
 
 /* Provider page */
