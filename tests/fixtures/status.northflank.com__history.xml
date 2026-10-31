@@ -1,0 +1,821 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Northflank Status - Incident history</title>
+    <link>https://status.northflank.com</link>
+    <description>Northflank</description>
+    <pubDate>Fri, 30 Oct 2026 13:40:03 +0000</pubDate>
+    
+<item>
+  <title>Security incident</title>
+  <description>
+    Type: Incident
+    
+
+    Affected Components: Builds, Networking, Addons, Logs and Metrics, Jobs, Services, Certificates
+    Oct 31, 01:04:08 GMT+0 - Identified - We have enabled audit logs for all customers, including free users. Oct 30, 23:38:35 GMT+0 - Identified - Users have reported unauthorised use of AI API keys supplied to the Northflank platform.
+
+If you have not already rotated your user-provided secrets stored in Northflank, please do so immediately. Revoke existing credentials with their issuing providers, generate replacements, and update the affected secrets and workloads in Northflank. Review your AI provider usage and billing logs for unexpected activity, and report any suspicious usage to Northflank support and the relevant provider.
+
+These reports may be consistent with the broader pattern of attacks targeting AI credentials. Similar IP addresses are contained in this article [Wiz’s “Black October” report](https://www.wiz.io/blog/black-october-for-ai-developer-platforms). Oct 30, 19:28:55 GMT+0 - Identified - Our investigation is ongoing. We have no further confirmed findings to share at this time.  
+  
+Our guidance remains unchanged: assume all environment variables have been compromised and rotate all secrets and credentials immediately, including those in workloads, secret groups and global secrets. Disable public access to addons where enabled.  
+  
+We will share further updates as more information is confirmed. Oct 30, 15:12:25 GMT+0 - Identified - Secret rotation on Postgres and MongoDB has been enabled for all users. We recommend disabling public expose on addons if you have enabled that.  
+
+All users should assume their environment variables are decrypted and begin rotation immediately.  
+  
+Secrets on workloads
+
+Secret groups
+
+Global secrets
+
+Multiple users are confirming that their AI keys have been used. Oct 30, 13:58:15 GMT+0 - Identified - Assume all environment variables have been decrypted. Disable/rotate all keys. Oct 30, 13:40:03 GMT+0 - Investigating - Rotate environment variables immediately.
+
+11:43 UTC: Wiz threat alert
+
+11:44 UTC: Northflank engineers review the alert
+
+12:02 UTC: Initial network policy patch  
+12:50 UTC: Additional patching deployed
+
+13:00 UTC: Wiz CIRT support requested
+
+13:05 UTC: Additional patching deployed
+
+13:05 UTC: Additional patching deployed 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Oct <var data-var='date'> 31</var>, <var data-var='time'>01:04:08</var> GMT+0</small><br><strong>Identified</strong> -
+  We have enabled audit logs for all customers, including free users..</p>
+<p><small>Oct <var data-var='date'> 30</var>, <var data-var='time'>23:38:35</var> GMT+0</small><br><strong>Identified</strong> -
+  Users have reported unauthorised use of AI API keys supplied to the Northflank platform.
+
+If you have not already rotated your user-provided secrets stored in Northflank, please do so immediately. Revoke existing credentials with their issuing providers, generate replacements, and update the affected secrets and workloads in Northflank. Review your AI provider usage and billing logs for unexpected activity, and report any suspicious usage to Northflank support and the relevant provider.
+
+These reports may be consistent with the broader pattern of attacks targeting AI credentials. Similar IP addresses are contained in this article [Wiz’s “Black October” report](https://www.wiz.io/blog/black-october-for-ai-developer-platforms)..</p>
+<p><small>Oct <var data-var='date'> 30</var>, <var data-var='time'>19:28:55</var> GMT+0</small><br><strong>Identified</strong> -
+  Our investigation is ongoing. We have no further confirmed findings to share at this time.  
+  
+Our guidance remains unchanged: assume all environment variables have been compromised and rotate all secrets and credentials immediately, including those in workloads, secret groups and global secrets. Disable public access to addons where enabled.  
+  
+We will share further updates as more information is confirmed..</p>
+<p><small>Oct <var data-var='date'> 30</var>, <var data-var='time'>15:12:25</var> GMT+0</small><br><strong>Identified</strong> -
+  Secret rotation on Postgres and MongoDB has been enabled for all users. We recommend disabling public expose on addons if you have enabled that.  
+
+All users should assume their environment variables are decrypted and begin rotation immediately.  
+  
+Secrets on workloads
+
+Secret groups
+
+Global secrets
+
+Multiple users are confirming that their AI keys have been used..</p>
+<p><small>Oct <var data-var='date'> 30</var>, <var data-var='time'>13:58:15</var> GMT+0</small><br><strong>Identified</strong> -
+  Assume all environment variables have been decrypted. Disable/rotate all keys..</p>
+<p><small>Oct <var data-var='date'> 30</var>, <var data-var='time'>13:40:03</var> GMT+0</small><br><strong>Investigating</strong> -
+  Rotate environment variables immediately.
+
+11:43 UTC: Wiz threat alert
+
+11:44 UTC: Northflank engineers review the alert
+
+12:02 UTC: Initial network policy patch  
+12:50 UTC: Additional patching deployed
+
+13:00 UTC: Wiz CIRT support requested
+
+13:05 UTC: Additional patching deployed
+
+13:05 UTC: Additional patching deployed.</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 30 Oct 2026 13:40:03 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmvv0rn5a092f14rutwccodpp</link>
+  <guid>https://status.northflank.com/incident/cmvv0rn5a092f14rutwccodpp</guid>
+</item>
+
+<item>
+  <title>Partial Control Plane Degredation</title>
+  <description>
+    Type: Incident
+    Duration: 6 hours and 51 minutes
+
+    Affected Components: Logs and Metrics, Northflank App
+    Oct 20, 13:34:50 GMT+0 - Resolved - This incident has been resolved. Oct 20, 09:53:02 GMT+0 - Monitoring - Services are operating normally, and we are monitoring the situation. Oct 20, 09:40:03 GMT+0 - Investigating - The incident has expanded to our core control plane services, affecting login and control plane components. We are working to mitigate the impact. Existing user workloads deployed are unaffected. Oct 20, 07:46:44 GMT+0 - Monitoring - We have moved the affected parts of the logging and metric components to a different zone. We will continue to monitor the situation.
+
+A public Google status page is now available: &lt;https://status.cloud.google.com/incidents/Xs2XTHzAVC9YnafnPyzj&gt; Oct 20, 06:44:08 GMT+0 - Identified - Availability zone b in GCP europe-west2 is experiencing issues with VM to VM communication impacting parts of the platform. We are working on mitigating the impact. The majority of users and system components are unaffeced. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 6 hours and 51 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>13:34:50</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>09:53:02</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Services are operating normally, and we are monitoring the situation..</p>
+<p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>09:40:03</var> GMT+0</small><br><strong>Investigating</strong> -
+  The incident has expanded to our core control plane services, affecting login and control plane components. We are working to mitigate the impact. Existing user workloads deployed are unaffected..</p>
+<p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>07:46:44</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We have moved the affected parts of the logging and metric components to a different zone. We will continue to monitor the situation.
+
+A public Google status page is now available: &lt;https://status.cloud.google.com/incidents/Xs2XTHzAVC9YnafnPyzj&gt;.</p>
+<p><small>Oct <var data-var='date'> 20</var>, <var data-var='time'>06:44:08</var> GMT+0</small><br><strong>Identified</strong> -
+  Availability zone b in GCP europe-west2 is experiencing issues with VM to VM communication impacting parts of the platform. We are working on mitigating the impact. The majority of users and system components are unaffeced..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 20 Oct 2026 06:44:08 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmvgbi9tw02sw1mmnhu634801</link>
+  <guid>https://status.northflank.com/incident/cmvgbi9tw02sw1mmnhu634801</guid>
+</item>
+
+<item>
+  <title>Degraded SSO login via WorkOS</title>
+  <description>
+    Type: Incident
+    Duration: 46 minutes
+
+    Affected Components: Northflank App
+    Sep 25, 16:01:05 GMT+0 - Resolved - This incident has been resolved. Sep 25, 15:15:00 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 46 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Sep <var data-var='date'> 25</var>, <var data-var='time'>16:01:05</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Sep <var data-var='date'> 25</var>, <var data-var='time'>15:15:00</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 25 Sep 2026 15:15:00 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmuh4kc8h00s013pih51rz3uf</link>
+  <guid>https://status.northflank.com/incident/cmuh4kc8h00s013pih51rz3uf</guid>
+</item>
+
+<item>
+  <title>Addon expose/unexpose temporarily disabled in US - Central</title>
+  <description>
+    Type: Incident
+    Duration: 2 hours and 25 minutes
+
+    Affected Components: Addons
+    Sep 4, 20:52:58 GMT+0 - Resolved - This incident has been resolved. Sep 4, 18:27:54 GMT+0 - Monitoring - We have temporarily disabled addon expose/unexpose in our US - Central region. This is due to an ongoing incident with our cloud service provider.  
+We will re-enable this feature once we confirm that it is safe to do so. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 2 hours and 25 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Sep <var data-var='date'> 4</var>, <var data-var='time'>20:52:58</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Sep <var data-var='date'> 4</var>, <var data-var='time'>18:27:54</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We have temporarily disabled addon expose/unexpose in our US - Central region. This is due to an ongoing incident with our cloud service provider.  
+We will re-enable this feature once we confirm that it is safe to do so..</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 4 Sep 2026 18:27:54 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmtnae42b0e811no58822esum</link>
+  <guid>https://status.northflank.com/incident/cmtnae42b0e811no58822esum</guid>
+</item>
+
+<item>
+  <title>Workloads Failing to Start Across Multiple Regions</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 1 minute
+
+    Affected Components: Addons, Jobs, Services
+    Aug 5, 14:27:54 GMT+0 - Resolved - All affected workloads are now fully operational.  Aug 5, 13:42:39 GMT+0 - Monitoring - We have identified the issue and applied a mitigation. Previously stuck workloads are now starting successfully across affected regions. We are monitoring recovery and will confirm once all workloads are fully operational. Aug 5, 13:27:13 GMT+0 - Investigating - We are seeing partial start up issues for workloads across multiple regions. 
+
+We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 1 minute</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Aug <var data-var='date'> 5</var>, <var data-var='time'>14:27:54</var> GMT+0</small><br><strong>Resolved</strong> -
+  All affected workloads are now fully operational. .</p>
+<p><small>Aug <var data-var='date'> 5</var>, <var data-var='time'>13:42:39</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We have identified the issue and applied a mitigation. Previously stuck workloads are now starting successfully across affected regions. We are monitoring recovery and will confirm once all workloads are fully operational..</p>
+<p><small>Aug <var data-var='date'> 5</var>, <var data-var='time'>13:27:13</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are seeing partial start up issues for workloads across multiple regions. 
+
+We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 5 Aug 2026 13:27:13 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmsg4fvtt034m1ao3nowjoker</link>
+  <guid>https://status.northflank.com/incident/cmsg4fvtt034m1ao3nowjoker</guid>
+</item>
+
+<item>
+  <title>Investigating node stability issues in the US - East region</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 22 minutes
+
+    Affected Components: Addons, Jobs, Services
+    Jul 22, 13:39:58 GMT+0 - Resolved - We have recovered affected workloads in the region and there are no more on-going node failures. The root cause was an outage on the Google Cloud Platform in us-east4 which hosts Northflank&#039;s US - East region. Jul 22, 13:11:06 GMT+0 - Monitoring - We are seeing recovery across compute and storage. We are working to get the remaining workloads back online. Jul 22, 12:17:46 GMT+0 - Investigating - We have noticed increased failure rates of nodes in the US - East region and are investigating the issue. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 22 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Jul <var data-var='date'> 22</var>, <var data-var='time'>13:39:58</var> GMT+0</small><br><strong>Resolved</strong> -
+  We have recovered affected workloads in the region and there are no more on-going node failures. The root cause was an outage on the Google Cloud Platform in us-east4 which hosts Northflank&#039;s US - East region..</p>
+<p><small>Jul <var data-var='date'> 22</var>, <var data-var='time'>13:11:06</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We are seeing recovery across compute and storage. We are working to get the remaining workloads back online..</p>
+<p><small>Jul <var data-var='date'> 22</var>, <var data-var='time'>12:17:46</var> GMT+0</small><br><strong>Investigating</strong> -
+  We have noticed increased failure rates of nodes in the US - East region and are investigating the issue..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 22 Jul 2026 12:17:46 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmrw1sp1g00870smo8ztfcsfn</link>
+  <guid>https://status.northflank.com/incident/cmrw1sp1g00870smo8ztfcsfn</guid>
+</item>
+
+<item>
+  <title>Active DDoS Attack in US - Central</title>
+  <description>
+    Type: Incident
+    Duration: 2 hours and 49 minutes
+
+    Affected Components: Networking
+    Jul 21, 13:58:28 GMT+0 - Resolved - This incident has been resolved. We will continue to monitor the affected region. Jul 21, 13:43:46 GMT+0 - Monitoring - We have implemented mitigations are monitoring the situation. Jul 21, 13:23:09 GMT+0 - Identified - We are currently experiencing a DDoS attack in the US - Central region. This is affecting public ingress into the cluster. Internal traffic is not affected. The team is working on additional mitigations. Jul 21, 11:41:41 GMT+0 - Resolved - The DDoS attack has stopped, we will continue to monitor the affected region. Jul 21, 11:20:15 GMT+0 - Monitoring - We have implemented mitigations are monitoring the situation. Jul 21, 11:09:21 GMT+0 - Identified - We are currently experiencing a DDoS attack in the US - Central region. This is affecting public ingress into the cluster. Internal traffic is not affected. The team is working on additional mitigations. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 2 hours and 49 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Jul <var data-var='date'> 21</var>, <var data-var='time'>13:58:28</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved. We will continue to monitor the affected region..</p>
+<p><small>Jul <var data-var='date'> 21</var>, <var data-var='time'>13:43:46</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We have implemented mitigations are monitoring the situation..</p>
+<p><small>Jul <var data-var='date'> 21</var>, <var data-var='time'>13:23:09</var> GMT+0</small><br><strong>Identified</strong> -
+  We are currently experiencing a DDoS attack in the US - Central region. This is affecting public ingress into the cluster. Internal traffic is not affected. The team is working on additional mitigations..</p>
+<p><small>Jul <var data-var='date'> 21</var>, <var data-var='time'>11:41:41</var> GMT+0</small><br><strong>Resolved</strong> -
+  The DDoS attack has stopped, we will continue to monitor the affected region..</p>
+<p><small>Jul <var data-var='date'> 21</var>, <var data-var='time'>11:20:15</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We have implemented mitigations are monitoring the situation..</p>
+<p><small>Jul <var data-var='date'> 21</var>, <var data-var='time'>11:09:21</var> GMT+0</small><br><strong>Identified</strong> -
+  We are currently experiencing a DDoS attack in the US - Central region. This is affecting public ingress into the cluster. Internal traffic is not affected. The team is working on additional mitigations..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 21 Jul 2026 11:09:21 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmrujwsz307ud0kqm1nugymth</link>
+  <guid>https://status.northflank.com/incident/cmrujwsz307ud0kqm1nugymth</guid>
+</item>
+
+<item>
+  <title>Let&#039;s Encrypt Certificate Generation Issues</title>
+  <description>
+    Type: Incident
+    Duration: 4 hours and 40 minutes
+
+    Affected Components: Certificates
+    Jun 18, 23:36:05 GMT+0 - Resolved - No more certificate creation errors have been observed from Let&#039;s Encrypt. This incident has been resolved. Jun 18, 23:02:45 GMT+0 - Monitoring - No recent API errors experienced and addon provisioning is working as expected. We&#039;re still closely monitoring Let&#039;s Encrypt API responses. Jun 18, 18:55:48 GMT+0 - Investigating - We are currently observing delays in certificate generation due to an ongoing incident with Let&#039;s Encrypt: &lt;https://letsencrypt.status.io/&gt;
+
+This will affect provisioning of new addons with TLS enabled, the provisioning of BYOC clusters as well as domain certification provisioning. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 4 hours and 40 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Jun <var data-var='date'> 18</var>, <var data-var='time'>23:36:05</var> GMT+0</small><br><strong>Resolved</strong> -
+  No more certificate creation errors have been observed from Let&#039;s Encrypt. This incident has been resolved..</p>
+<p><small>Jun <var data-var='date'> 18</var>, <var data-var='time'>23:02:45</var> GMT+0</small><br><strong>Monitoring</strong> -
+  No recent API errors experienced and addon provisioning is working as expected. We&#039;re still closely monitoring Let&#039;s Encrypt API responses..</p>
+<p><small>Jun <var data-var='date'> 18</var>, <var data-var='time'>18:55:48</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently observing delays in certificate generation due to an ongoing incident with Let&#039;s Encrypt: &lt;https://letsencrypt.status.io/&gt;
+
+This will affect provisioning of new addons with TLS enabled, the provisioning of BYOC clusters as well as domain certification provisioning..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 18 Jun 2026 18:55:48 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmqjv1jt601p42okxsc6cjelx</link>
+  <guid>https://status.northflank.com/incident/cmqjv1jt601p42okxsc6cjelx</guid>
+</item>
+
+<item>
+  <title>Issues accessing app.northflank.com</title>
+  <description>
+    Type: Incident
+    Duration: 17 minutes
+
+    Affected Components: Northflank App
+    Jun 10, 16:14:52 GMT+0 - Resolved - This incident has been resolved. Jun 10, 16:03:23 GMT+0 - Monitoring - We implemented a fix and are currently monitoring the result.
+
+Users should now be able to log in and access the UI. Running workloads were unaffected. Jun 10, 15:58:15 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 17 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Jun <var data-var='date'> 10</var>, <var data-var='time'>16:14:52</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Jun <var data-var='date'> 10</var>, <var data-var='time'>16:03:23</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix and are currently monitoring the result.
+
+Users should now be able to log in and access the UI. Running workloads were unaffected..</p>
+<p><small>Jun <var data-var='date'> 10</var>, <var data-var='time'>15:58:15</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 10 Jun 2026 15:58:15 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmq896fck00lcqopy8micgt3z</link>
+  <guid>https://status.northflank.com/incident/cmq896fck00lcqopy8micgt3z</guid>
+</item>
+
+<item>
+  <title>Europe - West (London): Intermittent connectivity issues impacting Postgres cluster management</title>
+  <description>
+    Type: Incident
+    Duration: 6 hours and 23 minutes
+
+    Affected Components: Addons
+    Jun 10, 14:23:08 GMT+0 - Resolved - This incident has been resolved. Jun 10, 11:53:12 GMT+0 - Monitoring - We have not observed any further issues since 11:05 UTC. 
+
+We are awaiting confirmation from our cloud provider that the issue is fully resolved on their side, and we will update this status accordingly. Jun 10, 10:19:44 GMT+0 - Identified - We saw a period of recovery between 09:45 and 10:04 UTC, but the issue has since recurred.
+
+This is tied to an ongoing incident affecting our cloud service provider in the region.
+
+We are continuing to monitor and will share further updates as we have them Jun 10, 09:59:53 GMT+0 - Monitoring - We have observed a recovery starting about 20 minutes ago. Currently, Postgres addons are stable. Jun 10, 08:00:23 GMT+0 - Investigating - We are currently investigating this incident.
+
+You may see logs in Postgres with the following error message:
+
+```
+ERROR: Error communicating with DCS
+``` 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 6 hours and 23 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Jun <var data-var='date'> 10</var>, <var data-var='time'>14:23:08</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Jun <var data-var='date'> 10</var>, <var data-var='time'>11:53:12</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We have not observed any further issues since 11:05 UTC. 
+
+We are awaiting confirmation from our cloud provider that the issue is fully resolved on their side, and we will update this status accordingly..</p>
+<p><small>Jun <var data-var='date'> 10</var>, <var data-var='time'>10:19:44</var> GMT+0</small><br><strong>Identified</strong> -
+  We saw a period of recovery between 09:45 and 10:04 UTC, but the issue has since recurred.
+
+This is tied to an ongoing incident affecting our cloud service provider in the region.
+
+We are continuing to monitor and will share further updates as we have them.</p>
+<p><small>Jun <var data-var='date'> 10</var>, <var data-var='time'>09:59:53</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We have observed a recovery starting about 20 minutes ago. Currently, Postgres addons are stable..</p>
+<p><small>Jun <var data-var='date'> 10</var>, <var data-var='time'>08:00:23</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident.
+
+You may see logs in Postgres with the following error message:
+
+```
+ERROR: Error communicating with DCS
+```.</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 10 Jun 2026 08:00:23 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmq7v8suo0762p4uz2pxqysg8</link>
+  <guid>https://status.northflank.com/incident/cmq7v8suo0762p4uz2pxqysg8</guid>
+</item>
+
+<item>
+  <title>Europe - West (London): New resources not able to be created</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 26 minutes
+
+    Affected Components: Addons, Jobs, Services
+    May 13, 16:27:13 GMT+0 - Resolved - This incident has been resolved. May 13, 15:33:29 GMT+0 - Monitoring - We are seeing an improvement; workloads are starting to be created.
+
+Connectivity has been restored, and we are continuing to monitor the situation. May 13, 15:00:45 GMT+0 - Investigating - We are currently investigating this incident.
+
+Existing running workloads are unaffected. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 26 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>May <var data-var='date'> 13</var>, <var data-var='time'>16:27:13</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>May <var data-var='date'> 13</var>, <var data-var='time'>15:33:29</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We are seeing an improvement; workloads are starting to be created.
+
+Connectivity has been restored, and we are continuing to monitor the situation..</p>
+<p><small>May <var data-var='date'> 13</var>, <var data-var='time'>15:00:45</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident.
+
+Existing running workloads are unaffected..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 13 May 2026 15:00:45 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmp46smud00byp6qva4zwgzm6</link>
+  <guid>https://status.northflank.com/incident/cmp46smud00byp6qva4zwgzm6</guid>
+</item>
+
+<item>
+  <title>Active DDoS Attack in Europe - West - Netherlands</title>
+  <description>
+    Type: Incident
+    Duration: 2 hours and 2 minutes
+
+    Affected Components: Addons, Services
+    May 10, 20:31:56 GMT+0 - Resolved - This incident has been resolved. May 10, 20:10:07 GMT+0 - Monitoring - We have put in place mitigations and are monitoring the affected region. May 10, 18:30:00 GMT+0 - Identified - We are currently experiencing a large DDoS attack in the Europe - West - Netherlands region. This is affecting public ingress into the cluster. Internal traffic is not affected. The team is working on additional mitigations. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 2 hours and 2 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>May <var data-var='date'> 10</var>, <var data-var='time'>20:31:56</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>May <var data-var='date'> 10</var>, <var data-var='time'>20:10:07</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We have put in place mitigations and are monitoring the affected region..</p>
+<p><small>May <var data-var='date'> 10</var>, <var data-var='time'>18:30:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We are currently experiencing a large DDoS attack in the Europe - West - Netherlands region. This is affecting public ingress into the cluster. Internal traffic is not affected. The team is working on additional mitigations..</p>
+]]>
+  </content:encoded>
+  <pubDate>Sun, 10 May 2026 18:30:00 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmp05l0ln00fo96bh1a4pufch</link>
+  <guid>https://status.northflank.com/incident/cmp05l0ln00fo96bh1a4pufch</guid>
+</item>
+
+<item>
+  <title>Let&#039;s Encrypt Certificate Generation Issues</title>
+  <description>
+    Type: Incident
+    Duration: 2 hours and 36 minutes
+
+    Affected Components: Certificates
+    May 8, 21:36:09 GMT+0 - Resolved - Certificate generation is functioning normally again. We will continue to monitor the situation. May 8, 19:00:00 GMT+0 - Identified - [Let&#039;s Encrypt is currently experiencing a partial service disruption](https://letsencrypt.status.io/) leading to certificate generation delays and failures on the Northflank platform. This will impact provisioning of new addons, domains and BYOC clusters. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 2 hours and 36 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>May <var data-var='date'> 8</var>, <var data-var='time'>21:36:09</var> GMT+0</small><br><strong>Resolved</strong> -
+  Certificate generation is functioning normally again. We will continue to monitor the situation..</p>
+<p><small>May <var data-var='date'> 8</var>, <var data-var='time'>19:00:00</var> GMT+0</small><br><strong>Identified</strong> -
+  [Let&#039;s Encrypt is currently experiencing a partial service disruption](https://letsencrypt.status.io/) leading to certificate generation delays and failures on the Northflank platform. This will impact provisioning of new addons, domains and BYOC clusters..</p>
+]]>
+  </content:encoded>
+  <pubDate>Fri, 8 May 2026 19:00:00 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmoxb63od01es6n0u18am5oyu</link>
+  <guid>https://status.northflank.com/incident/cmoxb63od01es6n0u18am5oyu</guid>
+</item>
+
+<item>
+  <title>Addon and volume availability issues in US - Central</title>
+  <description>
+    Type: Incident
+    Duration: 52 minutes
+
+    Affected Components: Addons, Services
+    Apr 8, 07:07:27 GMT+0 - Resolved - We have recovered the node, and all workloads are now running again. Apr 8, 06:15:00 GMT+0 - Identified - We are aware of an issue with a node affecting some stateful workloads in US - Central.
+
+We are working on a fix for this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 52 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Apr <var data-var='date'> 8</var>, <var data-var='time'>07:07:27</var> GMT+0</small><br><strong>Resolved</strong> -
+  We have recovered the node, and all workloads are now running again..</p>
+<p><small>Apr <var data-var='date'> 8</var>, <var data-var='time'>06:15:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We are aware of an issue with a node affecting some stateful workloads in US - Central.
+
+We are working on a fix for this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 8 Apr 2026 06:15:00 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmnpp03h1006jd0s28d2teq25</link>
+  <guid>https://status.northflank.com/incident/cmnpp03h1006jd0s28d2teq25</guid>
+</item>
+
+<item>
+  <title>Active DDoS Attack in Europe - West - Netherlands</title>
+  <description>
+    Type: Incident
+    Duration: 3 hours and 21 minutes
+
+    Affected Components: Addons, Jobs, Services
+    Mar 25, 17:48:48 GMT+0 - Resolved - The DDoS attack has stopped we will continue to monitor the affected region. Mar 25, 16:01:00 GMT+0 - Monitoring - The region is currently stable. We are still actively mitigating the ongoing attack. Mar 25, 14:28:04 GMT+0 - Identified - We are currently experiencing a large DDoS attack in the Europe - West - Netherlands region. This is affecting public ingress into the cluster. Internal traffic is not affected. The team is working on additional mitigations. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 3 hours and 21 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Mar <var data-var='date'> 25</var>, <var data-var='time'>17:48:48</var> GMT+0</small><br><strong>Resolved</strong> -
+  The DDoS attack has stopped we will continue to monitor the affected region..</p>
+<p><small>Mar <var data-var='date'> 25</var>, <var data-var='time'>16:01:00</var> GMT+0</small><br><strong>Monitoring</strong> -
+  The region is currently stable. We are still actively mitigating the ongoing attack..</p>
+<p><small>Mar <var data-var='date'> 25</var>, <var data-var='time'>14:28:04</var> GMT+0</small><br><strong>Identified</strong> -
+  We are currently experiencing a large DDoS attack in the Europe - West - Netherlands region. This is affecting public ingress into the cluster. Internal traffic is not affected. The team is working on additional mitigations..</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 25 Mar 2026 14:28:04 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmn651uh000a880hcl3ox9cxf</link>
+  <guid>https://status.northflank.com/incident/cmn651uh000a880hcl3ox9cxf</guid>
+</item>
+
+<item>
+  <title>App UI is experiencing loading issues</title>
+  <description>
+    Type: Incident
+    Duration: 34 minutes
+
+    Affected Components: Northflank App
+    Mar 16, 18:16:28 GMT+0 - Resolved - This incident has been resolved. Mar 16, 18:15:58 GMT+0 - Monitoring - We identified the root cause as a system component causing disproportionate database load. This is affecting read performance leading to degraded performance for the app UI. We have implemented a fix and are monitoring the situation. Mar 16, 17:42:54 GMT+0 - Identified - We are investing an incident where the UI is failing to load correctly. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 34 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Mar <var data-var='date'> 16</var>, <var data-var='time'>18:16:28</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Mar <var data-var='date'> 16</var>, <var data-var='time'>18:15:58</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We identified the root cause as a system component causing disproportionate database load. This is affecting read performance leading to degraded performance for the app UI. We have implemented a fix and are monitoring the situation..</p>
+<p><small>Mar <var data-var='date'> 16</var>, <var data-var='time'>17:42:54</var> GMT+0</small><br><strong>Identified</strong> -
+  We are investing an incident where the UI is failing to load correctly..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 16 Mar 2026 17:42:54 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmmth1qit0cwahxt9crdwuuo3</link>
+  <guid>https://status.northflank.com/incident/cmmth1qit0cwahxt9crdwuuo3</guid>
+</item>
+
+<item>
+  <title>Degraded performance in US Central region</title>
+  <description>
+    Type: Incident
+    Duration: 29 minutes
+
+    Affected Components: Networking, Addons, Services
+    Mar 9, 12:35:56 GMT+0 - Resolved - The root cause has been identified as an issue with the GCP infrastructure control plane and has been resolved.  
+  
+There was minimal impact to running user workloads. The main impact was a delay in provisioning net new or redeploying existing workloads. Mar 9, 12:06:32 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 29 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Mar <var data-var='date'> 9</var>, <var data-var='time'>12:35:56</var> GMT+0</small><br><strong>Resolved</strong> -
+  The root cause has been identified as an issue with the GCP infrastructure control plane and has been resolved.  
+  
+There was minimal impact to running user workloads. The main impact was a delay in provisioning net new or redeploying existing workloads..</p>
+<p><small>Mar <var data-var='date'> 9</var>, <var data-var='time'>12:06:32</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 9 Mar 2026 12:06:32 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmmj4y7ct01zw1jix7jv6r4vd</link>
+  <guid>https://status.northflank.com/incident/cmmj4y7ct01zw1jix7jv6r4vd</guid>
+</item>
+
+<item>
+  <title>Issues with builds using the Heroku 24 Buildpack</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 34 minutes
+
+    Affected Components: Builds
+    Feb 19, 16:34:09 GMT+0 - Resolved - We have released a fix for the issue. Feb 19, 15:00:00 GMT+0 - Identified - We are aware of an issue where builds fail to start when using the Heroku 24 buildpack image.
+
+We are currently working on identifying a solution. We will provide an update when the fix has been released. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 34 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Feb <var data-var='date'> 19</var>, <var data-var='time'>16:34:09</var> GMT+0</small><br><strong>Resolved</strong> -
+  We have released a fix for the issue..</p>
+<p><small>Feb <var data-var='date'> 19</var>, <var data-var='time'>15:00:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We are aware of an issue where builds fail to start when using the Heroku 24 buildpack image.
+
+We are currently working on identifying a solution. We will provide an update when the fix has been released..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 19 Feb 2026 15:00:00 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmltl7z5d002trjwmeqyabys9</link>
+  <guid>https://status.northflank.com/incident/cmltl7z5d002trjwmeqyabys9</guid>
+</item>
+
+<item>
+  <title>Node infrastructure stability - London Region</title>
+  <description>
+    Type: Incident
+    Duration: 39 minutes
+
+    Affected Components: Networking, Addons, Jobs, Services, 
+Northflank Platform →
+    Dec 11, 14:33:03 GMT+0 - Resolved - The incident has been resolved and the cause identified. A node image security release lead to the host filesystem going into a read only mode when interacting with a specific set of workloads causing the node to become unresponsive. We have implemented a mitigation and are working on a permanent solution. Dec 11, 14:13:28 GMT+0 - Monitoring - The mitigation is in place and the region is operating as expected. Dec 11, 13:54:32 GMT+0 - Identified - There are currently issues with node stability in the London region leading to partial outages for some workloads. The team has identified the issue and is implementing a mitigation. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 39 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Dec <var data-var='date'> 11</var>, <var data-var='time'>14:33:03</var> GMT+0</small><br><strong>Resolved</strong> -
+  The incident has been resolved and the cause identified. A node image security release lead to the host filesystem going into a read only mode when interacting with a specific set of workloads causing the node to become unresponsive. We have implemented a mitigation and are working on a permanent solution..</p>
+<p><small>Dec <var data-var='date'> 11</var>, <var data-var='time'>14:13:28</var> GMT+0</small><br><strong>Monitoring</strong> -
+  The mitigation is in place and the region is operating as expected..</p>
+<p><small>Dec <var data-var='date'> 11</var>, <var data-var='time'>13:54:32</var> GMT+0</small><br><strong>Identified</strong> -
+  There are currently issues with node stability in the London region leading to partial outages for some workloads. The team has identified the issue and is implementing a mitigation..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 11 Dec 2025 13:54:32 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmj1i24qr0106uhdob8a4bf2w</link>
+  <guid>https://status.northflank.com/incident/cmj1i24qr0106uhdob8a4bf2w</guid>
+</item>
+
+<item>
+  <title>Docker Hub is experiencing issues</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 44 minutes
+
+    Affected Components: Addons, Jobs, Services
+    Sep 25, 01:38:09 GMT+0 - Resolved - Dockerhub is fully operational and image pulling is now working as expected. Sep 25, 01:11:08 GMT+0 - Monitoring - We are observing that image pull requests for Docker Hub images are now succeeding. Sep 24, 23:53:50 GMT+0 - Identified - Dockerhub is currently experiencing issues related to authentication. This may cause issues with starting jobs, addons and services. &lt;https://www.dockerstatus.com/pages/incident/533c6539221ae15e3f000031/68d47a2f93c09e05486d93a9&gt; 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 44 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Sep <var data-var='date'> 25</var>, <var data-var='time'>01:38:09</var> GMT+0</small><br><strong>Resolved</strong> -
+  Dockerhub is fully operational and image pulling is now working as expected..</p>
+<p><small>Sep <var data-var='date'> 25</var>, <var data-var='time'>01:11:08</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We are observing that image pull requests for Docker Hub images are now succeeding..</p>
+<p><small>Sep <var data-var='date'> 24</var>, <var data-var='time'>23:53:50</var> GMT+0</small><br><strong>Identified</strong> -
+  Dockerhub is currently experiencing issues related to authentication. This may cause issues with starting jobs, addons and services. &lt;https://www.dockerstatus.com/pages/incident/533c6539221ae15e3f000031/68d47a2f93c09e05486d93a9&gt;.</p>
+]]>
+  </content:encoded>
+  <pubDate>Wed, 24 Sep 2025 23:53:50 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmfyn4drv02axox9ea8otzvu7</link>
+  <guid>https://status.northflank.com/incident/cmfyn4drv02axox9ea8otzvu7</guid>
+</item>
+
+<item>
+  <title>Delay in DNS propagation</title>
+  <description>
+    Type: Incident
+    Duration: 18 hours and 29 minutes
+
+    Affected Components: Addons, Services, Certificates
+    Sep 17, 09:39:01 GMT+0 - Resolved - The incident has been resolved on NS1 and we have not been seeing any more related failures over the last hour. Sep 16, 15:09:51 GMT+0 - Monitoring - Our DNS provider NS1 is experiencing delays in DNS propagation.
+
+This is affecting service and addon creation.  
+  
+NS1 status page: &lt;https://status.ai-apps-comms.ibm.com/ns1connect&gt; 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 18 hours and 29 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Sep <var data-var='date'> 17</var>, <var data-var='time'>09:39:01</var> GMT+0</small><br><strong>Resolved</strong> -
+  The incident has been resolved on NS1 and we have not been seeing any more related failures over the last hour..</p>
+<p><small>Sep <var data-var='date'> 16</var>, <var data-var='time'>15:09:51</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Our DNS provider NS1 is experiencing delays in DNS propagation.
+
+This is affecting service and addon creation.  
+  
+NS1 status page: &lt;https://status.ai-apps-comms.ibm.com/ns1connect&gt;.</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 16 Sep 2025 15:09:51 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmfmovpks003r739gifi0hnsh</link>
+  <guid>https://status.northflank.com/incident/cmfmovpks003r739gifi0hnsh</guid>
+</item>
+
+<item>
+  <title>Issue affecting local disk caching for builds running on Northflank&#039;s infrastructure</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour and 17 minutes
+
+    Affected Components: Builds
+    Aug 25, 23:04:54 GMT+0 - Resolved - This incident has been resolved. Aug 25, 22:45:24 GMT+0 - Monitoring - We implemented a fix and are currently monitoring the result. Aug 25, 21:48:19 GMT+0 - Identified - There is an issue with the underlying storage which provides the local disk-based caching feature for builds on Northflank&#039;s infrastructure. BYOC builds and builds without a local cache will be unaffected.
+
+  
+We are currently working on a fix for this. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour and 17 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Aug <var data-var='date'> 25</var>, <var data-var='time'>23:04:54</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Aug <var data-var='date'> 25</var>, <var data-var='time'>22:45:24</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix and are currently monitoring the result..</p>
+<p><small>Aug <var data-var='date'> 25</var>, <var data-var='time'>21:48:19</var> GMT+0</small><br><strong>Identified</strong> -
+  There is an issue with the underlying storage which provides the local disk-based caching feature for builds on Northflank&#039;s infrastructure. BYOC builds and builds without a local cache will be unaffected.
+
+  
+We are currently working on a fix for this..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 25 Aug 2025 21:48:19 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmernfevf002amj1q4pgwr3xn</link>
+  <guid>https://status.northflank.com/incident/cmernfevf002amj1q4pgwr3xn</guid>
+</item>
+
+<item>
+  <title>Log &amp; Metric Ingestion and Query Outage</title>
+  <description>
+    Type: Incident
+    Duration: 1 hour
+
+    Affected Components: Logs and Metrics
+    Aug 5, 08:23:56 GMT+0 - Resolved - This incident has been resolved. Aug 5, 07:55:18 GMT+0 - Monitoring - We implemented a fix and are currently monitoring the result. Aug 5, 07:23:59 GMT+0 - Investigating - We are currently investigating this incident. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 1 hour</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Aug <var data-var='date'> 5</var>, <var data-var='time'>08:23:56</var> GMT+0</small><br><strong>Resolved</strong> -
+  This incident has been resolved..</p>
+<p><small>Aug <var data-var='date'> 5</var>, <var data-var='time'>07:55:18</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We implemented a fix and are currently monitoring the result..</p>
+<p><small>Aug <var data-var='date'> 5</var>, <var data-var='time'>07:23:59</var> GMT+0</small><br><strong>Investigating</strong> -
+  We are currently investigating this incident..</p>
+]]>
+  </content:encoded>
+  <pubDate>Tue, 5 Aug 2025 07:23:59 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmdy7qu4001ym91lf2txeit0h</link>
+  <guid>https://status.northflank.com/incident/cmdy7qu4001ym91lf2txeit0h</guid>
+</item>
+
+<item>
+  <title>Let&#039;s Encrypt Certificate Generation Issues</title>
+  <description>
+    Type: Incident
+    Duration: 11 hours and 31 minutes
+
+    Affected Components: Certificates
+    Jul 22, 06:44:30 GMT+0 - Resolved - Certificate generation is functioning without issue. We will continue to monitor the situation. Jul 21, 19:13:49 GMT+0 - Monitoring - [Let&#039;s Encrypt is currently experiencing an outage](https://letsencrypt.status.io/pages/incident/55957a99e800baa4470002da/687e8d62b8a4e804fad85799) leading to certificate generation delays and failures on the Northflank platform. This will impact provisioning of new addons or domains. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 11 hours and 31 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Jul <var data-var='date'> 22</var>, <var data-var='time'>06:44:30</var> GMT+0</small><br><strong>Resolved</strong> -
+  Certificate generation is functioning without issue. We will continue to monitor the situation..</p>
+<p><small>Jul <var data-var='date'> 21</var>, <var data-var='time'>19:13:49</var> GMT+0</small><br><strong>Monitoring</strong> -
+  [Let&#039;s Encrypt is currently experiencing an outage](https://letsencrypt.status.io/pages/incident/55957a99e800baa4470002da/687e8d62b8a4e804fad85799) leading to certificate generation delays and failures on the Northflank platform. This will impact provisioning of new addons or domains..</p>
+]]>
+  </content:encoded>
+  <pubDate>Mon, 21 Jul 2025 19:13:49 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmddhhx1500cbb87xjzw4t6ee</link>
+  <guid>https://status.northflank.com/incident/cmddhhx1500cbb87xjzw4t6ee</guid>
+</item>
+
+<item>
+  <title>Issues with Google Cloud platform - Affecting multiple services</title>
+  <description>
+    Type: Incident
+    Duration: 2 hours and 45 minutes
+
+    Affected Components: Builds, Addons, Logs and Metrics
+    Jun 12, 20:44:39 GMT+0 - Resolved - GCP BYOC cluster processing is now operational. Jun 12, 20:40:23 GMT+0 - Monitoring - We are observing improved operations in the US - Central region. Addon creation and backup issues are now resolved. Ongoing Issues: \* GCP BYOC cluster processing Jun 12, 19:21:45 GMT+0 - Monitoring - Google Cloud has acknowledged the incident. For detailed information, please visit: &lt;https://status.cloud.google.com/incidents/ow5i3PPK96RduMcb1SsW&gt;
+
+Most services have been restored to normal operation. However, we are still experiencing the following issues: 
+
+* Addon creation in the US - Central region
+* Addon backups in the US - Central region
+* GCP BYOC cluster processing
+
+We will continue monitoring the situation and provide updates as they become available. Jun 12, 18:00:00 GMT+0 - Identified - We have noticed issues with Google Cloud APIs. This seems to be widespread across the Google Cloud platform. We are currently determining the impact of the outage, and we will provide updates when we know more. Currently, logs, metrics, builds, BYOC and addon backups may be affected. 
+  </description>
+  <content:encoded>
+    <![CDATA[<p><strong>Type:</strong> Incident</p>
+    <p><strong>Duration:</strong> 2 hours and 45 minutes</p>
+    <p><strong>Affected Components:</strong> </p>
+    <p><small>Jun <var data-var='date'> 12</var>, <var data-var='time'>20:44:39</var> GMT+0</small><br><strong>Resolved</strong> -
+  GCP BYOC cluster processing is now operational..</p>
+<p><small>Jun <var data-var='date'> 12</var>, <var data-var='time'>20:40:23</var> GMT+0</small><br><strong>Monitoring</strong> -
+  We are observing improved operations in the US - Central region. Addon creation and backup issues are now resolved. Ongoing Issues: \* GCP BYOC cluster processing.</p>
+<p><small>Jun <var data-var='date'> 12</var>, <var data-var='time'>19:21:45</var> GMT+0</small><br><strong>Monitoring</strong> -
+  Google Cloud has acknowledged the incident. For detailed information, please visit: &lt;https://status.cloud.google.com/incidents/ow5i3PPK96RduMcb1SsW&gt;
+
+Most services have been restored to normal operation. However, we are still experiencing the following issues: 
+
+* Addon creation in the US - Central region
+* Addon backups in the US - Central region
+* GCP BYOC cluster processing
+
+We will continue monitoring the situation and provide updates as they become available..</p>
+<p><small>Jun <var data-var='date'> 12</var>, <var data-var='time'>18:00:00</var> GMT+0</small><br><strong>Identified</strong> -
+  We have noticed issues with Google Cloud APIs. This seems to be widespread across the Google Cloud platform. We are currently determining the impact of the outage, and we will provide updates when we know more. Currently, logs, metrics, builds, BYOC and addon backups may be affected..</p>
+]]>
+  </content:encoded>
+  <pubDate>Thu, 12 Jun 2025 18:00:00 +0000</pubDate>
+  <link>https://status.northflank.com/incident/cmbtqad4j000l6didp4d0xkfy</link>
+  <guid>https://status.northflank.com/incident/cmbtqad4j000l6didp4d0xkfy</guid>
+</item>
+
+  </channel>
+  </rss>

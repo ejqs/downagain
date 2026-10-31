@@ -98,6 +98,9 @@ describe("classify", () => {
     // Railway, Oct 21 2026: no "breach" word, but an attacker and every token revoked.
     const railway = "We strongly recommend that you revoke all environment variables stored in Railway. We are rotating all Railway bucket credentials. We have invalidated all Railway API tokens. Preliminary forensics on the intent of the attacker.";
     expect(classify({ ...base, title: "Railway Platform Outage", impact: "major", components: ["Builds"], updateText: railway }).compromise).toBe(true);
+    // Northflank, Oct 30 2026: env vars decrypted, customers' AI keys used.
+    const northflank = "Assume all environment variables have been decrypted. Disable/rotate all keys. Users have reported unauthorised use of AI API keys supplied to the Northflank platform.";
+    expect(classify({ ...base, title: "Security incident", impact: "critical", components: ["Services"], updateText: northflank }, new Map([["Services", "serving"]]))).toMatchObject({ tier: 1, compromise: true });
     expect(classify({ ...base, title: "Elevated errors", impact: "major", components: ["Builds"], updateText: "We are rotating TLS certificates on the edge." }).compromise).toBe(false);
   });
 

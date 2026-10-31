@@ -11,7 +11,7 @@
     "lint": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "e2e:prepare": "bun run db:migrate && bun run db:seed && bun run dev:sample && STATUS_FIXTURES_DIR=tests/fixtures bun run poll vercel railway heroku",
+    "e2e:prepare": "bun run db:migrate && bun run db:seed && STATUS_FIXTURES_DIR=tests/fixtures bun run poll vercel railway heroku && bun run dev:sample",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "bun scripts/seed.ts",

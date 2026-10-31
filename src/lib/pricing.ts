@@ -130,6 +130,16 @@ export const PRICES: Record<string, Price> = {
     source: "https://developers.cloudflare.com/workers/platform/pricing/",
     checked: "2026-10-22",
   },
+  northflank: {
+    plan: "Pay as you go, nf-compute-20",
+    lines: [
+      { label: "nf-compute-20 (0.2 vCPU, 512 MB)", usd: 5.4 },
+      { label: "100 GB egress at $0.06/GB", usd: 6 },
+    ],
+    note: "The free Sandbox tier caps services and databases, so a production app goes on pay as you go.",
+    source: "https://northflank.com/pricing",
+    checked: "2026-10-31",
+  },
 
   // Cloud: 730 hours a month, on-demand list prices.
   aws: {
